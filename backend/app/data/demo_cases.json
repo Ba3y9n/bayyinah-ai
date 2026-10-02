@@ -1,0 +1,74 @@
+[
+  {
+    "id": "case-1",
+    "title": "1. نص له مصدر موثق وصحيح",
+    "badge": "حديث صحيح ثابت",
+    "type": "hadith",
+    "input_text": "سمعت رسول الله صلى الله عليه وسلم يقول: إنما الأعمال بالنيات وإنما لكل امرئ ما نوى فمن كانت هجرته إلى دنيا يصيبها أو امرأة ينكحها فهجرته إلى ما هاجر إليه.",
+    "description": "حديث نبوي مشهور متفق على صحته موجود في أصح كتب الحديث.",
+    "expected_status": "ثابت بحسب المصدر",
+    "expected_slug": "verified_authentic"
+  },
+  {
+    "id": "case-2",
+    "title": "2. نص شائع لم يثبت بهذا اللفظ (موضوع)",
+    "badge": "حديث موضوع / لا يصح",
+    "type": "hadith",
+    "input_text": "قال رسول الله صلى الله عليه وسلم: اطلبوا العلم ولو بالصين، فإن طلب العلم فريضة على كل مسلم.",
+    "description": "عبارة متداولة بكثرة كحديث نبوي ولكن صرّح أئمة الحديث ببطلانها ووضعها.",
+    "expected_status": "موضوع/مكذوب بحسب المصدر",
+    "expected_slug": "fabricated_per_source"
+  },
+  {
+    "id": "case-3",
+    "title": "3. ادعاء لا توجد له أدلة كافية في المصادر",
+    "badge": "لم نجد دليلًا كافيًا",
+    "type": "dua",
+    "input_text": "من قرأ سورة الواقعة سبع مرات متتالية ليلة الجمعة أرسل الله له ملكاً يناديه باسمه ويوسع عليه رزقه في نفس اليوم.",
+    "description": "منشور دعوي متداول في شبكات التواصل لا يوجد له أصل أو تخريج في دواوين السنة المعتمدة.",
+    "expected_status": "لم نجد دليلًا كافيًا",
+    "expected_slug": "insufficient_evidence"
+  },
+  {
+    "id": "case-4",
+    "title": "4. مسألة فقهية فيها اختلاف معتبر بين المصادر",
+    "badge": "اختلاف في المصادر",
+    "type": "fiqh",
+    "input_text": "هل قراءة الفاتحة واجبة على المأموم في الصلاة الجهرية خلف الإمام؟",
+    "description": "مسألة فقهية اختلف فيها أئمة المذاهب الفقهية الكبرى مع إسناد كل رأي لمدرسته الفقهية.",
+    "expected_status": "اختلاف في المصادر",
+    "expected_slug": "scholarly_disagreement"
+  },
+  {
+    "id": "case-5",
+    "title": "5. فحص صورة تحوي نصاً دعوياً (Multimodal OCR)",
+    "badge": "صورة بطاقة دعوية",
+    "type": "quote",
+    "input_text": "قال النبي صلى الله عليه وسلم: الكلمة الطيبة صدقة ويميط الأذى عن الطريق صدقة.",
+    "is_image_demo": true,
+    "image_sample_url": "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='600' height='300' viewBox='0 0 600 300'><rect width='600' height='300' fill='%2312183F'/><rect x='20' y='20' width='560' height='260' rx='12' fill='%231A2152' stroke='%236150EA' stroke-width='2'/><text x='300' y='100' font-family='Arial, sans-serif' font-size='24' font-weight='bold' fill='%232EF2C2' text-anchor='middle'>قال النبي صلى الله عليه وسلم</text><text x='300' y='160' font-family='Arial, sans-serif' font-size='26' font-weight='bold' fill='%23FFFFFF' text-anchor='middle'>الكلمة الطيبة صدقة</text><text x='300' y='210' font-family='Arial, sans-serif' font-size='18' fill='%23F2F4FF' text-anchor='middle'>ويميط الأذى عن الطريق صدقة</text></svg>",
+    "description": "استخراج النص من الصورة وتحليله وتخريجه من صحيح البخاري.",
+    "expected_status": "ثابت بحسب المصدر",
+    "expected_slug": "verified_authentic"
+  },
+  {
+    "id": "case-6",
+    "title": "6. نص يحتوي على خطأ أو تحريف في نقل آية",
+    "badge": "خطأ في نقل النص القرآني",
+    "type": "ayah",
+    "input_text": "قال تعالى: فاتقوا الله حق تقاته ما استطعتم لعلكم تفلحون.",
+    "description": "خلط بين قوله تعالى في آل عمران {اتقوا الله حق تقاته} والتغابن {فاتقوا الله ما استطعتم}.",
+    "expected_status": "لم يثبت بهذا اللفظ",
+    "expected_slug": "unverified_wording"
+  },
+  {
+    "id": "case-7",
+    "title": "7. مسألة شخصية / نازلة تستوجب الإحالة لمختص",
+    "badge": "يحتاج مراجعة مختص",
+    "type": "fatwa",
+    "input_text": "تلفظت بالطلاق على زوجتي في حالة غضب شديد أثناء شجار عنيف، ولم أكن في وعيي التام، فهل يعتبر الطلاق واقعاً أم يلزمني كفارة؟",
+    "description": "استفتاء شخصي خاص في مسائل الطلاق والنزاع الأسري يمنع النظام من البت فيه ويحيله للجهة الرسمية.",
+    "expected_status": "يحتاج مراجعة مختص",
+    "expected_slug": "needs_specialist"
+  }
+]
