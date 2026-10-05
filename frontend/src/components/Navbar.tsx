@@ -35,8 +35,8 @@ export const Navbar: React.FC<NavbarProps> = ({ activeTab, setActiveTab }) => {
     <header 
       className={`fixed top-0 w-full z-50 transition-all duration-300 ${
         scrolled 
-          ? 'bg-[#071f1d]/85 backdrop-blur-md shadow-xl border-b border-white/10 py-3' 
-          : 'bg-[#071f1d]/80 backdrop-blur-sm py-5'
+          ? 'bg-white/90 backdrop-blur-md shadow-sm border-b border-gray-100 py-3' 
+          : 'bg-white/95 backdrop-blur-sm py-5'
       }`}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between relative">
@@ -60,8 +60,8 @@ export const Navbar: React.FC<NavbarProps> = ({ activeTab, setActiveTab }) => {
               onClick={() => handleTabClick(tab.id)}
               className={`text-[15px] font-medium transition-colors ${
                 activeTab === tab.id
-                  ? 'text-white font-semibold'
-                  : 'text-white/70 hover:text-white'
+                  ? 'text-[#0d1a1a] font-semibold'
+                  : 'text-gray-700 hover:text-[#0d1a1a]'
               }`}
             >
               {tab.label}

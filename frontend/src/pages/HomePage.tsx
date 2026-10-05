@@ -38,18 +38,18 @@ const HeroOrbit = () => {
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
       >
-        <div className="absolute inset-0 rounded-full border border-white/10 bg-white/5 backdrop-blur-[1px]" />
-        <div className="absolute inset-[18%] rounded-full border border-dashed border-white/15" />
-        <div className="absolute inset-[33%] rounded-full border border-white/10" />
+        <div className="absolute inset-[8%] rounded-full border-[12px] border-[#7ef4d6]/80 shadow-[0_0_40px_rgba(126,244,214,0.25)]" />
+        <div className="absolute inset-[22%] rounded-full border-[3px] border-[#d7fff5]/50" />
+        <div className="absolute inset-[36%] rounded-full border-[2px] border-white/15" />
 
-        <div className="absolute z-30 w-24 h-24 md:w-32 md:h-32 rounded-full bg-white flex flex-col items-center justify-center text-center p-2 shadow-[0_0_40px_rgba(255,255,255,0.35)] border border-[#D2EFE9]">
+        <div className="absolute z-30 w-24 h-24 md:w-32 md:h-32 rounded-full bg-white flex flex-col items-center justify-center text-center p-2 shadow-[0_0_35px_rgba(255,255,255,0.3)] border border-[#D2EFE9]">
           <span className="text-[#0a2d2b] font-bold text-base md:text-lg tracking-wide">بيّنة AI</span>
           <span className="text-[10px] md:text-xs text-[#1b5f59] mt-0.5">محرك التحقق</span>
         </div>
 
         {steps.map((step, idx) => {
           const angle = (idx * (360 / steps.length) - 90) * (Math.PI / 180);
-          const radius = window.innerWidth < 768 ? 120 : 170;
+          const radius = window.innerWidth < 768 ? 125 : 170;
           const x = Math.cos(angle) * radius;
           const y = Math.sin(angle) * radius;
           const isActive = activeIndex === idx;
@@ -240,47 +240,54 @@ export const HomePage: React.FC<HomePageProps> = ({ onStartVerification, setActi
     <div className="flex flex-col bg-bayyinah-ivory text-bayyinah-dark-text overflow-x-hidden">
       
       {/* 1. HERO SECTION */}
-      <section className="relative min-h-[90vh] flex flex-col items-center pt-28 pb-16 overflow-hidden bg-[#0a302d]">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_rgba(60,162,146,0.18),_rgba(10,48,45,0.96)_55%,_rgba(4,17,16,1)_100%)]" />
-        <div className="absolute inset-0 opacity-60" style={{ backgroundImage: 'linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px)', backgroundSize: '40px 40px' }} />
+      <section className="relative min-h-[90vh] flex flex-col items-center pt-28 pb-16 overflow-hidden">
+        <div
+          className="absolute inset-0"
+          style={{
+            backgroundImage: "linear-gradient(90deg, rgba(9, 49, 45, 0.10) 0%, rgba(9, 49, 45, 0.10) 100%), url('https://images.unsplash.com/photo-1514565131-fce0801e5785?auto=format&fit=crop&w=1600&q=80')",
+            backgroundSize: 'cover',
+            backgroundPosition: 'center'
+          }}
+        />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_rgba(12,93,82,0.15),_rgba(8,26,22,0.82)_55%,_rgba(7,17,14,0.9)_100%)]" />
 
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 w-full flex flex-col items-center justify-center gap-12 text-center">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 w-full flex flex-col lg:flex-row-reverse items-center justify-between gap-10">
           <motion.div
-            initial={{ opacity: 0, y: 24 }}
-            animate={{ opacity: 1, y: 0 }}
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.6 }}
-            className="max-w-3xl"
+            className="w-full lg:w-[46%] text-right"
           >
-            <h1 className="text-shadow-soft text-4xl md:text-6xl lg:text-7xl font-black text-white leading-[1.15] tracking-tight mb-4">
+            <h1 className="text-shadow-soft text-4xl md:text-6xl lg:text-[5rem] font-black text-white leading-[1.1] tracking-tight mb-5">
               تحقّق قبل أن تنشر.
             </h1>
-            <p className="text-lg md:text-2xl text-white/80 max-w-2xl mx-auto leading-relaxed font-medium">
+            <p className="text-lg md:text-2xl text-white/80 max-w-2xl ml-auto leading-relaxed font-medium">
               بيّنة تساعدك على التحقق من الادعاءات الإسلامية بالرجوع إلى المصادر المعتمدة وإظهار الدليل.
             </p>
+
+            <motion.div
+              initial={{ opacity: 0, y: 18 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+              className="mt-8 flex justify-start"
+            >
+              <button
+                onClick={onStartVerification}
+                className="bg-[#0f8b7e] hover:bg-[#0c776d] text-white px-10 py-4 rounded-2xl font-bold text-xl transition-all shadow-[0_0_24px_rgba(15,139,126,0.35)] cursor-pointer flex items-center justify-center gap-3"
+              >
+                ابدأ التحقق
+                <ArrowLeft className="w-6 h-6" />
+              </button>
+            </motion.div>
           </motion.div>
 
           <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
+            initial={{ opacity: 0, scale: 0.92 }}
             animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.8, delay: 0.2 }}
-            className="w-full flex justify-center"
+            transition={{ duration: 0.8, delay: 0.15 }}
+            className="w-full lg:w-[54%] flex justify-center lg:justify-start"
           >
             <HeroOrbit />
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, y: 18 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.35 }}
-            className="flex justify-center"
-          >
-            <button
-              onClick={onStartVerification}
-              className="bg-[#0f8b7e] hover:bg-[#0c776d] text-white px-10 py-4 rounded-2xl font-bold text-xl transition-all shadow-[0_0_24px_rgba(15,139,126,0.35)] cursor-pointer flex items-center justify-center gap-3"
-            >
-              ابدأ التحقق
-              <ArrowLeft className="w-6 h-6" />
-            </button>
           </motion.div>
         </div>
       </section>
