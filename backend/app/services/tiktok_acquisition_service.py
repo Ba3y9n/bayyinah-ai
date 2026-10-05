@@ -22,7 +22,7 @@ from datetime import datetime, timezone
 import uuid
 
 from ..config import settings
-from .url_resolver import url_resolver
+
 
 logger = logging.getLogger("bayyinah.tiktok_acquisition")
 
@@ -113,7 +113,18 @@ class TikTokAcquisitionService:
         Analyzes a TikTok URL and determines capability status honestly.
         """
         video_id = self.extract_video_id(url)
-        oembed_res = url_resolver.resolve(url)
+        oembed_title = "محتوى تيك توك"
+        oembed_author = "مستخدم"
+        try:
+            import urllib.parse, requests
+            oembed_url = f"https://www.tiktok.com/oembed?url={urllib.parse.quote(url)}"
+            res = requests.get(oembed_url, timeout=5)
+            if res.ok:
+                data = res.json()
+                oembed_title = data.get("title", oembed_title)
+                oembed_author = data.get("author_name", oembed_author)
+        except Exception:
+            pass
 
         if self.has_display_api_access:
             return {
@@ -122,9 +133,9 @@ class TikTokAcquisitionService:
                 "video_id": video_id,
                 "capability": "FULL_CONTENT",
                 "provenance": "USER_SOCIAL_CONTENT",
-                "title": getattr(oembed_res, "title", "فيديو تيك توك"),
-                "author": getattr(oembed_res, "author", "user"),
-                "extracted_text": getattr(oembed_res, "title", "فيديو تيك توك"),
+                "title": oembed_title,
+                "author": oembed_author,
+                "extracted_text": oembed_title,
                 "requires_upload": False,
                 "message": "تم جلب الفيديو ومحتواه عبر الصلاحية الرسمية لـ TikTok Display API"
             }
@@ -141,9 +152,9 @@ class TikTokAcquisitionService:
                 "video_id": video_id,
                 "capability": "FULL_CONTENT",
                 "provenance": "USER_SOCIAL_CONTENT",
-                "title": oembed_res.title,
-                "author": oembed_res.author,
-                "extracted_text": oembed_res.title,
+                "title": oembed_title,
+                "author": oembed_author,
+                "extracted_text": oembed_title,
                 "requires_upload": False,
                 "message": "تم جلب الفيديو ومحتواه عبر الصلاحية الرسمية لـ TikTok Display API"
             }
@@ -155,9 +166,9 @@ class TikTokAcquisitionService:
             "video_id": video_id,
             "capability": "METADATA_ONLY",
             "provenance": "USER_SOCIAL_CONTENT",
-            "title": oembed_res.title,
-            "author": oembed_res.author,
-            "extracted_text": oembed_res.title,
+            "title": oembed_title,
+            "author": oembed_author,
+            "extracted_text": oembed_title,
             "requires_upload": True,
             "honest_notice": "تم التعرف على المقطع، لكن لا يتوفر محتواه الكامل للتحليل المباشر من الرابط.",
             "alternative_action": "يرجى رفع ملف الفيديو مباشرة للتحليل الكامل باستخدام Gemini Files API."

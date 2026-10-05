@@ -24,11 +24,24 @@ class EvidenceGate:
     @staticmethod
     def validate_source(source_id: Optional[str], source_url: Optional[str] = None) -> bool:
         """Validates that the source belongs to the official allowlist."""
-        approved_ids = {s["id"] for s in OFFICIAL_SOURCE_ALLOWLIST}
-        if source_id and source_id in approved_ids:
+        approved_map = {s["id"]: s for s in OFFICIAL_SOURCE_ALLOWLIST}
+        
+        is_id_approved = source_id and source_id in approved_map
+        is_url_approved = source_url and is_url_in_allowlist(source_url)
+
+        # Both must be present and valid. If URL is given, it must map to the same approved source ID.
+        if source_id and source_url:
+            if not (is_id_approved and is_url_approved):
+                return False
+            # Check domain match loosely
+            expected_domain = approved_map[source_id].get("domain", "")
+            if expected_domain and expected_domain not in source_url:
+                return False
             return True
-        if source_url and is_url_in_allowlist(source_url):
-            return True
+        elif source_id:
+            return is_id_approved
+        elif source_url:
+            return is_url_approved
         return False
 
     @classmethod
@@ -85,7 +98,7 @@ class EvidenceGate:
         for ev in evidences:
             src_id = ev.get("source_id")
             url = ev.get("url") or ev.get("canonical_url")
-            text = ev.get("text") or ev.get("content") or ""
+            text = ev.get("excerpt") or ev.get("text") or ev.get("content") or ""
 
             # Check if source is official
             if not cls.validate_source(src_id, url):

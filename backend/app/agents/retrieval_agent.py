@@ -1,4 +1,4 @@
-import datetime
+﻿import datetime
 import logging
 from typing import List, Dict, Any, Optional
 from sqlalchemy.orm import Session
@@ -17,24 +17,24 @@ logger = logging.getLogger("bayyinah.retrieval_agent")
 
 CATEGORY_ROUTER_MAP = {
     "hadith": "HADITH",
-    "حديث": "HADITH",
+    "ط­ط¯ظٹط«": "HADITH",
     "quran": "QURAN",
-    "قرآن": "QURAN",
-    "آية": "QURAN",
+    "ظ‚ط±ط¢ظ†": "QURAN",
+    "ط¢ظٹط©": "QURAN",
     "tafsir": "TAFSEER",
-    "تفسير": "TAFSEER",
+    "طھظپط³ظٹط±": "TAFSEER",
     "fiqh": "FIQH",
-    "فقه": "FIQH",
-    "فتوى/مسألة فقهية": "FIQH",
-    "مسألة فقهية": "FIQH",
+    "ظپظ‚ظ‡": "FIQH",
+    "ظپطھظˆظ‰/ظ…ط³ط£ظ„ط© ظپظ‚ظ‡ظٹط©": "FIQH",
+    "ظ…ط³ط£ظ„ط© ظپظ‚ظ‡ظٹط©": "FIQH",
     "aqeedah": "AQEEDAH",
-    "عقيدة": "AQEEDAH",
+    "ط¹ظ‚ظٹط¯ط©": "AQEEDAH",
     "seerah": "SEERAH_HISTORY",
-    "سيرة": "SEERAH_HISTORY",
-    "تاريخ": "SEERAH_HISTORY",
+    "ط³ظٹط±ط©": "SEERAH_HISTORY",
+    "طھط§ط±ظٹط®": "SEERAH_HISTORY",
     "dictionary": "DICTIONARY_TRANSLATION",
-    "قاموس": "DICTIONARY_TRANSLATION",
-    "مصطلح": "DICTIONARY_TRANSLATION",
+    "ظ‚ط§ظ…ظˆط³": "DICTIONARY_TRANSLATION",
+    "ظ…طµط·ظ„ط­": "DICTIONARY_TRANSLATION",
 }
 
 def map_claim_type_to_category(claim_type: str) -> Optional[str]:
@@ -115,19 +115,19 @@ class RetrievalAgent:
                             ev = EvidenceItem(
                                 document_id=str(prov.document_id),
                                 source_id=str(prov.source_id),
-                                source_name=prov.source_name or "المصدر المعتمد",
+                                source_name=prov.source_name or "ط§ظ„ظ…طµط¯ط± ط§ظ„ظ…ط¹طھظ…ط¯",
                                 author=None,
                                 organization=None,
                                 category=item.document.get("category") or mapped_cat or "general",
-                                title=prov.document_title or "وثيقة معتمدة",
+                                title=prov.document_title or "ظˆط«ظٹظ‚ط© ظ…ط¹طھظ…ط¯ط©",
                                 excerpt=item.chunk.get("content", ""),
                                 reference=prov.reference or prov.locator or "",
                                 url=prov.url or "",
-                                license=prov.license_status or "مرجع موثق",
-                                relevance_score=min(score, 1.0) if score > 0 else 0.85,
+                                license=prov.license_status or "ظ…ط±ط¬ط¹ ظ…ظˆط«ظ‚",
+                                relevance_score=min(score, 1.0) if score > 0 else 0.0,
                                 evidence_type="EXACT" if score >= 0.85 else ("HYBRID" if score >= 0.65 else "SEMANTIC"),
                                 ruling_or_grade=prov.scientific_status,
-                                comparison_notes="مطابقة من قاعدة البيانات الحية (Supabase FTS + pgvector)"
+                                comparison_notes="ظ…ط·ط§ط¨ظ‚ط© ظ…ظ† ظ‚ط§ط¹ط¯ط© ط§ظ„ط¨ظٹط§ظ†ط§طھ ط§ظ„ط­ظٹط© (Supabase FTS + pgvector)"
                             )
                             evidence_items.append(ev)
             except Exception as e:
@@ -145,77 +145,16 @@ class RetrievalAgent:
         # =========================================================================
         # STEP 2: LIVE_DISCOVERY (SerpAPI Discovery -> Official Allowlist -> Adapters)
         # =========================================================================
-        # If internal DB has no evidence or top_score is low (< 0.45), run Live Discovery
-        if top_score < 0.45 and queries:
-            search_query = queries[0] if queries else (claim_text or "")
-            logger.info(f"[LIVE_DISCOVERY] Internal DB top_score ({top_score:.3f}) < 0.45. Triggering SerpAPI discovery for '{search_query}'")
+        # As per strict verification architecture, general search engines (Google, SerpAPI, Bing)
+        # are explicitly banned from providing evidence. We rely strictly on the INTERNAL_DB
+        # (pgvector) which indexes the official sources, or direct URL acquisition.
+        # Live Discovery via SerpAPI is DISABLED to prevent snippet leakage and general web reliance.
 
-            try:
-                discovered_entries = serpapi_discovery_service.search_official_sources(
-                    query=search_query,
-                    category=mapped_cat,
-                    max_results=5
-                )
-
-                for entry in discovered_entries:
-                    candidate_url = entry.get("url")
-                    if not candidate_url:
-                        continue
-
-                    # RULE 7 & 10: Check if URL belongs to official_allowlist.py
-                    if not is_url_in_allowlist(candidate_url):
-                        logger.warning(f"[EVIDENCE_GATE] BLOCKED candidate URL outside official allowlist: {candidate_url}")
-                        continue
-
-                    # RULE 8 & 9: Use Source Adapter to fetch canonical original page
-                    adapter = get_adapter_by_url(candidate_url)
-                    parsed_content = None
-                    if adapter:
-                        logger.info(f"[SOURCE_ADAPTER] Fetching & parsing canonical page via {adapter.__class__.__name__}: {candidate_url}")
-                        fetch_res = adapter.fetch_page(candidate_url, timeout=6)
-                        if fetch_res.get("success") and fetch_res.get("html"):
-                            parsed_content = adapter.parse(fetch_res["html"], candidate_url)
-
-                    # Extract canonical text from adapter (NOT from SerpAPI snippet)
-                    title = (parsed_content.get("title") if parsed_content else None) or entry.get("title") or "مصدر معتمد"
-                    content = (parsed_content.get("content") if parsed_content else None) or entry.get("content") or ""
-                    reference = (parsed_content.get("reference") if parsed_content else None) or entry.get("reference") or "الموسوعة المعتمدة"
-                    grading = (parsed_content.get("grading_text") if parsed_content else None) or "ثابت بحسب المصدر"
-
-                    allowlist_entry = get_matched_allowlist_entry(candidate_url)
-                    source_id = entry.get("source_id") or (allowlist_entry["id"] if allowlist_entry else "src-official")
-                    source_name = (allowlist_entry.get("name_ar") if allowlist_entry else None) or "المصدر المعتمد"
-
-                    if len(content.strip()) >= 20:
-                        live_ev = EvidenceItem(
-                            document_id=f"doc-live-{hash(candidate_url) & 0xffffffff}",
-                            source_id=source_id,
-                            source_name=source_name,
-                            author=None,
-                            organization=None,
-                            category=mapped_cat or "general",
-                            title=title,
-                            excerpt=content[:1500],
-                            reference=reference,
-                            url=candidate_url,
-                            license="رخصة استخدام معتمدة",
-                            relevance_score=0.88,
-                            evidence_type="direct_match",
-                            ruling_or_grade=grading,
-                            comparison_notes="تم السحب والتحقق حياً عبر محول المصدر المعتمد (Live Discovery Adapter)"
-                        )
-                        evidence_items.append(live_ev)
-                        logger.info(f"[LIVE_DISCOVERY] Appended canonical evidence from {candidate_url} ({source_name})")
-
-            except Exception as e:
-                logger.error(f"[LIVE_DISCOVERY] Live discovery failed: {e}")
-
-        # =========================================================================
         # STEP 3: EVIDENCE_GATE Filter
         # =========================================================================
         validated_items: List[EvidenceItem] = []
         for ev in evidence_items:
-            if evidence_gate.validate_source(ev.source_id, ev.url):
+            if evidence_gate.validate_source(ev.source_id, ev.url) and ev.excerpt and ev.reference and ev.url:
                 validated_items.append(ev)
             else:
                 logger.warning(f"[EVIDENCE_GATE] Discarded item from unapproved source: {ev.source_id} / {ev.url}")
@@ -224,3 +163,6 @@ class RetrievalAgent:
         return validated_items[:limit]
 
 retrieval_agent = RetrievalAgent()
+
+
+
