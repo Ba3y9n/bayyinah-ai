@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { Menu, X } from 'lucide-react';
 
 export type NavTab = 'home' | 'verify' | 'judge-demo' | 'sources' | 'knowledge-domains' | 'health';
@@ -19,12 +19,11 @@ export const Navbar: React.FC<NavbarProps> = ({ activeTab, setActiveTab }) => {
   }, []);
 
   const tabs = [
-    { id: 'home', label: 'الرئيسية' },
-    { id: 'verify', label: 'التحقق' },
-    { id: 'judge-demo', label: 'عرض الحكّام (Demo)' },
-    { id: 'sources', label: 'المصادر المعتمدة' },
-    { id: 'knowledge-domains', label: 'طبقة البحث والتحقق' },
-    { id: 'health', label: 'حالة النظام' },
+    { id: 'home', label: 'ط§ظ„ط±ط¦ظٹط³ظٹط©' },
+    { id: 'verify', label: 'ط§ظ„طھط­ظ‚ظ‚' },
+    { id: 'sources', label: 'ط§ظ„ظ…طµط§ط¯ط± ط§ظ„ظ…ط¹طھظ…ط¯ط©' },
+    { id: 'knowledge-domains', label: 'ط·ط¨ظ‚ط© ط§ظ„ط¨ط­ط« ظˆط§ظ„طھط­ظ‚ظ‚' },
+    { id: 'health', label: 'ط­ط§ظ„ط© ط§ظ„ظ†ط¸ط§ظ…' },
   ];
 
   const handleTabClick = (tabId: string) => {
@@ -40,7 +39,7 @@ export const Navbar: React.FC<NavbarProps> = ({ activeTab, setActiveTab }) => {
           : 'bg-transparent py-5'
       }`}
     >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between relative">
         {/* Brand Logo */}
         <div 
           onClick={() => handleTabClick('home')}
@@ -48,13 +47,13 @@ export const Navbar: React.FC<NavbarProps> = ({ activeTab, setActiveTab }) => {
         >
           <img 
             src="/bayyinah-logo.png" 
-            alt="بيّنة AI" 
+            alt="ط¨ظٹظ‘ظ†ط© AI" 
             className="h-9 w-auto object-contain transition-transform duration-300 group-hover:scale-105" 
           />
         </div>
 
         {/* Desktop Navigation */}
-        <nav className="hidden lg:flex items-center gap-8">
+        <nav className="hidden lg:flex items-center justify-center gap-8 absolute left-1/2 -translate-x-1/2">
           {tabs.map((tab) => (
             <button
               key={tab.id}
@@ -100,3 +99,4 @@ export const Navbar: React.FC<NavbarProps> = ({ activeTab, setActiveTab }) => {
     </header>
   );
 };
+
