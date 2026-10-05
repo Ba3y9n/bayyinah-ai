@@ -1,0 +1,69 @@
+{
+  "database": {
+    "counts": {
+      "trusted_sources": 15,
+      "documents": 27,
+      "document_chunks": 27,
+      "terms": 4,
+      "term_translations": 4,
+      "claims": 0,
+      "evidence": 0,
+      "knowledge_audit_logs": 0
+    },
+    "orphans": {
+      "docs": 0,
+      "chunks": 0,
+      "translations": 0
+    }
+  },
+  "provenance": {
+    "total_chunks_checked": 27,
+    "hash_mismatches_count": 0
+  },
+  "quran_test": {
+    "exact_passed": true,
+    "corrupted_handled": true
+  },
+  "hadith_test": {
+    "known_found": true,
+    "fake_top_relevance": 0.0
+  },
+  "personal_fatwa_test": {
+    "status": "يحتاج مراجعة مختص",
+    "status_slug": "SPECIALIST",
+    "is_specialist": true
+  },
+  "conflict_test": {
+    "status": "اختلاف في المصادر",
+    "status_slug": "CONFLICT",
+    "is_conflict": true
+  },
+  "terminology_test": {
+    "found": true,
+    "translations_count": 1
+  },
+  "fabricated_rule_test": {
+    "fabricated_case_slug": "INSUFFICIENT",
+    "no_result_case_slug": "INSUFFICIENT",
+    "distinction_correct": false
+  },
+  "e2e_trace": {
+    "input": "قال رسول الله ﷺ: إنما الأعمال بالنيات وإنما لكل امرئ ما نوى",
+    "claim": "قال رسول الله ﷺ: إنما الأعمال بالنيات وإنما لكل امرئ ما نوى",
+    "category": "Hadith",
+    "status": "ثابت بحسب المصدر",
+    "status_slug": "VERIFIED",
+    "primary_source": "صحيح البخاري (الجامع المسند الصحيح المختصر)",
+    "reference": "صحيح البخاري، كتاب بدء الوحي، باب كيف كان بدء الوحي إلى رسول الله صلى الله عليه وسلم، رقم الحديث: 1",
+    "url": "https://dorar.net/hadith/sharh/1",
+    "relevance_score": 0.866,
+    "latency_breakdown": {
+      "gemini_latency_ms": 1039.6,
+      "search_latency_ms": 20.1,
+      "database_latency_ms": 10.8,
+      "validation_latency_ms": 301.9,
+      "total_latency_ms": 1372.7
+    },
+    "total_e2e_ms": 1373.15
+  }
+}

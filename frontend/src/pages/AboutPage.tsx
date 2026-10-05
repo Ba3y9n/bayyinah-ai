@@ -8,7 +8,8 @@ import {
   Award, 
   Scale,
   CheckCircle2,
-  XCircle
+  XCircle,
+  Cpu
 } from 'lucide-react';
 
 export const AboutPage: React.FC = () => {
@@ -110,6 +111,62 @@ export const AboutPage: React.FC = () => {
             <strong className="text-white text-sm block">3. الباحثون والمترجمون</strong>
             <p>للوصول السريع إلى مراجع التخريج الموثقة وأرقام الأبواب في أصح دواوين السنة والتفاسير.</p>
           </div>
+        </div>
+      </div>
+
+      {/* Model Specifications Card (Section 34) */}
+      <div className="bg-white rounded-3xl p-8 md:p-10 border border-bayyinah-gray-200 shadow-elevated space-y-6">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+          <h2 className="text-xl font-bold text-bayyinah-navy flex items-center gap-2">
+            <Cpu className="w-5 h-5 text-bayyinah-purple" />
+            بطاقة مواصفات نموذج الذكاء الاصطناعي (AI Model Transparency)
+          </h2>
+          <span className="text-xs bg-emerald-50 text-emerald-700 border border-emerald-200 px-3 py-1 rounded-full font-bold self-start sm:self-auto">
+            Google GenAI SDK 2.27.0
+          </span>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 text-xs">
+          <div className="bg-bayyinah-off-white p-4 rounded-2xl border border-bayyinah-gray-200">
+            <span className="text-bayyinah-gray-500 block mb-1">Model</span>
+            <span className="text-base font-bold text-bayyinah-navy font-mono">Gemini 3.8 Flash</span>
+          </div>
+
+          <div className="bg-bayyinah-off-white p-4 rounded-2xl border border-bayyinah-gray-200">
+            <span className="text-bayyinah-gray-500 block mb-1">Multimodal</span>
+            <span className="text-base font-bold text-emerald-600 flex items-center gap-1">
+              <CheckCircle2 className="w-4 h-4" /> Yes (OCR & Image Analysis)
+            </span>
+          </div>
+
+          <div className="bg-bayyinah-off-white p-4 rounded-2xl border border-bayyinah-gray-200">
+            <span className="text-bayyinah-gray-500 block mb-1">Function Calling</span>
+            <span className="text-base font-bold text-emerald-600 flex items-center gap-1">
+              <CheckCircle2 className="w-4 h-4" /> Yes (7 Verification Tools)
+            </span>
+          </div>
+
+          <div className="bg-bayyinah-off-white p-4 rounded-2xl border border-bayyinah-gray-200">
+            <span className="text-bayyinah-gray-500 block mb-1">Structured Outputs</span>
+            <span className="text-base font-bold text-emerald-600 flex items-center gap-1">
+              <CheckCircle2 className="w-4 h-4" /> Yes (Pydantic Schemas)
+            </span>
+          </div>
+
+          <div className="bg-bayyinah-off-white p-4 rounded-2xl border border-bayyinah-gray-200">
+            <span className="text-bayyinah-gray-500 block mb-1">Thinking Policy</span>
+            <span className="text-base font-bold text-bayyinah-purple font-mono">Medium / High</span>
+          </div>
+
+          <div className="bg-bayyinah-off-white p-4 rounded-2xl border border-bayyinah-gray-200">
+            <span className="text-bayyinah-gray-500 block mb-1">Vector Embedding</span>
+            <span className="text-base font-bold text-bayyinah-navy font-mono">text-embedding-004</span>
+          </div>
+        </div>
+
+        <div className="bg-bayyinah-purple-light/40 border border-bayyinah-purple/20 p-4 rounded-2xl text-xs text-bayyinah-navy leading-relaxed">
+          <strong className="block mb-1 font-bold">Role:</strong>
+          <span>Analysis, retrieval orchestration, evidence validation and grounded response. (الذكاء الاصطناعي وسيلة فهم وبحث وتوثيق واسترجاع للأدلة، وليس مصدراً مستقلاً للفتوى أو الحكم الشرعي).</span>
         </div>
       </div>
     </div>

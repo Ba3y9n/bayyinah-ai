@@ -10,6 +10,7 @@ class ConflictAgent:
         pass
 
     def detect_conflicts(self, claim_type: str, evidence_items: List[EvidenceItem]) -> Dict[str, Any]:
+        from ..services.gemini_service import gemini_service
         if len(evidence_items) < 2:
             return {
                 "conflict_detected": False,

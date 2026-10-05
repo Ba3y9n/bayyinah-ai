@@ -28,11 +28,10 @@ export const GroundedChat: React.FC<GroundedChatProps> = ({ verificationContext 
   const [avatarState, setAvatarState] = useState<'idle' | 'thinking' | 'searching' | 'evidence_found' | 'explaining'>('idle');
 
   const defaultSuggestions = [
-    'وش المصدر؟',
-    'وش الدليل؟',
-    'ليش طلعت النتيجة كذا؟',
-    'هل فيه مصدر ثاني؟',
-    'اشرح لي هذا الكلام.'
+    'ما المصدر؟',
+    'أين الدليل؟',
+    'لماذا ظهرت هذه النتيجة؟',
+    'هل توجد مصادر مختلفة؟'
   ];
 
   const handleAsk = async (questionText: string) => {

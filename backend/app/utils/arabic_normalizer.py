@@ -1,11 +1,11 @@
 import re
 from typing import List
 
-# Arabic diacritics regex
-TASHKEEL_REGEX = re.compile(r'[\u0617-\u061A\u064B-\u0652\u0670\u0640]')
+# Arabic diacritics and Quranic annotations regex
+TASHKEEL_REGEX = re.compile(r'[\u0617-\u061A\u064B-\u065F\u0670\u0640\u06D6-\u06ED]')
 
 def remove_tashkeel(text: str) -> str:
-    """Removes all Arabic diacritics, harakat, and tatweel."""
+    """Removes all Arabic diacritics, harakat, tatweel, and Quranic recitation marks."""
     if not text:
         return ""
     return TASHKEEL_REGEX.sub('', text)
@@ -13,8 +13,8 @@ def remove_tashkeel(text: str) -> str:
 def normalize_arabic(text: str) -> str:
     """
     Normalizes Arabic text:
-    - Removes Tashkeel & Tatweel
-    - Normalizes Alef forms (أ, إ, آ -> ا)
+    - Removes Tashkeel & Tatweel & Quranic signs
+    - Normalizes Alef forms (أ, إ, آ, ٱ -> ا)
     - Normalizes Taa Marbuta (ة -> ه)
     - Normalizes Yaa (ى -> ي)
     - Replaces Quranic signs & extra spaces
@@ -40,16 +40,16 @@ def normalize_arabic(text: str) -> str:
     return text
 
 def tokenize_arabic(text: str) -> List[str]:
-    """Tokenizes Arabic text after normalization, ignoring stop words and single characters."""
+    """Tokenizes text after normalization, supporting Arabic and multilingual terms."""
     normalized = normalize_arabic(text)
-    tokens = normalized.split()
-    # Simple stop words filter for search refinement
+    raw_tokens = re.findall(r'[\w\u0600-\u06FF]+', normalized)
     stop_words = {
         'في', 'من', 'عن', 'على', 'إلى', 'الى', 'مع', 'هذا', 'هذه', 'ذلك', 'تلك', 
         'التي', 'الذي', 'الذين', 'هو', 'هي', 'هم', 'نحن', 'انا', 'أنا', 'ان', 'أن', 
-        'انما', 'إنما', 'كان', 'يكون', 'قال', 'قالت', 'ما', 'لا', 'لم', 'لن', 'ثم', 'او', 'أو'
+        'كان', 'يكون', 'قال', 'قالت', 'ما', 'لا', 'لم', 'لن', 'ثم', 'او', 'أو',
+        'is', 'the', 'what', 'and', 'in', 'of', 'to', 'a', 'true', 'for', 'are'
     }
-    return [t for t in tokens if len(t) > 1 and t not in stop_words]
+    return [t.lower() for t in raw_tokens if len(t) > 1 and t.lower() not in stop_words]
 
 def compute_jaccard_similarity(text1: str, text2: str) -> float:
     """Calculates Jaccard similarity between two Arabic strings."""

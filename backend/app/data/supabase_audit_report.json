@@ -1,0 +1,80 @@
+{
+  "timestamp": "2026-10-03 21:34:22 UTC",
+  "supabase_configured": true,
+  "database_url_configured": true,
+  "embedding_model": "models/text-embedding-004",
+  "embedding_dimension": 768,
+  "migrations": {
+    "total_files": 18,
+    "files": [
+      "001_extensions.sql",
+      "002_sources.sql",
+      "003_documents.sql",
+      "004_document_chunks.sql",
+      "005_claims.sql",
+      "006_evidence.sql",
+      "007_verification_results.sql",
+      "008_translation_terms.sql",
+      "009_audit_logs.sql",
+      "010_source_health.sql",
+      "011_indexes.sql",
+      "012_rls.sql",
+      "013_seed_sources.sql",
+      "014_sync_knowledge_schema.sql",
+      "015_canonical_enterprise_schema.sql",
+      "016_official_challenge_schema_and_sources.sql",
+      "017_autonomous_knowledge_acquisition.sql",
+      "018_update_job_constraints.sql"
+    ]
+  },
+  "connectivity": {
+    "connected": true,
+    "status": "PostgreSQL connected successfully."
+  },
+  "pgvector": {
+    "active": true,
+    "status": "pgvector extension is active."
+  },
+  "fts": {
+    "active": true,
+    "status": "PostgreSQL FTS is active and functioning."
+  },
+  "hybrid_search": {
+    "sample_query": "إنما الأعمال بالنيات",
+    "result_count": 3,
+    "latency_ms": 6865.98,
+    "sample_top_result": {
+      "chunk_id": "af62864a-46fe-5414-87cd-94ea0487e93d",
+      "document_id": "c1a1a1a1-0012-4000-8000-000000000012",
+      "source_id": "00000000-0000-0000-0000-000000000004",
+      "source_name": "الموسوعة الحديثية - الدرر السنية",
+      "source_url": "https://dorar.net/hadith",
+      "document_title": "تخريج وتحقيق حديث: إنما الأعمال بالنيات",
+      "document_category": "HADITH",
+      "chunk_text": "عن عمر بن الخطاب رضي الله عنه قال: سمعت رسول الله ﷺ يقول: «إنما الأعمال بالنيات، وإنما لكل امرئ ما نوى، فمن كانت هجرته إلى دنيا يصيبها، أو إلى امرأة ينكحها، فهجرته إلى ما هاجر إليه». أخرجه البخاري (1)، ومسلم (1907). حكم الحديث في الموسوعة الحديثية: صحيح ثابت متفق عليه بأعلى درجات الصحة، وهو أصل عظيم وقاعدة كلية من قواعد الشريعة ومدار الإسلام عليه.",
+      "reference": "الموسوعة الحديثية - الدرر السنية، صحيح البخاري (1)، صحيح مسلم (1907)",
+      "locator": "الدرر السنية - الموسوعة الحديثية: إنما الأعمال بالنيات",
+      "canonical_url": "https://dorar.net/hadith",
+      "content_hash": "a957719bd31f3fc4a525de45f57ce209154f5d47db6f73f7169ebb179e0bbe46",
+      "scores": {
+        "exact": 1.0,
+        "fts": 0.4,
+        "vector": 0.744,
+        "rrf": 0.0607,
+        "relevance": 1.0
+      },
+      "support_level": "DIRECT_SUPPORT",
+      "verification_status": "VERIFIED",
+      "scientific_status": "APPROVED",
+      "license_status": "VERIFIED"
+    }
+  },
+  "provenance": {
+    "sha256_match": true
+  },
+  "evaluation_summary": {
+    "total_cases": 12,
+    "passed_cases": 11,
+    "success_rate_percent": 91.7
+  }
+}

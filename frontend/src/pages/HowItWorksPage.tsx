@@ -38,7 +38,7 @@ export const HowItWorksPage: React.FC = () => {
         </h1>
 
         <p className="text-sm md:text-base text-bayyinah-gray-600 leading-relaxed">
-          تعمل بيّنة كمنظومة استدلالية متكاملة تدمج بين الذكاء الاصطناعي متعدد الوسائط (Gemini Multimodal)، والبحث الهجين (Hybrid Search)، ومحرك التثبت من الأدلة الموثقة (Grounded RAG).
+          تعمل بيّنة كمنظومة استدلالية متكاملة تدمج بين الذكاء الاصطناعي متعدد الوسائط (Gemini 3.8 Flash مع سياسات التفكير Medium/High)، والبحث الهجين (Hybrid Search)، ومحرك التثبت من الأدلة الموثقة (Grounded RAG).
         </p>
       </div>
 
@@ -110,10 +110,10 @@ export const HowItWorksPage: React.FC = () => {
         <div className="flex items-center justify-between">
           <h2 className="text-xl font-bold text-bayyinah-navy flex items-center gap-2">
             <Code2 className="w-5 h-5 text-bayyinah-purple" />
-            أدوات Gemini التفاعلية (Function Calling / Tool Calling)
+            أدوات Gemini 3.8 Flash التفاعلية (Function Calling / Tool Orchestration)
           </h2>
           <span className="text-xs bg-bayyinah-purple-light text-bayyinah-purple px-3 py-1 rounded-full font-semibold">
-            7 أدوات معيارية
+            7 أدوات معيارية (Thinking: High)
           </span>
         </div>
 

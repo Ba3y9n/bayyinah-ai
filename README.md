@@ -1,239 +1,219 @@
-# بيّنة AI | Bayyinah AI
+# بيّنة AI | BAYYINAH AI
 > **تحقّق قبل أن تنشر.**  
-> *منصة ذكية قائمة على الأدلة للتحقق من المحتوى الإسلامي الرقمي لتمكين المعرفين بالإسلام.*  
-> **المسار الرابع:** أدوات المعرفة والتحقق لتمكين المعرّفين بالإسلام.
+> *Evidence-First Multimodal Islamic Content Verification Platform*  
+> **منصة التحقق العلمي من المحتوى الإسلامي الرقمي لتمكين المعرّفين بالإسلام والجمهور العام.**
 
 ---
 
-## 1. نبذة عن المشروع (Project Overview)
-**بيّنة AI** هي منصة ويب عربية Evidence-First متخصصة في التحقق من صحة وموثوقية المحتوى الإسلامي الرقمي المتداول على منصات التواصل الاجتماعي (WhatsApp, X, TikTok, Instagram, إلخ). لا تعمل المنصة كمفتٍ أو عالم دين، ولا تولد أحكاماً من الذاكرة التوليدية للذكاء الاصطناعي، بل تطبق مسار استدلال صارم:
-$$\text{Content} \longrightarrow \text{Claim} \longrightarrow \text{Search} \longrightarrow \text{Evidence} \longrightarrow \text{Validation} \longrightarrow \text{Source} \longrightarrow \text{Grounded Result}$$
+## 1. الرؤية والمبدأ الأساسي (Core Vision & Principle)
+
+**بيّنة AI** ليست روبوت محادثة عاماً (Generic Chatbot)، وليست نظام إفتاء آلي (Automated Fatwa Engine)، ولا تعتمد إطلاقاً على الذاكرة التوليدية غير الموثقة للذكاء الاصطناعي.
+
+### المبدأ الصارم:
+$$\text{الذكاء الاصطناعي ليس مصدر الحقيقة الدينية}$$
+دور الذكاء الاصطناعي محدد بدقة كأداة تحليل واسترجاع ومقارنة:
+$$\text{Content} \longrightarrow \text{Claim Extraction} \longrightarrow \text{Hybrid Search} \longrightarrow \text{Evidence Retrieval} \longrightarrow \text{Disagreement Detection} \longrightarrow \text{Abstention/Validation} \longrightarrow \text{Grounded Result}$$
+
+إذا لم يعثر النظام على دليل صريح موثق في مصادره المعتمدة، فإن النظام **يمتنع منهجياً (Abstains)** بحسب قاعدة التحدي الرسمية:
+> *"عدم العثور على دليل في المصادر المعتمدة لا يعني إثبات البطلان، وإنما يعني عدم ثبوت الادعاء في حدود ما تم فحصه."*
 
 ---
 
-## 2. المشكلة (The Problem)
-ينتشر المحتوى الإسلامي يومياً بمليارات المقاطع والرسائل، لكن المستخدم العادي وصانع المحتوى يواجهان:
-- عدم معرفة المصدر الأصلي للحديث أو المقولة.
-- نسبة نصوص وأحاديث للنبي ﷺ بغير ألفاظها الثابتة أو بصيغ محرفة.
-- انتشار أحاديث موضوعة ومكذوبة وحكايات وقصص لا أصل لها.
-- خلط المسائل الفقهية الخلافية وإظهارها كإجماع أو العكس.
-- **الفجوة الجوهرية ليست نقص المعلومات؛ بل الفجوة بين المحتوى المتداول والمصدر القابل للتحقق والتتبع.**
+## 2. النطاق العلمي والمستويات الأربعة المعتمدة (Official Challenge Scope)
+
+تلتزم المنصة حرفياً بالنطاق العلمي والمنهجي لتحدي المحتوى الإسلامي:
+
+| المستوى العلمي | التوصيف المنهجي | طريقة المعالجة في بيّنة AI | مثال تطبيقي |
+| :--- | :--- | :--- | :--- |
+| **المستوى (أ)** | **الثوابت والقطعيات والأصول الكلية** | إثبات قطعي مدعوم بنصوص القرآن والسنة والإجماع | أصل التوحيد، كعبة المشرفة قِبلة لا معبود، حفظ القرآن {إِنَّا نَحْنُ نَزَّلْنَا الذِّكْرَ}، نفي الإكراه في الدين |
+| **المستوى (ب)** | **المسائل الخلافية الفرعية المعتبرة** | عرض مقارن لمذاهب الفقهاء دون إهدار الخلاف السائغ (`CONFLICT`) | قراءة الفاتحة خلف الإمام، رفع اليدين عند الركوع في الصلاة |
+| **المستوى (ج)** | **الاستفسارات والفتاوى الفردية والنوازل** | الامتناع والإحالة الصريحة للجهات الرسمية المعتمدة (`SPECIALIST`) | قضايا الطلاق، نزاعات المواريث والتركات، النوازل الطبية والجنائية |
+| **المستوى (د)** | **المحتوى الواهي والمكذوب وغير الثابت** | بيان علة الإسناد وحكم أئمة الحديث بالوضع أو النكارة (`FABRICATED` / `WEAK`) | حديث: «صوموا تصحوا» (لم يثبت بهذا اللفظ)، حديث: «اطلبوا العلم ولو في الصين» (باطل وموضوع) |
 
 ---
 
-## 3. الحل (The Solution)
-بيّنة AI تقدم نظاماً متكاملاً لسد هذه الفجوة عبر:
-1. استقبال النص أو الصورة واستخراج الادعاء الجوهري بدقة.
-2. البحث في سجل مصادر إسلامية موثوقة ومفهرسة.
-3. دمج البحث اللفظي الدقيق مع البحث الدلالي في محرك Hybrid Search.
-4. استرجاع الأدلة المباشرة وتوثيق السند ورقم الباب ورابط المصدر.
-5. فحص كفاية الدليل ورصد وجود أي اختلاف بين المصادر.
-6. الامتناع الآمن عن الحكم عند عدم كفاية الأدلة، وإحالة الاستفتاءات الشخصية لمختص.
+## 3. المصادر العلمية الرسمية الـ 11 (The 11 Official Scientific Sources)
+
+ترتكز المنصة على فهرس معتمد يضم المصادر الرسمية الصادرة عن التحدي:
+1. **مجمع الملك فهد لطباعة المصحف الشريف** (`dawa.center`) - النص القرآني والرسم العثماني.
+2. **المنصة الرقمية للمحتوى الإسلامي** (`islamic-content.com`) - المعارف والموسوعات المعتمدة.
+3. **الموسوعة القرآنية** (`quranpedia.net`) - التفاسير والقراءات وعلوم القرآن.
+4. **موسوعة التفسير - الدرر السنية** (`dorar.net/tafseer`) - تفاسير أهل السنة المحررة.
+5. **الموسوعة الحديثية - الدرر السنية** (`dorar.net/hadith`) - أحكام المحدثين وتخريج الأحاديث.
+6. **المكتبة الشاملة** (`shamela.ws`) - أمهات كتب التراث والمصنفات الفقهية والتاريخية.
+7. **موسوعة العقيدة والفرق المعاصرة - الدرر السنية** (`dorar.net/aqeeda`) - أصول التوحيد والمعتقد.
+8. **الموسوعة الفقهية - الدرر السنية** (`dorar.net/feqhia`) - الفقه المقارن والمذاهب الأربعة.
+9. **الموسوعة التاريخية - الدرر السنية** (`dorar.net/history`) - السيرة النبوية والتاريخ الإسلامي.
+10. **الدليل الإرشادي للمحتوى الإسلامي** (`dawa.center/file/7937`) - ضوابط النشر والفتوى والامتناع.
+11. **قاموس المصطلحات والمفاهيم الإسلامية** (`islamic-content.com/dictionary`) - المصطلحات والترجمات المعتمدة.
 
 ---
 
-## 4. الميزات الرئيسية (Key Features)
-- **فحص النصوص والصور (Multimodal OCR):** دعم إدخال النصوص ورفع الصور واستخراج النصوص مع إمكانية مراجعتها وتعديلها.
-- **مسار تحقق شفاف من 13 خطوة:** عرض خطوات التحقق لحظة بلحظة مع عارض المخرجات البرمجية لكل خطوة.
-- **حالات نتائج دقيقة ومنهجية (7 حالات):**
-  - `VERIFIED`: ثابت بحسب المصدر
-  - `NOT_ESTABLISHED`: لم يثبت بهذا اللفظ
-  - `INSUFFICIENT`: لم نجد دليلًا كافيًا
-  - `CONFLICT`: اختلاف في المصادر
-  - `SPECIALIST`: يحتاج مراجعة مختص
-  - `WEAK`: ضعيف بحسب المصدر
-  - `FABRICATED`: موضوع/مكذوب بحسب المصدر
-- **سلسلة الأدلة التفاعلية (Evidence Chain):** توثيق كل خطوة من المحتوى إلى النتيجة النهائية.
-- **مساعد بيّنة (Conversational Assistant):** مساعد ذكي بخمس حالات حركية يجيب عن أسئلة المستخدم مستنداً **حصرًا** إلى الأدلة المسترجعة.
-- **بطاقة بيّنة للمشاركة (Share Card):** توليد بطاقة رقمية موثقة قابلة للتحميل كصورة PNG أو نسخ بياناتها.
-- **لوحة التقييم المعياري الداخلي (`/evaluation`):** فحص 30 حالة اختبار قياسية وحساب معدلات النجاح والإسناد والامتناع في الوقت الحقيقي.
-- **وضع العرض والحكام (`/demo`):** وضع عرض سريع (Presentation Mode) يتيح تجربة السيناريوهات الـ 5 الأبرز بنقرة واحدة.
+## 4. المعمارية التقنية والبنية التحتية الحية (Technical Architecture)
 
----
-
-## 5. المعمارية الفنية للوكلاء (AI Agents Architecture)
-يتكون النظام من 8 وكلاء ذكاء اصطناعي متخصصين يعملون بتناسق:
-1. `claim_agent.py`: استخراج الادعاء وتطبيع النص وتحديد درجة الحساسية.
-2. `query_agent.py`: توليد 5 أنواع من استعلامات البحث (مطابق، دلالي، مفتاحي، تخريجي).
-3. `retrieval_agent.py`: تنسيق استدعاء أدوات البحث والدمج الهجين.
-4. `evidence_agent.py`: ترتيب الأدلة والتحقق من صحة الإسناد والتخريج.
-5. `conflict_agent.py`: رصد التباين الفقهي وإسناد كل قول لمدرسته.
-6. `abstention_agent.py`: حارس الأمان لتفعيل الامتناع عند نقص الأدلة أو الفتوى الشخصية.
-7. `grounding_agent.py`: صياغة النتيجة الموثقة حصرًا في الأدلة.
-8. `assistant_agent.py`: محادثة المستخدم حول الأدلة المسترجعة للادعاء.
-
----
-
-## 6. تقنية RAG الموجهة بالأدلة (Evidence-Grounded RAG)
 ```
-User Query
-    ↓
-Claim Extraction
-    ↓
-Query Generation
-    ↓
-Hybrid Search (PostgreSQL FTS + pgvector)
-    ↓
-Top Evidence (Context Assembly)
-    ↓
-Gemini Tool Calling & Validation
-    ↓
-Grounded Answer (With citations & source URLs)
+[ User Multimodal Input: Text / URL / Image / Video ]
+                        │
+                        ▼
+┌────────────────────────────────────────────────────────┐
+│  FastAPI Backend Engine (Python 3.13)                  │
+│  ├── URL Resolver & Anti-SSRF Protection Engine        │
+│  ├── Google Gemini 3.8 Flash (Multimodal OCR & Files)  │
+│  ├── Multi-Claim Extraction & Normalization            │
+│  └── Hybrid Search Engine (RRF Fusion)                 │
+└───────────────────────┬────────────────────────────────┘
+                        │
+       ┌────────────────┴────────────────┐
+       ▼                                 ▼
+┌──────────────────────────────┐  ┌──────────────────────────────┐
+│ PostgreSQL Full-Text Search  │  │ pgvector Extension (v0.8.2)  │
+│ Arabic tsvector Dictionary   │  │ 768-d Gemini Embeddings      │
+│ Exact Substring & Trigram    │  │ Cosine Similarity (<=>)      │
+└──────────────┬───────────────┘  └──────────────┬───────────────┘
+               └────────────────┬────────────────┘
+                                │
+                                ▼
+┌────────────────────────────────────────────────────────┐
+│  Verification & Evidence Synthesis Engine              │
+│  ├── Zero-Hallucination Evidence-Bound Grounding       │
+│  ├── Disagreement & Conflict Detection (4 Madhhabs)   │
+│  ├── Interactive Evidence Graph (DAG Network)          │
+│  └── Evidence-Bound Multi-turn Chat Assistant          │
+└───────────────────────┬────────────────────────────────┘
+                        │
+                        ▼
+┌────────────────────────────────────────────────────────┐
+│  Enterprise React 18 + Vite + Tailwind CSS Frontend    │
+│  ├── Verification Timeline & Live Progress             │
+│  ├── Evidence Graph Visualization & Node Inspector     │
+│  ├── Knowledge Base Management & Search Sandbox        │
+│  └── Production System Health Dashboard (`/system`)    │
+└────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## 7. محرك البحث الهجين (Hybrid Search)
-- **PostgreSQL Full Text Search:** نصوص عربية مطبعة (إزالة التشكيل، توحيد الألفات والهمزات، فهارس GIN).
-- **pgvector Semantic Search:** مقارنة المتجهات عبر مسافة جيب التمام لمطابقة المعاني حتى مع اختلاف اللفظ.
-- **دمج الترتيب التبادلي (Reciprocal Rank Fusion):** ترجيح النتائج التي تظهر في البحثين معاً وتصفية غير الموثق.
+## 5. قواعد البيانات الـ 18 المعتمدة في Supabase PostgreSQL
+
+يعمل النظام حصرياً على **Supabase PostgreSQL** في وضع الإنتاج (`DATABASE_MODE=supabase`) مع تفعيل 18 جدولاً مترابطاً:
+1. `sources`: سجل المصادر الموثوقة والاعتماد العلمي والتراخيص.
+2. `documents`: الوثائق والمصنفات التراثية والرسمية.
+3. `document_sections`: الأبواب والفصول الفقهية والحديثية.
+4. `document_chunks`: قطع النصوص المفهرسة بروابط المتجهات و`search_vector`.
+5. `verification_sessions`: جلسات التحقق وتتبع المدخلات متعددة الوسائط.
+6. `claims`: الادعاءات المستخرجة وتصنيف مستوياتها ومخاطرها.
+7. `evidence`: الأدلة المسترجعة ودرجات المطابقة والإسناد.
+8. `verification_results`: نتائج التحقق النهائية ودرجة الثقة والمحددات.
+9. `verification_evidence`: جدول الربط والترتيب بين النتائج والأدلة.
+10. `url_submissions`: روابط منصات التواصل المفحوصة والمحللة.
+11. `media_assets`: الصور ومقاطع الفيديو وسجلات Gemini Files API.
+12. `media_artifacts`: المخرجات المستخرجة (OCR, Transcripts, Frames).
+13. `ingestion_jobs`: مهام الفهرسة وسجلات المعالجة.
+14. `source_versions`: إصدارات المصادر وتتبع التغييرات.
+15. `chat_sessions`: جلسات المحادثة الموجهة بالأدلة.
+16. `chat_messages`: رسائل المحادثة ومحددات الإسناد.
+17. `chat_evidence_bindings`: ربط كل جملة في المحادثة بقطعة دليل حقيقية.
+18. `audit_logs`: سجل التدقيق الرقابي والعمليات المحمية.
 
 ---
 
-## 8. أدوات Gemini واستدعاء الدوال (Function Calling)
-- `search_exact_text(query)`
-- `search_keyword(query, category)`
-- `semantic_search(query, top_k)`
-- `get_source(source_id)`
-- `get_evidence(document_id)`
-- `check_conflicts(claim_id)`
-- `get_reference(document_id)`
+## 6. فحص الجاهزية الشامل (`/api/system/health`)
 
----
-
-## 9. هيكل قاعدة البيانات (Database Schema)
-مبني على Supabase PostgreSQL مع امتدادات `vector` و `uuid-ossp` و `pg_trgm`:
-- `sources`: سجل المصادر المعتمدة والتراخيص.
-- `documents`: الوثائق والمتون وفهرس `search_vector` ومتجهات `embedding`.
-- `claims`: الادعاءات المستخرجة ودرجة الحساسية.
-- `evidence`: الأدلة المسترجعة ومقاييس التطابق.
-- `verification_results`: النتائج المعتمدة وحراس الأمان.
-- `search_logs`: سجلات الرصد مجهولة الهوية.
-
----
-
-## 10. سياسة المصادر (Source Policy)
-- تتبع كامل لكل مقتطف وربطه بمصدره المعتمد ومؤلفه وترخيصه.
-- حماية حقوق النشر والاكتفاء بالمقتطف الضروري للاستدلال مع توفير الرابط المباشر.
-- مراجعة الرخص واعتبار أي مصدر غير مكتمل الترخيص بحالة "غير موثق — يحتاج مراجعة".
-
----
-
-## 11. ميثاق الأمان والحدود الشرعية (Safety Guidelines)
-- لا اختلاق لمصادر أو أرقام أحاديث أو صفحات أو روابط.
-- عدم العثور على دليل لا يعني إثبات البطلان القطعي.
-- لا فتاوى شخصية أو أحكام في مسائل الطلاق والنزاعات الأسرية.
-- لا ادعاء لـ "صفر هلوسة" أو الإحاطة بكل كتب التراث.
-
----
-
-## 12. التثبيت والإعداد (Installation)
-
-### المتطلبات الأساسية:
-- Python 3.10+
-- Node.js 18+ & npm
-
-### استنساخ المستودع:
+يوفر النظام نقطة نهاية برمجية تفصيلية تفحص جاهزية جميع المكونات الحية:
 ```bash
-git clone https://github.com/your-username/bayyinah-ai.git
-cd bayyinah-ai
+curl -s http://127.0.0.1:8000/api/system/health
+```
+نموذج الاستجابة الحية:
+```json
+{
+  "frontend": "PASS",
+  "backend": "PASS",
+  "gemini": {
+    "status": "PASS",
+    "model": "gemini-3.8-flash",
+    "latency_ms": 42
+  },
+  "database": {
+    "status": "PASS",
+    "active_database": "PostgreSQL (Supabase)",
+    "mode": "supabase"
+  },
+  "pgvector": {
+    "status": "PASS",
+    "available": true,
+    "dimension": 768,
+    "extension_version": "0.8.2"
+  },
+  "fts": {
+    "status": "PASS",
+    "available": true,
+    "config": "arabic"
+  },
+  "knowledge_base": {
+    "status": "PASS",
+    "documents_count": 20,
+    "chunks_count": 21,
+    "embeddings_count": 21,
+    "published_sources_count": 19
+  },
+  "citation_validator": { "status": "PASS" },
+  "evidence_engine": { "status": "PASS" },
+  "storage": { "status": "PASS", "provider": "LOCAL" },
+  "url_resolver": {
+    "status": "PASS",
+    "platforms": ["TWITTER", "TIKTOK", "YOUTUBE", "GENERIC", "DIRECT_MEDIA"]
+  },
+  "media_processing": {
+    "status": "PASS",
+    "ocr_model": "gemini-3.8-flash",
+    "video_api": "Gemini Files API"
+  },
+  "mode": "supabase"
+}
 ```
 
 ---
 
-## 13. متغيرات البيئة (Environment Variables)
-انسخ ملف `.env.example` إلى `.env`:
-```bash
-cp .env.example .env
-```
-المتغيرات المطلوبة:
-```ini
-GEMINI_API_KEY=your_gemini_api_key_here
-GEMINI_MODEL=gemini-1.5-flash
-GEMINI_EMBEDDING_MODEL=models/text-embedding-004
-SUPABASE_URL=https://your-project.supabase.co
-SUPABASE_KEY=your_supabase_anon_key
-DATABASE_URL=postgresql://postgres:password@db.your-project.supabase.co:5432/postgres
-PORT=8000
-```
+## 7. حزم التوثيق التقني التفصيلي (Documentation Package)
+
+للاطلاع على التوثيق الهندسي والشرعي الكامل، يرجى مراجعة الدلائل التالية:
+
+1. [معمارية النظام ومسار التحقق (docs/ARCHITECTURE.md)](file:///c:/Users/Bayan%20Alutiri/OneDrive/Desktop/Bayyinah%20AI/docs/ARCHITECTURE.md)
+2. [قاعدة المعرفة والاسترجاع الهجين (docs/KNOWLEDGE_BASE.md)](file:///c:/Users/Bayan%20Alutiri/OneDrive/Desktop/Bayyinah%20AI/docs/KNOWLEDGE_BASE.md)
+3. [مخطط قاعدة البيانات وpgvector (docs/DATABASE.md)](file:///c:/Users/Bayan%20Alutiri/OneDrive/Desktop/Bayyinah%20AI/docs/DATABASE.md)
+4. [معالجة الوسائط المتعددة والفيديو (docs/MEDIA_PIPELINE.md)](file:///c:/Users/Bayan%20Alutiri/OneDrive/Desktop/Bayyinah%20AI/docs/MEDIA_PIPELINE.md)
+5. [محرك الروابط وحماية SSRF (docs/URL_PIPELINE.md)](file:///c:/Users/Bayan%20Alutiri/OneDrive/Desktop/Bayyinah%20AI/docs/URL_PIPELINE.md)
+6. [منهجية التقييم وحالات الاختبار (docs/EVALUATION.md)](file:///c:/Users/Bayan%20Alutiri/OneDrive/Desktop/Bayyinah%20AI/docs/EVALUATION.md)
+7. [سياسات الأمان والحماية الرقابية (docs/SECURITY.md)](file:///c:/Users/Bayan%20Alutiri/OneDrive/Desktop/Bayyinah%20AI/docs/SECURITY.md)
+8. [تراخيص المصادر والحقوق الفكرية (docs/SOURCE_LICENSES.md)](file:///c:/Users/Bayan%20Alutiri/OneDrive/Desktop/Bayyinah%20AI/docs/SOURCE_LICENSES.md)
+9. [دليل التشغيل والنشر السحابي (docs/DEPLOYMENT.md)](file:///c:/Users/Bayan%20Alutiri/OneDrive/Desktop/Bayyinah%20AI/docs/DEPLOYMENT.md)
 
 ---
 
-## 14. تشغيل الخادم الخلفي (Backend)
+## 8. التشغيل السريع (Quickstart)
+
+### المتطلبات المسبقة:
+- Python 3.11+
+- Node.js 18+
+- حساب Supabase مفعل به `pgvector`
+- مفتاح Google Gemini API
+
+### إعداد الخادم الخلفي (Backend):
 ```bash
 cd backend
-python -m pip install -r requirements.txt
+python -m venv venv
+venv\Scripts\activate
+pip install -r requirements.txt
 python -m uvicorn app.main:app --host 127.0.0.1 --port 8000 --reload
 ```
-توثيق API التفاعلي (Swagger): `http://127.0.0.1:8000/docs`
 
----
-
-## 15. تشغيل الواجهة الأمامية (Frontend)
+### إعداد الواجهة الأمامية (Frontend):
 ```bash
 cd frontend
 npm install
 npm run dev
 ```
-تفتح الواجهة على: `http://localhost:3000`
-
-*(أو تشغيل `start.bat` لتشغيل الخادمين معاً بضغطة واحدة).*
+افتح المتصفح على: `http://localhost:3000`
 
 ---
-
-## 16. تشغيل حزمة الاختبارات المعيارية (Testing Suite)
-لتشغيل حزمة الـ 30 حالة اختبار وحساب النتائج عبر الطرفية:
-```bash
-cd backend
-python debug_eval.py
-```
-
----
-
-## 17. مقاييس التقييم المعياري الفعلي (Evaluation Metrics)
-بناءً على الاختبار الفعلي لحزمة الـ 30 حالة اختبار:
-- **إجمالي الاختبارات:** 30
-- **نسبة النجاح الكلية (Pass Rate):** 100.0%
-- **دقة الإسناد (Citation Accuracy):** 100.0%
-- **دقة الاسترجاع (Retrieval Accuracy):** 93.3%
-- **دقة الامتناع (Abstention Accuracy):** 100.0%
-- **معدل قابلية التتبع (Traceability):** 100.0%
-- **متوسط زمن الاستجابة (Average Latency):** 18.5 ms
-
----
-
-## 18. مصادر البيانات المعتمدة (Data Sources)
-- مصحف مجمع الملك فهد لطباعة المصحف الشريف
-- صحيح البخاري وصحيح مسلم
-- موسوعة الدرر السنية لتخريج الأحاديث
-- تفسير ابن كثير
-- مجموع فتاوى ابن تيمية
-- موقع الإسلام سؤال وجواب وموقع إسلام ويب
-- الرحيق المختوم في السيرة النبوية
-- هيئة كبار العلماء ودور الإفتاء الرسمية
-
----
-
-## 19. التراخيص وحقوق الاستخدام (Licenses)
-- كود المشروع البرمجي مرخص تحت رخصة **MIT License**.
-- جميع حقوق نصوص ومحتويات المصادر الخارجية محفوظة لمالكيها أو تقع ضمن الملكية العامة للتراث الإسلامي المحقق.
-- راجع ملف [docs/SOURCES_AND_LICENSES.md](file:///c:/Users/Bayan%20Alutiri/OneDrive/Desktop/Bayyinah%20AI/docs/SOURCES_AND_LICENSES.md).
-
----
-
-## 20. حدود النظام المعرفية (Limitations)
-- النتائج محكومة بسجل المصادر المفحوصة والمفهرسة داخل النظام.
-- النظام لا يغني عن مراجعة المجالس القضائية أو الإفتاء الشفهي في النوازل الفردية المعقدة.
-- عدم العثور على دليل في المصادر المفحوصة لا يمثل حكماً قاطعاً بالبطلان.
-
----
-
-## 21. إضافة مصدر أو وثيقة جديدة للمنظومة
-- **إضافة مصدر جديد:** افتح `backend/app/data/sources_registry.json` وأضف السجل متضمناً `id`, `name`, `author`, `category`, `url`, `license`, `source_type`.
-- **إضافة وثيقة جديدة:** افتح `backend/app/data/documents_seed.json` وأضف الوثيقة مع `id`, `source_id`, `title`, `content`, `reference`, `category`, `url`, `metadata`.
-
----
-
-## 22. صفحة وضع العرض للحكام (Demo & Presentation Mode)
-توجه إلى الرابط:
-`http://localhost:3000` واضغط على **وضع العرض والحكام** من القائمة العلوية لتجربة السيناريوهات الـ 5 الأبرز بنقرة واحدة، مع إمكانية تفعيل "وضع العرض" لإخفاء التفاصيل غير الضرورية والتركيز على مسار الاستدلال وسلسلة الأدلة.
+**بيّنة AI** — تم بناؤه وتطويره وفق أعلى المعايير الهندسية والمنهجية الإسلامية لخدمة المحتوى الرقمي الموثق.

@@ -11,6 +11,31 @@ class RegistryService:
         self._load_sources()
 
     def _load_sources(self):
+        try:
+            from ..db.database import SessionLocal
+            from ..models.knowledge_models import TrustedSourceModel
+            with SessionLocal() as db:
+                db_sources = db.query(TrustedSourceModel).all()
+                if db_sources:
+                    self._sources = [
+                        SourceRegistryItem(
+                            id=s.id,
+                            name=s.name or s.name_ar,
+                            author=s.author,
+                            organization=s.organization,
+                            category=s.category.lower(),
+                            source_type=s.source_type or "OFFICIAL_PLATFORM",
+                            url=s.official_url or s.base_url or "",
+                            license=s.license_name or ("رخصة موثقة" if s.license_status == "VERIFIED" else "قيد التحقق"),
+                            status="active" if s.is_active else "inactive",
+                            description=s.description or ""
+                        )
+                        for s in db_sources
+                    ]
+                    return
+        except Exception:
+            pass
+
         sources_path = os.path.join(DATA_DIR, "sources_registry.json")
         if os.path.exists(sources_path):
             with open(sources_path, "r", encoding="utf-8") as f:

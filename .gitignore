@@ -9,12 +9,29 @@ env/
 venv/
 .venv/
 
-# Environment Variables & Secrets
+# Environment Variables & Secrets (Root, Backend, Frontend)
 .env
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
+.env.*
+!.env.example
+backend/.env
+backend/.env.*
+frontend/.env
+frontend/.env.*
+
+# Temporary / Scratch directories & uploads & helper scripts
+scratch/
+.manus/
+backend/app/data/uploads/
+tests_50_results.json
+backend/tests_50_results.json
+bayyinah-evidence/
+inspect_schema.py
+seed_live_kb.py
+sync_audit_logs.py
+backend/fix_uuid.py
+backend/sync_claims_cols.py
+backend/test_image_ocr_upload.py
+backend/test_upload.py
 
 # Build outputs
 dist/

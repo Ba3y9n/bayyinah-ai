@@ -10,12 +10,9 @@ class QueryAgent:
         pass
 
     def generate_queries(self, claim_data: Dict[str, Any]) -> List[str]:
-        raw = claim_data.get("original_text", "")
-        norm = claim_data.get("normalized_text", "")
-        claim_type = claim_data.get("claim_type", "GeneralReligiousClaim")
-        tokens = tokenize_arabic(raw)
-        
-        queries = []
+        from ..services.gemini_service import gemini_service, ClaimExtraction
+        claim_obj = ClaimExtraction(**claim_data)
+        return gemini_service.generate_queries_structured(claim_obj)
 
         # 1. Exact phrase query
         queries.append(raw.strip())

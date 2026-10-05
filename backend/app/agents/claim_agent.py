@@ -18,9 +18,12 @@ class ClaimAgent:
 
     def process(self, raw_text: str, is_image: bool = False) -> Dict[str, Any]:
         """
-        Extracts claim, normalizes text, determines claim_type and sensitivity.
+        Extracts claim using Gemini 3.8 Flash (structured Pydantic ClaimExtraction)
+        with deterministic normalization fallback.
         """
-        # Strip common demo or OCR wrapper prefixes if present
+        from ..services.gemini_service import gemini_service
+        
+        # Strip common visual/demo label prefixes if present
         prefixes = [
             "صورة بطاقة دعوية:", "صورة إنفوجرافيك:", "صورة منشور واتساب:", 
             "صورة مخطوطة مصحف:", "صورة منشور دعوي:", "صورة منشور:"
@@ -31,60 +34,125 @@ class ClaimAgent:
                 cleaned_text = cleaned_text[len(p):].strip()
                 break
 
-        normalized = normalize_arabic(cleaned_text)
-        
-        # Check personal fatwa / sensitivity
-        personal_terms = [
-            "حلفت", "زوجتي", "طلقت", "طلاق", "غضبان", "شجار", "ميراث", "ابي مات", 
-            "امي ماتت", "هل يلزمني كفارة", "هل وقع", "حكم فعلي", "ذنبي", "تبت",
-            "معاملة مالية", "رافعة مالية", "مقايضة", "ارباحي حلال", "أرباحي حلال", "تداول"
-        ]
-        is_personal = any(term in normalized for term in personal_terms) and ("؟" in raw_text or "هل" in raw_text or "ما حكم" in raw_text)
-        
-        sensitivity = "high" if is_personal else "low"
-        requires_specialist = is_personal
+        # Call Gemini 3.8 Flash structured claim extraction
+        claim_obj = gemini_service.extract_claim_structured(cleaned_text)
+        return claim_obj.model_dump()
 
-        # Determine claim type
-        if is_personal:
-            claim_type = "PersonalCase"
-        elif any(w in normalized for w in ["حكم", "واجب", "صلاه", "الفاتحه", "الجهريه", "خلف الامام", "وضوء", "صيام"]):
-            claim_type = "Fiqh"
-        elif any(w in normalized for w in ["قال رسول الله", "عن النبي", "سمعت رسول الله", "صلي الله عليه وسلم", "حديث", "انما الاعمال", "اطلبوا العلم", "الكلمه الطيبه", "من قال سبحان الله"]):
-            claim_type = "Hadith"
-        elif any(w in normalized for w in ["دعاء", "من قرا", "ليله الجمعه", "ملك يناديه", "وسع رزقه", "سبع مرات"]):
-            claim_type = "Dua"
-        elif any(w in normalized for w in ["قال تعالي", "قال الله", "سوره", "ايه", "فاتقوا الله", "الله لا اله الا هو"]):
-            claim_type = "Quran"
-        elif any(w in normalized for w in ["حكم", "واجب", "صلاه", "الفاتحه", "الجهريه", "خلف الامام", "وضوء", "صيام"]):
-            claim_type = "Fiqh"
-        elif any(w in normalized for w in ["هجره", "غار ثور", "ابو بكر", "غزوه", "بدر", "احد"]):
-            claim_type = "Seerah"
-        elif any(w in normalized for w in ["قال ابن تيميه", "قال الشافعي", "قال احمد", "قال مالك", "قال ابو حنيفه"]):
-            claim_type = "ScholarQuote"
-        else:
-            claim_type = "GeneralReligiousClaim"
+    def extract_multi_claims(self, raw_text: str) -> List[Any]:
+        """
+        Detects multiple distinct claims in a single user input or transcript.
+        Returns a list of MultiClaimItem instances.
+        """
+        import re
+        from ..models.schemas import MultiClaimItem
 
-        # Extract entities and religious terms
-        tokens = tokenize_arabic(raw_text)
-        religious_terms = [t for t in tokens if t in [
-            'صلاة', 'صيام', 'حج', 'زكاة', 'نية', 'طلاق', 'فاتحة', 'قرآن', 'حديث', 
-            'نبي', 'رسول', 'صحابي', 'علم', 'صدقة', 'استطاعة', 'تقوى', 'غضب'
-        ]]
+        cleaned = raw_text.strip()
+        lines = [l.strip() for l in cleaned.splitlines() if l.strip()]
+        detected_claims: List[str] = []
 
-        main_claim = raw_text.strip()
-        if len(main_claim) > 200:
-            main_claim = main_claim[:200] + "..."
+        numbered_pattern = re.compile(r'^(?:[0-9]+[\.\-\)]|[•\-\*]|أولاً[:\s]|ثانياً[:\s]|ثالثاً[:\s]|رابعاً[:\s])\s*(.+)$')
+        for line in lines:
+            match = numbered_pattern.match(line)
+            if match:
+                c = match.group(1).strip()
+                if len(c) > 10:
+                    detected_claims.append(c)
+            elif len(lines) > 1 and len(line) > 20 and any(w in line for w in ["حديث", "قال", "سورة", "آية", "حكم"]):
+                detected_claims.append(line)
 
-        return {
-            "original_text": raw_text.strip(),
-            "normalized_text": normalized,
-            "main_claim": main_claim,
-            "claim_type": claim_type,
-            "entities": tokens[:5],
-            "religious_terms": religious_terms,
-            "possible_references": [],
-            "sensitivity": sensitivity,
-            "requires_specialist": requires_specialist
-        }
+        if len(detected_claims) <= 1:
+            return [
+                MultiClaimItem(
+                    claim_index=1,
+                    claim_text=cleaned[:250],
+                    content_type="GeneralClaim",
+                    is_visual=False
+                )
+            ]
+
+        items = []
+        for idx, c_text in enumerate(detected_claims, start=1):
+            items.append(
+                MultiClaimItem(
+                    claim_index=idx,
+                    claim_text=c_text,
+                    content_type="Hadith" if any(w in c_text for w in ["حديث", "قال رسول الله", "صلى الله عليه وسلم"]) else "GeneralClaim",
+                    is_visual=False
+                )
+            )
+        return items
+
+    def extract_claims_from_pdf_pages(self, pages_data: List[Dict[str, Any]], filename: str = "document.pdf") -> List[Any]:
+        """
+        Extracts claims from PDF page structure with provenance tracking:
+        - file_name
+        - page_number
+        - extracted_excerpt
+        - claim_text
+        """
+        from ..models.schemas import MultiClaimItem
+        import re
+
+        items: List[MultiClaimItem] = []
+        global_index = 1
+
+        for page in pages_data:
+            p_num = page.get("page_number", 1)
+            p_text = (page.get("text") or "").strip()
+            if not p_text or len(p_text) < 10:
+                continue
+
+            lines = [l.strip() for l in p_text.splitlines() if l.strip()]
+            page_claims: List[str] = []
+
+            numbered_pattern = re.compile(r'^(?:[0-9]+[\.\-\)]|[•\-\*]|أولاً[:\s]|ثانياً[:\s]|ثالثاً[:\s]|رابعاً[:\s])\s*(.+)$')
+            for line in lines:
+                match = numbered_pattern.match(line)
+                if match:
+                    c = match.group(1).strip()
+                    if len(c) > 10:
+                        page_claims.append(c)
+                elif len(line) > 20 and any(w in line for w in ["حديث", "قال رسول الله", "صلى الله عليه وسلم", "سورة", "آية", "حكم", "فتوى", "مذهب"]):
+                    page_claims.append(line)
+
+            if not page_claims:
+                page_claims = [p_text[:250]]
+
+            for c_text in page_claims:
+                ctype = "Hadith" if any(w in c_text for w in ["حديث", "قال رسول الله", "صلى الله عليه وسلم"]) else (
+                    "Quran" if any(w in c_text for w in ["سورة", "آية", "القرآن"]) else "GeneralClaim"
+                )
+                items.append(
+                    MultiClaimItem(
+                        claim_index=global_index,
+                        claim_text=c_text,
+                        content_type=ctype,
+                        file_name=filename,
+                        page_number=p_num,
+                        page_start=p_num,
+                        page_end=p_num,
+                        extracted_excerpt=p_text[:400],
+                        is_visual=False
+                    )
+                )
+                global_index += 1
+
+        if not items and pages_data:
+            p1_text = pages_data[0].get("text", "") or "وثيقة مرفوعة"
+            items.append(
+                MultiClaimItem(
+                    claim_index=1,
+                    claim_text=p1_text[:250],
+                    content_type="GeneralClaim",
+                    file_name=filename,
+                    page_number=1,
+                    page_start=1,
+                    page_end=1,
+                    extracted_excerpt=p1_text[:400],
+                    is_visual=False
+                )
+            )
+
+        return items
 
 claim_agent = ClaimAgent()

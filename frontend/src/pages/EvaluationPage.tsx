@@ -99,15 +99,15 @@ export const EvaluationPage: React.FC = () => {
       <div className="text-center max-w-3xl mx-auto space-y-4">
         <div className="inline-flex items-center gap-2 bg-bayyinah-purple-light text-bayyinah-purple px-4 py-1.5 rounded-full text-xs font-semibold">
           <BarChart3 className="w-3.5 h-3.5" />
-          <span>لوحة التقييم المعياري وحساب الدقة الحقيقية</span>
+          <span>Synthetic / Local Evaluation Dataset (حزمة تقييم محلية تركيبية)</span>
         </div>
 
         <h1 className="text-3xl md:text-5xl font-extrabold text-bayyinah-navy">
-          لوحة الاختبار والتقييم الداخلي
+          لوحة الاختبار والتقييم المعياري
         </h1>
 
         <p className="text-sm md:text-base text-bayyinah-gray-600 leading-relaxed">
-          تقييم فعلي وحقيقي مبني على <strong>30 حالة اختبار قياسية</strong> تشمل: المتون الثابتة، والألفاظ غير الثابتة، والأدلة غير الكافية، والتباين الفقهي، والتحليل البصري، وقواعد الامتناع والإحالة لمختص.
+          تقييم داخلي تركيبي (Synthetic / Local Evaluation) مبني على <strong>30 حالة اختبار قياسية</strong> تغطي: المتون الثابتة، والألفاظ غير الثابتة، والأدلة غير الكافية، والتباين الفقهي، والتحليل البصري عبر Gemini 3.8 Flash، وقواعد الامتناع والإحالة لمختص.
         </p>
       </div>
 
