@@ -38,11 +38,7 @@ const HeroOrbit = () => {
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
       >
-        <div className="absolute inset-[8%] rounded-full border-[12px] border-[#7ef4d6]/80 shadow-[0_0_40px_rgba(126,244,214,0.25)]" />
-        <div className="absolute inset-[22%] rounded-full border-[3px] border-[#d7fff5]/50" />
-        <div className="absolute inset-[36%] rounded-full border-[2px] border-white/15" />
-
-        <div className="absolute z-30 w-24 h-24 md:w-32 md:h-32 rounded-full bg-white flex flex-col items-center justify-center text-center p-2 shadow-[0_0_35px_rgba(255,255,255,0.3)] border border-[#D2EFE9]">
+        <div className="absolute z-10 w-24 h-24 md:w-32 md:h-32 rounded-full bg-white flex flex-col items-center justify-center text-center p-2 shadow-[0_0_35px_rgba(255,255,255,0.3)] border border-[#D2EFE9]">
           <span className="text-[#0a2d2b] font-bold text-base md:text-lg tracking-wide">بيّنة AI</span>
           <span className="text-[10px] md:text-xs text-[#1b5f59] mt-0.5">محرك التحقق</span>
         </div>
@@ -251,17 +247,26 @@ export const HomePage: React.FC<HomePageProps> = ({ onStartVerification, setActi
         />
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_rgba(12,93,82,0.15),_rgba(8,26,22,0.82)_55%,_rgba(7,17,14,0.9)_100%)]" />
 
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 w-full flex flex-col lg:flex-row-reverse items-center justify-between gap-10">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 w-full flex flex-col lg:flex-row items-center justify-between gap-8">
           <motion.div
-            initial={{ opacity: 0, x: 20 }}
+            initial={{ opacity: 0, scale: 0.92 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.8, delay: 0.15 }}
+            className="w-full lg:w-[52%] flex justify-start"
+          >
+            <HeroOrbit />
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.6 }}
-            className="w-full lg:w-[46%] text-right"
+            className="w-full lg:w-[48%] text-right"
           >
             <h1 className="text-shadow-soft text-4xl md:text-6xl lg:text-[5rem] font-black text-white leading-[1.1] tracking-tight mb-5">
               تحقّق قبل أن تنشر.
             </h1>
-            <p className="text-lg md:text-2xl text-white/80 max-w-2xl ml-auto leading-relaxed font-medium">
+            <p className="text-lg md:text-2xl text-white/80 max-w-2xl mr-auto leading-relaxed font-medium">
               بيّنة تساعدك على التحقق من الادعاءات الإسلامية بالرجوع إلى المصادر المعتمدة وإظهار الدليل.
             </p>
 
@@ -269,7 +274,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onStartVerification, setActi
               initial={{ opacity: 0, y: 18 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.2 }}
-              className="mt-8 flex justify-start"
+              className="mt-8 flex justify-end"
             >
               <button
                 onClick={onStartVerification}
@@ -279,15 +284,6 @@ export const HomePage: React.FC<HomePageProps> = ({ onStartVerification, setActi
                 <ArrowLeft className="w-6 h-6" />
               </button>
             </motion.div>
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, scale: 0.92 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.8, delay: 0.15 }}
-            className="w-full lg:w-[54%] flex justify-center lg:justify-start"
-          >
-            <HeroOrbit />
           </motion.div>
         </div>
       </section>
