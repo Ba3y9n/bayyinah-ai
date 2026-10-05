@@ -232,6 +232,38 @@ const HowItWorks = () => {
 
 // --- MAIN PAGE EXPORT ---
 export const HomePage: React.FC<HomePageProps> = ({ onStartVerification, setActiveTab }) => {
+  const [activeStat, setActiveStat] = useState(0);
+  const [activeQuestion, setActiveQuestion] = useState(0);
+
+  const stats = [
+    {
+      value: '63%',
+      label: 'رصد المحتوى',
+      description: 'من محتوى الأحاديث على Instagram في إحدى الدراسات المنشورة عام 2025 لم يتضمن بيانًا لحالة الحديث من حيث الأصالة.',
+      insight: 'في العينة المذكورة، لم يتضمن المحتوى بيان حالة الحديث من حيث الأصالة.'
+    },
+    {
+      value: '37.5%',
+      label: 'حالة التوثيق',
+      description: 'من العينة المدروسة في دراسة أخرى منشورة عام 2025 لم تتضمن حالة توثيق الحديث.',
+      insight: 'الرقم يصف العينة المدروسة، ولا يحكم على كل ما يُنشر أو يُتداول.'
+    },
+    {
+      value: '3,281',
+      label: 'مرجع تراثي',
+      description: 'مادة وحديثًا مما اشتهر على ألسنة الناس في كتاب "كشف الخفاء ومزيل الإلباس" للإمام العجلوني.',
+      insight: 'يشير الرقم إلى مواد وأحاديث اشتهرت على الألسنة وجُمعت في الكتاب المذكور.'
+    }
+  ];
+
+  const verificationQuestions = [
+    { num: '01', text: 'هل تم توثيقه؟', detail: 'تأكد من وجود إحالة يمكن الرجوع إليها، لا مجرد نسبة عامة.' },
+    { num: '02', text: 'ما مصدره؟', detail: 'ارجع إلى المرجع الأصلي، وتحقق من اسم المصدر وموضع النص.' },
+    { num: '03', text: 'هل النص مطابق؟', detail: 'قارن النص المتداول بما ورد في مصدره، وانتبه للاختصار أو التغيير.' },
+    { num: '04', text: 'ما درجة ثبوته؟', detail: 'اعرض الحكم كما ورد في مرجع متخصص، مع مصدره وسياقه.' },
+    { num: '05', text: 'هل توجد مصادر أخرى؟', detail: 'قارن النتيجة بمراجع معتمدة أخرى عند الحاجة.' }
+  ];
+
   return (
     <div className="flex flex-col bg-bayyinah-ivory text-bayyinah-dark-text overflow-x-hidden">
       
@@ -289,14 +321,20 @@ export const HomePage: React.FC<HomePageProps> = ({ onStartVerification, setActi
       </section>
 
       {/* 2. PROBLEM SECTION (Rule 38) */}
-      <section className="py-24 bg-white">
+      <section
+        className="overflow-hidden py-20 md:py-24"
+        style={{ background: 'linear-gradient(135deg, #ffffff 0%, #f7faf8 54%, #fffdf7 100%)' }}
+      >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="max-w-3xl mb-16">
-            <span className="text-xs font-bold text-bayyinah-emerald uppercase tracking-wider block mb-3">واقع المحتوى المتداول</span>
-            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-bayyinah-dark-text mb-6 leading-tight">
+          <div className="max-w-4xl mx-auto mb-12 text-center">
+            <span className="inline-flex items-center gap-2 rounded-full border border-[#e8eadf] bg-white/80 px-4 py-2 text-xs font-bold text-[#527a66] shadow-sm">
+              <span className="h-2 w-2 rounded-full bg-[#c7a85a]" />
+              واقع المحتوى المتداول
+            </span>
+            <h2 className="mt-5 text-3xl md:text-4xl lg:text-5xl font-bold text-bayyinah-dark-text mb-5 leading-tight">
               سرعة الانتشار... وغياب التحقق
             </h2>
-            <div className="space-y-4 text-lg md:text-xl text-bayyinah-secondary-text leading-relaxed font-light">
+            <div className="max-w-3xl mx-auto space-y-3 text-base md:text-lg text-bayyinah-secondary-text leading-relaxed font-light">
               <p>
                 مع الانتشار السريع للمحتوى الرقمي، أصبح الوصول إلى المحتوى الإسلامي المتداول أسهل، لكن التحقق من مصدره ودرجة ثبوته لا يكون واضحًا دائمًا للمستخدم.
               </p>
@@ -310,79 +348,98 @@ export const HomePage: React.FC<HomePageProps> = ({ onStartVerification, setActi
           </div>
 
           {/* 3. STATISTICS (Rule 39 & 40: 63%, 37.5%, 3,281) */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-20">
-            {/* Stat 1 */}
-            <div className="bg-bayyinah-ivory p-8 rounded-3xl border border-gray-100 flex flex-col justify-between hover:border-bayyinah-emerald/30 transition-all">
-              <div>
-                <span className="text-6xl md:text-7xl font-bold text-bayyinah-deep-emerald block mb-4 tracking-tighter">
-                  63%
-                </span>
-                <p className="text-sm md:text-base text-bayyinah-secondary-text leading-relaxed">
-                  من محتوى الأحاديث على Instagram في إحدى الدراسات المنشورة عام 2025 لم يتضمن بيانًا لحالة الحديث من حيث الأصالة.
-                </p>
-              </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-5 lg:gap-7">
+            {stats.map((stat, index) => {
+              const isActive = activeStat === index;
 
-            </div>
-
-            {/* Stat 2 */}
-            <div className="bg-bayyinah-ivory p-8 rounded-3xl border border-gray-100 flex flex-col justify-between hover:border-bayyinah-emerald/30 transition-all">
-              <div>
-                <span className="text-6xl md:text-7xl font-bold text-bayyinah-deep-emerald block mb-4 tracking-tighter">
-                  37.5%
-                </span>
-                <p className="text-sm md:text-base text-bayyinah-secondary-text leading-relaxed">
-                  من العينة المدروسة في دراسة أخرى منشورة عام 2025 لم تتضمن حالة توثيق الحديث.
-                </p>
-              </div>
-
-            </div>
-
-            {/* Stat 3 */}
-            <div className="bg-bayyinah-ivory p-8 rounded-3xl border border-gray-100 flex flex-col justify-between hover:border-bayyinah-emerald/30 transition-all">
-              <div>
-                <span className="text-6xl md:text-7xl font-bold text-bayyinah-deep-emerald block mb-4 tracking-tighter">
-                  3,281
-                </span>
-                <p className="text-sm md:text-base text-bayyinah-secondary-text leading-relaxed">
-                  مادة وحديثًا مما اشتهر على ألسنة الناس في كتاب "كشف الخفاء ومزيل الإلباس" للإمام العجلوني.
-                </p>
-              </div>
-
-            </div>
+              return (
+                <motion.button
+                  key={stat.value}
+                  type="button"
+                  aria-pressed={isActive}
+                  onClick={() => setActiveStat(index)}
+                  whileHover={{ y: -4 }}
+                  whileTap={{ scale: 0.99 }}
+                  className={`group relative flex min-h-[248px] w-full flex-col justify-between overflow-hidden rounded-3xl border p-7 text-right transition-colors duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#347866]/50 md:p-8 ${
+                    isActive
+                      ? 'border-[#b8d6c7] bg-white shadow-[0_18px_45px_rgba(32,91,69,0.12)]'
+                      : 'border-white/90 bg-white/75 shadow-[0_8px_30px_rgba(24,55,44,0.05)] hover:border-[#e4d7b5] hover:bg-white'
+                  }`}
+                >
+                  <span className="flex items-center justify-between text-xs font-bold text-[#688173]">
+                    <span>{stat.label}</span>
+                    <span className="font-mono text-[#b49a5b]">0{index + 1}</span>
+                  </span>
+                  <span className="my-5 block text-6xl font-extrabold tracking-tight text-[#0b493f] md:text-7xl">
+                    {stat.value}
+                  </span>
+                  <span className="block text-sm leading-relaxed text-[#65716d] md:text-base">
+                    {stat.description}
+                  </span>
+                  <span className={`mt-6 h-1 w-full rounded-full transition-colors ${isActive ? 'bg-[#b8d6c7]' : 'bg-[#f0f1ec] group-hover:bg-[#eadfbe]'}`} />
+                </motion.button>
+              );
+            })}
           </div>
 
-          {/* RESTUCTURED BOX */}
-          <div className="mt-12">
-            <div className="mb-6">
-              <h3 className="text-2xl font-bold text-bayyinah-dark-text mb-2">ماذا تعني هذه الأرقام؟</h3>
-              <p className="text-base text-bayyinah-secondary-text">لا تعني هذه الأرقام أن كل ما يُنشر على وسائل التواصل غير صحيح. بل تكشف مشكلة أكثر تحديدًا:</p>
-            </div>
-            
-            <div className="flex flex-col lg:flex-row items-center justify-between gap-2 lg:gap-4 mt-8">
-              {[
-                { num: '01', text: 'هل تم توثيقه؟' },
-                { num: '02', text: 'ما مصدره؟' },
-                { num: '03', text: 'هل النص مطابق؟' },
-                { num: '04', text: 'ما درجة ثبوته؟' },
-                { num: '05', text: 'هل توجد مصادر أخرى؟' },
-              ].map((item, i) => (
-                <React.Fragment key={i}>
-                  <motion.div 
-                    whileHover={{ scale: 1.05, y: -5 }}
-                    className="flex-1 w-full bg-white p-6 rounded-2xl border border-gray-100 hover:border-bayyinah-emerald shadow-sm hover:shadow-elevated transition-all duration-300 cursor-default text-center"
+          <AnimatePresence mode="wait" initial={false}>
+            <motion.div
+              key={activeStat}
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.22 }}
+              aria-live="polite"
+              className="mt-5 flex flex-col gap-3 rounded-2xl border border-[#e5ebe5] bg-white/80 p-5 shadow-[0_8px_28px_rgba(24,55,44,0.04)] sm:flex-row sm:items-center sm:gap-5 md:px-7"
+            >
+              <span className="shrink-0 rounded-full bg-[#fff9e9] px-4 py-2 text-xs font-bold text-[#8b7135]">قراءة الرقم</span>
+              <p className="text-sm leading-relaxed text-[#465a51] md:text-base">{stats[activeStat].insight}</p>
+            </motion.div>
+          </AnimatePresence>
+
+          <div className="mt-16 text-center">
+            <h3 className="text-2xl font-bold text-bayyinah-dark-text md:text-3xl">ماذا تعني هذه الأرقام؟</h3>
+            <p className="mx-auto mt-3 max-w-3xl text-sm leading-relaxed text-bayyinah-secondary-text md:text-base">
+              لا تعني هذه الأرقام أن كل ما يُنشر على وسائل التواصل غير صحيح؛ بل تدعونا إلى أسئلة أوضح قبل مشاركة المحتوى.
+            </p>
+
+            <div className="mt-8 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-5" aria-label="أسئلة التحقق">
+              {verificationQuestions.map((question, index) => {
+                const isActive = activeQuestion === index;
+
+                return (
+                  <button
+                    key={question.num}
+                    type="button"
+                    aria-pressed={isActive}
+                    onClick={() => setActiveQuestion(index)}
+                    className={`min-h-[104px] rounded-2xl border p-5 text-right transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#347866]/50 ${
+                      isActive
+                        ? 'border-[#c7dcca] bg-white shadow-[0_10px_28px_rgba(32,91,69,0.09)]'
+                        : 'border-white bg-white/55 hover:border-[#e4d7b5] hover:bg-white/90'
+                    }`}
                   >
-                    <span className="text-bayyinah-emerald font-bold mb-3 block text-xl">{item.num}</span>
-                    <h4 className="text-bayyinah-dark-text font-bold text-base leading-relaxed">{item.text}</h4>
-                  </motion.div>
-                  {i < 4 && (
-                    <div className="hidden lg:flex items-center text-gray-300">
-                      <ArrowLeft className="w-6 h-6" />
-                    </div>
-                  )}
-                </React.Fragment>
-              ))}
+                    <span className="mb-3 block font-mono text-sm font-bold text-[#b49a5b]">{question.num}</span>
+                    <span className="block text-sm font-bold leading-relaxed text-[#283c34]">{question.text}</span>
+                  </button>
+                );
+              })}
             </div>
-          </div>
+
+            <AnimatePresence mode="wait" initial={false}>
+              <motion.p
+                key={activeQuestion}
+                initial={{ opacity: 0, y: 6 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -6 }}
+                transition={{ duration: 0.2 }}
+                aria-live="polite"
+                className="mx-auto mt-5 max-w-3xl rounded-2xl border border-[#e8eadf] bg-white/75 px-6 py-4 text-sm leading-relaxed text-[#52645a] md:text-base"
+              >
+                {verificationQuestions[activeQuestion].detail}
+              </motion.p>
+            </AnimatePresence>
+            </div>
 
         </div>
       </section>
