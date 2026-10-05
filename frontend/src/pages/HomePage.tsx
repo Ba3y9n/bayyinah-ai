@@ -76,7 +76,7 @@ const HeroOrbit = () => {
         })}
       </div>
 
-      <div className="mt-8 p-5 bg-white/95 rounded-2xl shadow-[0_12px_30px_rgba(0,0,0,0.12)] border border-white/40 max-w-md w-full text-center z-40 transition-all duration-300 transform min-h-[92px] flex flex-col justify-center backdrop-blur-sm">
+      <div className="mt-10 p-5 bg-white/95 rounded-2xl shadow-[0_12px_30px_rgba(0,0,0,0.12)] border border-white/40 max-w-md w-full text-center z-40 transition-all duration-300 transform min-h-[92px] flex flex-col justify-center backdrop-blur-sm">
         <p className="text-lg font-bold text-[#0b5d53] mb-2">{steps[activeIndex].label}</p>
         <p className="text-sm md:text-base text-[#10201D]/80 leading-relaxed">{steps[activeIndex].desc}</p>
       </div>
@@ -265,7 +265,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onStartVerification, setActi
               initial={{ opacity: 0, y: 18 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.2 }}
-              className="mt-8 flex justify-end"
+              className="mt-8 flex justify-start"
             >
               <button
                 onClick={onStartVerification}
