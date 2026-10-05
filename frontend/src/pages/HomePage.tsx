@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence, useAnimation } from 'framer-motion';
 import { NavTab } from '../components/Navbar';
-import { ArrowLeft, ArrowRight, Search, FileText, CheckCircle, Database, Link2, ShieldCheck, AlertCircle, Layout, BookOpen, Layers, Image as ImageIcon, Video as FileVideo } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Search, FileText, CheckCircle, Database, Link2, ShieldCheck, AlertCircle, Layout, BookOpen, Layers, Image as ImageIcon, Video as FileVideo, Info } from 'lucide-react';
 
 interface HomePageProps {
   onStartVerification: () => void;
@@ -239,18 +239,21 @@ export const HomePage: React.FC<HomePageProps> = ({ onStartVerification, setActi
     {
       value: '63%',
       label: 'رصد المحتوى',
+      icon: <FileText className="h-5 w-5" />,
       description: 'من محتوى الأحاديث على Instagram في إحدى الدراسات المنشورة عام 2025 لم يتضمن بيانًا لحالة الحديث من حيث الأصالة.',
       insight: 'في العينة المذكورة، لم يتضمن المحتوى بيان حالة الحديث من حيث الأصالة.'
     },
     {
       value: '37.5%',
       label: 'حالة التوثيق',
+      icon: <ShieldCheck className="h-5 w-5" />,
       description: 'من العينة المدروسة في دراسة أخرى منشورة عام 2025 لم تتضمن حالة توثيق الحديث.',
       insight: 'الرقم يصف العينة المدروسة، ولا يحكم على كل ما يُنشر أو يُتداول.'
     },
     {
       value: '3,281',
       label: 'مرجع تراثي',
+      icon: <BookOpen className="h-5 w-5" />,
       description: 'مادة وحديثًا مما اشتهر على ألسنة الناس في كتاب "كشف الخفاء ومزيل الإلباس" للإمام العجلوني.',
       insight: 'يشير الرقم إلى مواد وأحاديث اشتهرت على الألسنة وجُمعت في الكتاب المذكور.'
     }
@@ -322,79 +325,130 @@ export const HomePage: React.FC<HomePageProps> = ({ onStartVerification, setActi
 
       {/* 2. PROBLEM SECTION (Rule 38) */}
       <section
-        className="overflow-hidden py-20 md:py-24"
-        style={{ background: 'linear-gradient(120deg, #ffffff 0%, #f8faf8 52%, #fffdf8 100%)' }}
+        className="relative isolate overflow-hidden py-20 md:py-24"
+        style={{ background: 'radial-gradient(circle at 15% 50%, rgba(16,185,129,0.08), transparent 35%), radial-gradient(circle at 85% 55%, rgba(16,185,129,0.07), transparent 35%), linear-gradient(180deg, #ffffff 0%, #fbfdfb 50%, #f5fbf7 100%)' }}
       >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="max-w-4xl border-r-2 border-[#b49a5b] pr-5 text-right md:pr-8">
-            <span className="inline-flex items-center gap-3 text-xs font-bold text-[#8b7135]">
-              <span className="h-px w-8 bg-[#b49a5b]" />
-              واقع المحتوى المتداول
-            </span>
-            <h2 className="mt-4 text-3xl font-bold leading-tight text-[#123d34] md:text-4xl lg:text-5xl">
-              سرعة الانتشار... وغياب التحقق
+        <div aria-hidden="true" className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
+          <span className="absolute -right-24 top-[32%] h-80 w-80 rounded-full border border-emerald-900/[0.04]" />
+          <span className="absolute -right-12 top-[36%] h-56 w-56 rounded-full border border-emerald-900/[0.035]" />
+          <span className="absolute -left-28 top-[52%] h-72 w-72 rounded-full border border-emerald-900/[0.04]" />
+          <span className="absolute left-[14%] top-[43%] h-1.5 w-1.5 rounded-full bg-emerald-700/10" />
+          <span className="absolute right-[24%] top-[72%] h-1 w-1 rounded-full bg-emerald-700/10" />
+        </div>
+
+        <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <motion.div
+            initial={{ opacity: 0, y: 14 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.35 }}
+            transition={{ duration: 0.45 }}
+            className="mx-auto max-w-3xl text-center"
+          >
+            <span className="text-xs font-bold text-emerald-800">واقع المحتوى المتداول</span>
+            <h2 className="mt-4 text-4xl font-extrabold leading-tight text-[#123d34] md:text-5xl">
+              سرعة الانتشار...
+              <span className="mt-1 block text-emerald-700">وغياب التحقق</span>
             </h2>
-            <div className="mt-5 max-w-3xl space-y-3 text-sm leading-relaxed text-[#596660] md:text-base">
-              <p>
-                مع الانتشار السريع للمحتوى الرقمي، أصبح الوصول إلى المحتوى الإسلامي المتداول أسهل، لكن التحقق من مصدره ودرجة ثبوته لا يكون واضحًا دائمًا للمستخدم.
-              </p>
-              <p>
-                تنتشر الأحاديث الضعيفة أو الموضوعة، والأدعية غير الثابتة، والمقولات المحرّفة أو المنسوبة إلى العلماء دون توثيق واضح.
-              </p>
-              <p className="font-semibold text-[#263c34]">
-                وتزداد الحاجة إلى أدوات تساعد المستخدم على الوصول إلى المصدر والدليل بدل الاكتفاء بإجابة مولدة بالذكاء الاصطناعي.
-              </p>
+            <p className="mx-auto mt-5 max-w-3xl text-base leading-[1.8] text-[#53665c] md:text-lg">
+              مع الانتشار السريع للمحتوى الرقمي، أصبح الوصول إلى المحتوى الإسلامي المتداول أسهل، لكن التحقق من مصدره ودرجة ثبوته قد يستغرق وقتًا أطول.
+            </p>
+          </motion.div>
+
+          <div className="mx-auto mt-12 max-w-7xl">
+            <div className="grid grid-cols-1 items-stretch gap-y-0 md:grid-cols-[minmax(0,1fr)_48px_minmax(0,1fr)_48px_minmax(0,1fr)] md:gap-x-1 lg:grid-cols-[minmax(0,1fr)_68px_minmax(0,1fr)_68px_minmax(0,1fr)] lg:gap-x-2">
+              {stats.map((stat, index) => {
+                const isActive = activeStat === index;
+
+                return (
+                  <React.Fragment key={stat.value}>
+                    <motion.button
+                      type="button"
+                      aria-pressed={isActive}
+                      onClick={() => setActiveStat(index)}
+                      onMouseEnter={() => setActiveStat(index)}
+                      onFocus={() => setActiveStat(index)}
+                      initial={{ opacity: 0, y: 16 }}
+                      whileInView={{ opacity: 1, y: 0 }}
+                      viewport={{ once: true, amount: 0.2 }}
+                      transition={{ duration: 0.42, delay: index * 0.12, ease: 'easeOut' }}
+                      whileHover={{ y: -5 }}
+                      whileTap={{ scale: 0.99 }}
+                      className={`group relative flex min-h-[350px] w-full flex-col rounded-[26px] border bg-white/85 p-6 text-right shadow-[0_12px_34px_rgba(20,72,50,0.07)] backdrop-blur-sm transition-[border-color,box-shadow] duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-700/35 sm:p-7 ${
+                        index === 1 ? 'md:-translate-y-2 md:shadow-[0_18px_42px_rgba(20,72,50,0.1)]' : ''
+                      } ${
+                        isActive
+                          ? 'border-emerald-500/45 shadow-[0_18px_42px_rgba(16,185,129,0.14)]'
+                          : 'border-emerald-900/10 hover:border-emerald-500/30 hover:shadow-[0_18px_42px_rgba(16,185,129,0.11)]'
+                      }`}
+                    >
+                      <span className="pointer-events-none absolute right-0 top-0 h-14 w-16 rounded-tr-[26px] border-r border-t border-emerald-600/20 transition-colors duration-300 group-hover:border-emerald-500/50" />
+                      <span className="pointer-events-none absolute bottom-0 left-7 h-px w-16 bg-gradient-to-r from-transparent via-emerald-500/35 to-transparent opacity-60 transition-opacity duration-300 group-hover:opacity-100" />
+                      <span className="flex w-full items-center justify-between">
+                        <span className="font-mono text-xs font-semibold text-emerald-800/70">0{index + 1}</span>
+                        <motion.span
+                          whileHover={{ scale: 1.07 }}
+                          className="flex h-11 w-11 items-center justify-center rounded-full border border-emerald-800/5 bg-emerald-50 text-emerald-800 shadow-[0_4px_14px_rgba(16,185,129,0.08)] transition-shadow duration-300 group-hover:shadow-[0_5px_18px_rgba(16,185,129,0.2)]"
+                        >
+                          {stat.icon}
+                        </motion.span>
+                      </span>
+                      <span className="mt-5 block text-base font-semibold text-[#315747]">{stat.label}</span>
+                      <span dir="ltr" className="mt-2 block text-right text-5xl font-extrabold leading-none tracking-tight text-[#0b493f] lg:text-6xl">
+                        {stat.value}
+                      </span>
+                      <span className="my-5 block h-px w-12 bg-gradient-to-l from-emerald-600/70 to-[#d9c889]" />
+                      <span className="block text-sm leading-[1.8] text-[#52665b]">{stat.description}</span>
+                      <span className="mt-4 border-t border-emerald-900/[0.07] pt-3 text-xs leading-relaxed text-[#748078]">{stat.insight}</span>
+                    </motion.button>
+
+                    {index < stats.length - 1 && (
+                      <motion.div
+                        initial={{ opacity: 0 }}
+                        whileInView={{ opacity: 1 }}
+                        viewport={{ once: true, amount: 0.5 }}
+                        transition={{ duration: 0.4, delay: index * 0.16 + 0.12 }}
+                        className={`journey-connector group/connector relative flex h-14 items-center justify-center md:h-auto md:min-h-[350px] ${isActive ? 'is-active' : ''}`}
+                        aria-hidden="true"
+                      >
+                        <svg className="absolute inset-0 h-full w-full md:hidden" viewBox="0 0 64 56" preserveAspectRatio="none">
+                          <motion.path
+                            d="M32 0 C 10 18, 54 38, 32 56"
+                            fill="none"
+                            stroke={isActive ? '#34b982' : '#b7dfca'}
+                            strokeWidth="1.5"
+                            strokeDasharray={isActive ? '3 7' : '1 0'}
+                            strokeLinecap="round"
+                            animate={{ strokeDashoffset: isActive ? [0, -20] : 0 }}
+                            transition={{ duration: 8, repeat: isActive ? Infinity : 0, ease: 'linear' }}
+                          />
+                        </svg>
+                        <svg className="absolute inset-0 hidden h-full w-full overflow-visible md:block" viewBox="0 0 100 220" preserveAspectRatio="none">
+                          <motion.path
+                            d={index === 0 ? 'M100 110 C 74 20, 26 20, 0 110' : 'M100 110 C 74 200, 26 200, 0 110'}
+                            fill="none"
+                            stroke={isActive ? '#34b982' : '#b7dfca'}
+                            strokeWidth="1.6"
+                            strokeDasharray={isActive ? '3 8' : '1 0'}
+                            strokeLinecap="round"
+                            animate={{ strokeDashoffset: isActive ? [0, -22] : 0 }}
+                            transition={{ duration: 8, repeat: isActive ? Infinity : 0, ease: 'linear' }}
+                          />
+                        </svg>
+                        <span className="absolute left-1/2 top-1/2 z-10 flex h-9 w-9 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border border-emerald-600/25 bg-white text-emerald-800 shadow-[0_3px_14px_rgba(16,185,129,0.12)] transition duration-300 group-hover/connector:scale-110 group-hover/connector:border-emerald-500/60 group-hover/connector:shadow-[0_4px_20px_rgba(16,185,129,0.22)]">
+                          <ArrowLeft className="h-4 w-4 transition-transform duration-300 group-hover/connector:-translate-x-0.5 max-md:-rotate-90" />
+                        </span>
+                      </motion.div>
+                    )}
+                  </React.Fragment>
+                );
+              })}
             </div>
           </div>
 
-          <div className="mt-10 grid grid-cols-1 items-stretch gap-5 md:grid-cols-3 lg:gap-7">
-            {stats.map((stat, index) => {
-              const isActive = activeStat === index;
-
-              return (
-                <motion.button
-                  key={stat.value}
-                  type="button"
-                  aria-pressed={isActive}
-                  onClick={() => setActiveStat(index)}
-                  whileHover={{ y: -5 }}
-                  whileTap={{ scale: 0.99 }}
-                  className={`relative flex min-h-[300px] w-full flex-col justify-between overflow-hidden rounded-3xl border p-7 text-right transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#b49a5b]/70 md:p-8 ${
-                    isActive
-                      ? 'border-[#d2bb7c] bg-gradient-to-br from-[#073e34] via-[#0d5949] to-[#114f42] text-white shadow-[0_22px_50px_rgba(11,73,63,0.2)]'
-                      : 'border-[#d7e7dc] bg-gradient-to-br from-[#eaf3ed] via-[#e3efe7] to-[#d9e9df] text-[#173f35] shadow-[0_12px_32px_rgba(23,63,53,0.07)] hover:border-[#c5ad6c] hover:shadow-[0_18px_38px_rgba(23,63,53,0.12)]'
-                  }`}
-                >
-                  <span className={`flex items-center justify-between text-xs font-bold ${isActive ? 'text-[#e7d59e]' : 'text-[#668171]'}`}>
-                    <span>{stat.label}</span>
-                    <span dir="ltr" className="font-mono">0{index + 1}</span>
-                  </span>
-                  <span dir="ltr" className={`my-6 block text-right text-6xl font-black leading-none tracking-tight md:text-7xl ${isActive ? 'text-white' : 'text-[#0b493f]'}`}>
-                    {stat.value}
-                  </span>
-                  <span className={`mb-5 block h-px w-16 ${isActive ? 'bg-[#d8c17f]' : 'bg-[#b49a5b]'}`} />
-                  <span className={`block text-sm leading-relaxed md:text-base ${isActive ? 'text-white/85' : 'text-[#4c6658]'}`}>
-                    {stat.description}
-                  </span>
-                </motion.button>
-              );
-            })}
+          <div className="relative z-10 mx-auto mt-7 flex max-w-3xl items-center justify-center gap-2 text-center text-xs leading-relaxed text-[#718078] md:text-sm">
+            <Info className="h-4 w-4 shrink-0 text-emerald-700/65" />
+            <p>الأرقام تصف العينة المدروسة، ولا تحكم على كل ما يُنشر أو يُتداول.</p>
           </div>
-
-          <AnimatePresence mode="wait" initial={false}>
-            <motion.div
-              key={activeStat}
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -8 }}
-              transition={{ duration: 0.22 }}
-              aria-live="polite"
-              className="mt-7 flex items-start gap-4 border-r-2 border-[#b49a5b] pr-5 text-right md:pr-7"
-            >
-              <span className="shrink-0 pt-0.5 text-xs font-bold text-[#8b7135]">قراءة الرقم</span>
-              <p className="text-sm leading-relaxed text-[#52645a] md:text-base">{stats[activeStat].insight}</p>
-            </motion.div>
-          </AnimatePresence>
 
           <div className="mt-16 border-t border-[#d9d2bd] pt-9">
             <div className="max-w-4xl text-right">
