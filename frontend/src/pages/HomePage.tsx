@@ -326,92 +326,81 @@ export const HomePage: React.FC<HomePageProps> = ({ onStartVerification, setActi
         style={{ background: 'linear-gradient(120deg, #ffffff 0%, #f8faf8 52%, #fffdf8 100%)' }}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid gap-8 border-b border-[#d9d2bd] pb-9 md:grid-cols-[1.15fr_0.85fr] md:items-end md:gap-14">
-            <div className="text-right">
-              <span className="inline-flex items-center gap-3 text-xs font-bold text-[#8b7135]">
-                <span className="h-px w-8 bg-[#b49a5b]" />
-                واقع المحتوى المتداول
-              </span>
-              <h2 className="mt-4 text-3xl font-bold leading-tight text-[#123d34] md:text-4xl lg:text-5xl">
-                سرعة الانتشار...<br className="hidden sm:block" /> وغياب التحقق
-              </h2>
-            </div>
-            <div className="space-y-3 text-right text-sm leading-relaxed text-[#596660] md:text-base">
+          <div className="max-w-4xl border-r-2 border-[#b49a5b] pr-5 text-right md:pr-8">
+            <span className="inline-flex items-center gap-3 text-xs font-bold text-[#8b7135]">
+              <span className="h-px w-8 bg-[#b49a5b]" />
+              واقع المحتوى المتداول
+            </span>
+            <h2 className="mt-4 text-3xl font-bold leading-tight text-[#123d34] md:text-4xl lg:text-5xl">
+              سرعة الانتشار... وغياب التحقق
+            </h2>
+            <div className="mt-5 max-w-3xl space-y-3 text-sm leading-relaxed text-[#596660] md:text-base">
               <p>
                 مع الانتشار السريع للمحتوى الرقمي، أصبح الوصول إلى المحتوى الإسلامي المتداول أسهل، لكن التحقق من مصدره ودرجة ثبوته لا يكون واضحًا دائمًا للمستخدم.
               </p>
-              <p className="font-medium text-[#263c34]">
-                تنتشر الأحاديث والأدعية والمقولات دون توثيق واضح؛ وتزداد الحاجة إلى الوصول للمصدر والدليل بدل الاكتفاء بإجابة مولدة.
+              <p>
+                تنتشر الأحاديث الضعيفة أو الموضوعة، والأدعية غير الثابتة، والمقولات المحرّفة أو المنسوبة إلى العلماء دون توثيق واضح.
               </p>
-            </div>
-            </div>
-
-          <div className="mt-10 grid items-stretch gap-8 lg:grid-cols-[1.15fr_0.85fr] lg:gap-16">
-            <div className="relative flex min-h-[340px] flex-col justify-center border-y border-[#cfc5a8] bg-white/35 px-5 py-8 sm:px-9 md:min-h-[390px] md:px-12">
-              <div className="mb-7 flex items-center justify-between border-b border-[#e9e5d9] pb-4 text-xs font-semibold text-[#718078]">
-                <span>قراءة إحصائية</span>
-                <span dir="ltr" className="font-mono text-[#a68b4d]">{String(activeStat + 1).padStart(2, '0')} / 03</span>
-              </div>
-              <AnimatePresence mode="wait" initial={false}>
-                <motion.div
-                  key={activeStat}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -10 }}
-                  transition={{ duration: 0.24 }}
-                  aria-live="polite"
-                >
-                  <span className="block text-xs font-bold text-[#8b7135]">{stats[activeStat].label}</span>
-                  <span dir="ltr" className="mt-2 block text-right text-7xl font-black leading-none tracking-tight text-[#0b493f] sm:text-8xl">
-                    {stats[activeStat].value}
-                  </span>
-                  <span className="my-6 block h-px w-20 bg-[#b49a5b]" />
-                  <p className="max-w-2xl text-base leading-relaxed text-[#354940] md:text-lg">
-                    {stats[activeStat].description}
-                  </p>
-                  <p className="mt-4 text-sm leading-relaxed text-[#7a817a] md:text-base">
-                    {stats[activeStat].insight}
-                  </p>
-                </motion.div>
-              </AnimatePresence>
-            </div>
-
-            <div className="flex flex-col justify-center divide-y divide-[#e5e1d6] border-y border-[#e5e1d6]" aria-label="إحصاءات المحتوى والتوثيق">
-              {stats.map((stat, index) => {
-                const isActive = activeStat === index;
-
-                return (
-                  <motion.button
-                    key={stat.value}
-                    type="button"
-                    aria-pressed={isActive}
-                    onClick={() => setActiveStat(index)}
-                    whileHover={{ x: -3 }}
-                    className={`flex w-full items-center gap-4 border-r-2 px-4 py-6 text-right transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#9b8246]/50 md:px-5 ${
-                      isActive ? 'border-[#b49a5b] bg-white/65' : 'border-transparent hover:border-[#c9d8ce] hover:bg-white/40'
-                    }`}
-                  >
-                    <span className="font-mono text-xs text-[#a68b4d]">0{index + 1}</span>
-                    <span className="min-w-0 flex-1">
-                      <span className="block text-xs text-[#718078]">{stat.label}</span>
-                      <span dir="ltr" className="mt-1 block text-right text-2xl font-bold tracking-tight text-[#183f35] md:text-3xl">
-                        {stat.value}
-                      </span>
-                    </span>
-                    <span className={`h-1.5 w-1.5 shrink-0 rounded-full ${isActive ? 'bg-[#b49a5b]' : 'bg-[#d9ded8]'}`} />
-                  </motion.button>
-                );
-              })}
+              <p className="font-semibold text-[#263c34]">
+                وتزداد الحاجة إلى أدوات تساعد المستخدم على الوصول إلى المصدر والدليل بدل الاكتفاء بإجابة مولدة بالذكاء الاصطناعي.
+              </p>
             </div>
           </div>
 
+          <div className="mt-10 grid grid-cols-1 items-stretch gap-5 md:grid-cols-3 lg:gap-7">
+            {stats.map((stat, index) => {
+              const isActive = activeStat === index;
+
+              return (
+                <motion.button
+                  key={stat.value}
+                  type="button"
+                  aria-pressed={isActive}
+                  onClick={() => setActiveStat(index)}
+                  whileHover={{ y: -5 }}
+                  whileTap={{ scale: 0.99 }}
+                  className={`relative flex min-h-[300px] w-full flex-col justify-between overflow-hidden rounded-3xl border p-7 text-right transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#b49a5b]/70 md:p-8 ${
+                    isActive
+                      ? 'border-[#d2bb7c] bg-gradient-to-br from-[#073e34] via-[#0d5949] to-[#114f42] text-white shadow-[0_22px_50px_rgba(11,73,63,0.2)]'
+                      : 'border-[#d7e7dc] bg-gradient-to-br from-[#eaf3ed] via-[#e3efe7] to-[#d9e9df] text-[#173f35] shadow-[0_12px_32px_rgba(23,63,53,0.07)] hover:border-[#c5ad6c] hover:shadow-[0_18px_38px_rgba(23,63,53,0.12)]'
+                  }`}
+                >
+                  <span className={`flex items-center justify-between text-xs font-bold ${isActive ? 'text-[#e7d59e]' : 'text-[#668171]'}`}>
+                    <span>{stat.label}</span>
+                    <span dir="ltr" className="font-mono">0{index + 1}</span>
+                  </span>
+                  <span dir="ltr" className={`my-6 block text-right text-6xl font-black leading-none tracking-tight md:text-7xl ${isActive ? 'text-white' : 'text-[#0b493f]'}`}>
+                    {stat.value}
+                  </span>
+                  <span className={`mb-5 block h-px w-16 ${isActive ? 'bg-[#d8c17f]' : 'bg-[#b49a5b]'}`} />
+                  <span className={`block text-sm leading-relaxed md:text-base ${isActive ? 'text-white/85' : 'text-[#4c6658]'}`}>
+                    {stat.description}
+                  </span>
+                </motion.button>
+              );
+            })}
+          </div>
+
+          <AnimatePresence mode="wait" initial={false}>
+            <motion.div
+              key={activeStat}
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.22 }}
+              aria-live="polite"
+              className="mt-7 flex items-start gap-4 border-r-2 border-[#b49a5b] pr-5 text-right md:pr-7"
+            >
+              <span className="shrink-0 pt-0.5 text-xs font-bold text-[#8b7135]">قراءة الرقم</span>
+              <p className="text-sm leading-relaxed text-[#52645a] md:text-base">{stats[activeStat].insight}</p>
+            </motion.div>
+          </AnimatePresence>
+
           <div className="mt-16 border-t border-[#d9d2bd] pt-9">
-            <div className="flex flex-col gap-3 text-right md:flex-row md:items-end md:justify-between">
-              <div>
-                <span className="text-xs font-bold text-[#8b7135]">من الرقم إلى التحقق</span>
-                <h3 className="mt-2 text-2xl font-bold text-[#123d34] md:text-3xl">ماذا ينبغي أن نسأل؟</h3>
-              </div>
-              <p className="max-w-xl text-sm leading-relaxed text-[#69736d] md:text-base">
+            <div className="max-w-4xl text-right">
+              <span className="text-xs font-bold text-[#8b7135]">من الرقم إلى التحقق</span>
+              <h3 className="mt-2 text-2xl font-bold text-[#123d34] md:text-3xl">ماذا ينبغي أن نسأل؟</h3>
+              <p className="mt-3 max-w-3xl text-sm leading-relaxed text-[#69736d] md:text-base">
                 لا تعني هذه الأرقام أن كل ما يُنشر على وسائل التواصل غير صحيح؛ بل تدعونا إلى أسئلة أوضح قبل مشاركة المحتوى.
               </p>
             </div>
