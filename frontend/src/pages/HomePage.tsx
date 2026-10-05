@@ -244,7 +244,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onStartVerification, setActi
         <div
           className="absolute inset-0"
           style={{
-            backgroundImage: "linear-gradient(90deg, rgba(9, 49, 45, 0.10) 0%, rgba(9, 49, 45, 0.10) 100%), url('https://images.unsplash.com/photo-1514565131-fce0801e5785?auto=format&fit=crop&w=1600&q=80')",
+            backgroundImage: "linear-gradient(90deg, rgba(9, 49, 45, 0.10) 0%, rgba(9, 49, 45, 0.10) 100%), url('/hero-bg.jpg')",
             backgroundSize: 'cover',
             backgroundPosition: 'center'
           }}
