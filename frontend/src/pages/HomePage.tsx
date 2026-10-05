@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence, useAnimation } from 'framer-motion';
+import { motion, AnimatePresence, useAnimation, useReducedMotion } from 'framer-motion';
 import { NavTab } from '../components/Navbar';
-import { ArrowLeft, ArrowRight, Search, FileText, CheckCircle, Database, Link2, ShieldCheck, AlertCircle, Layout, BookOpen, Layers, Image as ImageIcon, Video as FileVideo, Info } from 'lucide-react';
+import { ArrowLeft, ArrowRight, ArrowDown, Search, FileText, CheckCircle, Database, Link2, ShieldCheck, AlertCircle, Layout, BookOpen, Layers, Image as ImageIcon, Video as FileVideo } from 'lucide-react';
 
 interface HomePageProps {
   onStartVerification: () => void;
@@ -232,30 +232,28 @@ const HowItWorks = () => {
 
 // --- MAIN PAGE EXPORT ---
 export const HomePage: React.FC<HomePageProps> = ({ onStartVerification, setActiveTab }) => {
-  const [activeStat, setActiveStat] = useState(0);
+  const [activeCard, setActiveCard] = useState(0);
   const [activeQuestion, setActiveQuestion] = useState(0);
+  const shouldReduceMotion = useReducedMotion() ?? false;
 
   const stats = [
     {
       value: '63%',
       label: 'رصد المحتوى',
       icon: <FileText className="h-5 w-5" />,
-      description: 'من محتوى الأحاديث على Instagram في إحدى الدراسات المنشورة عام 2025 لم يتضمن بيانًا لحالة الحديث من حيث الأصالة.',
-      insight: 'في العينة المذكورة، لم يتضمن المحتوى بيان حالة الحديث من حيث الأصالة.'
+      description: 'من محتوى الأحاديث على Instagram في إحدى الدراسات المنشورة عام 2025 لم يتضمن بيانًا لحالة الحديث من حيث الأصالة.'
     },
     {
       value: '37.5%',
       label: 'حالة التوثيق',
       icon: <ShieldCheck className="h-5 w-5" />,
-      description: 'من العينة المدروسة في دراسة أخرى منشورة عام 2025 لم تتضمن حالة توثيق الحديث.',
-      insight: 'الرقم يصف العينة المدروسة، ولا يحكم على كل ما يُنشر أو يُتداول.'
+      description: 'من العينة المدروسة في دراسة أخرى منشورة عام 2025 لم تتضمن حالة توثيق الحديث.'
     },
     {
       value: '3,281',
       label: 'مرجع تراثي',
       icon: <BookOpen className="h-5 w-5" />,
-      description: 'مادة وحديثًا مما اشتهر على ألسنة الناس في كتاب "كشف الخفاء ومزيل الإلباس" للإمام العجلوني.',
-      insight: 'يشير الرقم إلى مواد وأحاديث اشتهرت على الألسنة وجُمعت في الكتاب المذكور.'
+      description: 'مادة وحديثًا مما اشتهر على ألسنة الناس في كتاب "كشف الخفاء ومزيل الإلباس" للإمام العجلوني.'
     }
   ];
 
@@ -354,88 +352,105 @@ export const HomePage: React.FC<HomePageProps> = ({ onStartVerification, setActi
             </p>
           </motion.div>
 
-          <div className="mx-auto mt-12 max-w-7xl">
-            <div className="grid grid-cols-1 items-stretch gap-y-0 md:grid-cols-[minmax(0,1fr)_48px_minmax(0,1fr)_48px_minmax(0,1fr)] md:gap-x-1 lg:grid-cols-[minmax(0,1fr)_68px_minmax(0,1fr)_68px_minmax(0,1fr)] lg:gap-x-2">
+          <div className="mx-auto mt-12 max-w-6xl">
+            <div className="grid grid-cols-1 items-stretch gap-y-0 md:grid-cols-[minmax(0,1fr)_44px_minmax(0,1fr)_44px_minmax(0,1fr)] md:gap-x-1 lg:grid-cols-[minmax(0,1fr)_64px_minmax(0,1fr)_64px_minmax(0,1fr)] lg:gap-x-2">
               {stats.map((stat, index) => {
-                const isActive = activeStat === index;
+                const isActive = activeCard === index;
 
                 return (
                   <React.Fragment key={stat.value}>
                     <motion.button
                       type="button"
                       aria-pressed={isActive}
-                      onClick={() => setActiveStat(index)}
-                      onMouseEnter={() => setActiveStat(index)}
-                      onFocus={() => setActiveStat(index)}
-                      initial={{ opacity: 0, y: 16 }}
-                      whileInView={{ opacity: 1, y: 0 }}
+                      aria-controls="stat-detail-panel"
+                      aria-label={`${stat.label} ${stat.value}`}
+                      onClick={() => setActiveCard(index)}
+                      initial={shouldReduceMotion ? false : { opacity: 0, y: 14 }}
+                      whileInView={shouldReduceMotion ? undefined : { opacity: 1, y: 0 }}
                       viewport={{ once: true, amount: 0.2 }}
-                      transition={{ duration: 0.42, delay: index * 0.12, ease: 'easeOut' }}
-                      whileHover={{ y: -5 }}
-                      whileTap={{ scale: 0.99 }}
-                      className={`group relative flex min-h-[350px] w-full flex-col rounded-[26px] border bg-white/85 p-6 text-right shadow-[0_12px_34px_rgba(20,72,50,0.07)] backdrop-blur-sm transition-[border-color,box-shadow] duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-700/35 sm:p-7 ${
-                        index === 1 ? 'md:-translate-y-2 md:shadow-[0_18px_42px_rgba(20,72,50,0.1)]' : ''
+                      transition={{ duration: shouldReduceMotion ? 0 : 0.42, delay: shouldReduceMotion ? 0 : index * 0.12, ease: 'easeOut' }}
+                      whileHover={shouldReduceMotion ? undefined : { y: -4 }}
+                      whileTap={shouldReduceMotion ? undefined : { scale: 0.99 }}
+                      className={`group relative flex min-h-[174px] w-full flex-col justify-between overflow-hidden rounded-[24px] border bg-white/90 p-5 text-right shadow-[0_10px_28px_rgba(20,72,50,0.06)] backdrop-blur-sm transition-[border-color,box-shadow] duration-300 motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-700/35 sm:p-6 ${
+                        index === 1 ? 'md:-translate-y-1 md:shadow-[0_15px_34px_rgba(20,72,50,0.09)]' : ''
                       } ${
                         isActive
-                          ? 'border-emerald-500/45 shadow-[0_18px_42px_rgba(16,185,129,0.14)]'
-                          : 'border-emerald-900/10 hover:border-emerald-500/30 hover:shadow-[0_18px_42px_rgba(16,185,129,0.11)]'
+                          ? 'border-emerald-600/45 shadow-[0_16px_36px_rgba(16,185,129,0.13)]'
+                          : 'border-emerald-900/10 hover:border-emerald-500/30 hover:shadow-[0_15px_32px_rgba(16,185,129,0.1)]'
                       }`}
                     >
-                      <span className="pointer-events-none absolute right-0 top-0 h-14 w-16 rounded-tr-[26px] border-r border-t border-emerald-600/20 transition-colors duration-300 group-hover:border-emerald-500/50" />
-                      <span className="pointer-events-none absolute bottom-0 left-7 h-px w-16 bg-gradient-to-r from-transparent via-emerald-500/35 to-transparent opacity-60 transition-opacity duration-300 group-hover:opacity-100" />
+                      <span className="pointer-events-none absolute right-0 top-0 h-12 w-14 rounded-tr-[24px] border-r border-t border-emerald-600/20 transition-colors duration-300 group-hover:border-emerald-500/50" />
+                      <span className={`pointer-events-none absolute inset-x-5 bottom-0 h-[3px] rounded-full transition-colors duration-300 ${isActive ? 'bg-emerald-600/70' : 'bg-transparent group-hover:bg-emerald-500/35'}`} />
                       <span className="flex w-full items-center justify-between">
                         <span className="font-mono text-xs font-semibold text-emerald-800/70">0{index + 1}</span>
                         <motion.span
-                          whileHover={{ scale: 1.07 }}
+                          whileHover={shouldReduceMotion ? undefined : { scale: 1.07 }}
                           className="flex h-11 w-11 items-center justify-center rounded-full border border-emerald-800/5 bg-emerald-50 text-emerald-800 shadow-[0_4px_14px_rgba(16,185,129,0.08)] transition-shadow duration-300 group-hover:shadow-[0_5px_18px_rgba(16,185,129,0.2)]"
                         >
                           {stat.icon}
                         </motion.span>
                       </span>
-                      <span className="mt-5 block text-base font-semibold text-[#315747]">{stat.label}</span>
-                      <span dir="ltr" className="mt-2 block text-right text-5xl font-extrabold leading-none tracking-tight text-[#0b493f] lg:text-6xl">
+                      <span className="mt-4 block text-sm font-semibold text-[#315747] sm:text-base">{stat.label}</span>
+                      <span dir="ltr" className={`mt-2 block text-right text-4xl font-extrabold leading-none tracking-tight transition-colors duration-300 motion-reduce:transition-none sm:text-5xl ${isActive ? 'text-emerald-700' : 'text-[#0b493f]'}`}>
                         {stat.value}
                       </span>
-                      <span className="my-5 block h-px w-12 bg-gradient-to-l from-emerald-600/70 to-[#d9c889]" />
-                      <span className="block text-sm leading-[1.8] text-[#52665b]">{stat.description}</span>
-                      <span className="mt-4 border-t border-emerald-900/[0.07] pt-3 text-xs leading-relaxed text-[#748078]">{stat.insight}</span>
                     </motion.button>
 
                     {index < stats.length - 1 && (
                       <motion.div
-                        initial={{ opacity: 0 }}
-                        whileInView={{ opacity: 1 }}
+                        initial={shouldReduceMotion ? false : { opacity: 0 }}
+                        whileInView={shouldReduceMotion ? undefined : { opacity: 1 }}
                         viewport={{ once: true, amount: 0.5 }}
-                        transition={{ duration: 0.4, delay: index * 0.16 + 0.12 }}
-                        className={`journey-connector group/connector relative flex h-14 items-center justify-center md:h-auto md:min-h-[350px] ${isActive ? 'is-active' : ''}`}
+                        transition={{ duration: shouldReduceMotion ? 0 : 0.4, delay: shouldReduceMotion ? 0 : index * 0.16 + 0.12 }}
+                        className={`journey-connector group/connector relative flex h-14 items-center justify-center md:h-auto md:min-h-[174px] ${isActive || activeCard === index + 1 ? 'is-active' : ''}`}
                         aria-hidden="true"
                       >
                         <svg className="absolute inset-0 h-full w-full md:hidden" viewBox="0 0 64 56" preserveAspectRatio="none">
+                          <path d="M32 0 C 10 18, 54 38, 32 56" fill="none" stroke="#ccebd9" strokeWidth="1.5" />
                           <motion.path
                             d="M32 0 C 10 18, 54 38, 32 56"
                             fill="none"
-                            stroke={isActive ? '#34b982' : '#b7dfca'}
-                            strokeWidth="1.5"
-                            strokeDasharray={isActive ? '3 7' : '1 0'}
+                            stroke={isActive || activeCard === index + 1 ? '#20a96d' : '#72c99a'}
+                            strokeWidth="2"
+                            strokeDasharray="2 18"
                             strokeLinecap="round"
-                            animate={{ strokeDashoffset: isActive ? [0, -20] : 0 }}
-                            transition={{ duration: 8, repeat: isActive ? Infinity : 0, ease: 'linear' }}
+                            animate={shouldReduceMotion ? { strokeDashoffset: 0 } : { strokeDashoffset: [0, -40] }}
+                            transition={{ duration: 5, delay: shouldReduceMotion ? 0 : index * 2.5, repeat: shouldReduceMotion ? 0 : Infinity, ease: 'linear' }}
                           />
                         </svg>
                         <svg className="absolute inset-0 hidden h-full w-full overflow-visible md:block" viewBox="0 0 100 220" preserveAspectRatio="none">
+                          <path
+                            d={index === 0 ? 'M100 110 C 74 20, 26 20, 0 110' : 'M100 110 C 74 200, 26 200, 0 110'}
+                            fill="none"
+                            stroke="#ccebd9"
+                            strokeWidth="1.5"
+                          />
                           <motion.path
                             d={index === 0 ? 'M100 110 C 74 20, 26 20, 0 110' : 'M100 110 C 74 200, 26 200, 0 110'}
                             fill="none"
-                            stroke={isActive ? '#34b982' : '#b7dfca'}
-                            strokeWidth="1.6"
-                            strokeDasharray={isActive ? '3 8' : '1 0'}
+                            stroke={isActive || activeCard === index + 1 ? '#20a96d' : '#72c99a'}
+                            strokeWidth="2"
+                            strokeDasharray="2 20"
                             strokeLinecap="round"
-                            animate={{ strokeDashoffset: isActive ? [0, -22] : 0 }}
-                            transition={{ duration: 8, repeat: isActive ? Infinity : 0, ease: 'linear' }}
+                            animate={shouldReduceMotion ? { strokeDashoffset: 0 } : { strokeDashoffset: [0, -44] }}
+                            transition={{ duration: 5, delay: shouldReduceMotion ? 0 : index * 2.5, repeat: shouldReduceMotion ? 0 : Infinity, ease: 'linear' }}
                           />
                         </svg>
-                        <span className="absolute left-1/2 top-1/2 z-10 flex h-9 w-9 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border border-emerald-600/25 bg-white text-emerald-800 shadow-[0_3px_14px_rgba(16,185,129,0.12)] transition duration-300 group-hover/connector:scale-110 group-hover/connector:border-emerald-500/60 group-hover/connector:shadow-[0_4px_20px_rgba(16,185,129,0.22)]">
-                          <ArrowLeft className="h-4 w-4 transition-transform duration-300 group-hover/connector:-translate-x-0.5 max-md:-rotate-90" />
+                        <span className={`absolute left-1/2 top-1/2 z-10 flex h-9 w-9 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border border-emerald-600/25 bg-white text-emerald-800 shadow-[0_3px_14px_rgba(16,185,129,0.12)] transition duration-300 motion-reduce:transition-none ${shouldReduceMotion ? '' : 'group-hover/connector:scale-110'} group-hover/connector:border-emerald-500/60 group-hover/connector:shadow-[0_4px_20px_rgba(16,185,129,0.22)]`}>
+                          <motion.span
+                            className="hidden md:flex"
+                            animate={shouldReduceMotion ? { x: 0 } : { x: [0, -4, 0] }}
+                            transition={{ duration: 2.4, repeat: shouldReduceMotion ? 0 : Infinity, ease: 'easeInOut' }}
+                          >
+                            <ArrowLeft className="h-4 w-4" />
+                          </motion.span>
+                          <motion.span
+                            className="md:hidden"
+                            animate={shouldReduceMotion ? { y: 0 } : { y: [0, 3, 0] }}
+                            transition={{ duration: 2.4, repeat: shouldReduceMotion ? 0 : Infinity, ease: 'easeInOut' }}
+                          >
+                            <ArrowDown className="h-4 w-4" />
+                          </motion.span>
                         </span>
                       </motion.div>
                     )}
@@ -445,9 +460,78 @@ export const HomePage: React.FC<HomePageProps> = ({ onStartVerification, setActi
             </div>
           </div>
 
-          <div className="relative z-10 mx-auto mt-7 flex max-w-3xl items-center justify-center gap-2 text-center text-xs leading-relaxed text-[#718078] md:text-sm">
-            <Info className="h-4 w-4 shrink-0 text-emerald-700/65" />
-            <p>الأرقام تصف العينة المدروسة، ولا تحكم على كل ما يُنشر أو يُتداول.</p>
+          <div className="mx-auto mt-9 max-w-[850px] rounded-[18px] border border-emerald-800/[0.08] bg-emerald-50/[0.035] px-5 py-5 sm:px-8">
+            <div className="relative mx-auto grid max-w-md grid-cols-3" role="tablist" aria-label="اختيار الإحصائية">
+              <span className="absolute left-[16.666%] right-[16.666%] top-4 h-px bg-emerald-900/10" />
+              <motion.span
+                className="absolute right-[16.666%] top-4 h-0.5 bg-emerald-600"
+                animate={{ width: `${activeCard * 33.333}%` }}
+                transition={{ duration: shouldReduceMotion ? 0 : 0.5, ease: 'easeInOut' }}
+              />
+              {stats.map((stat, index) => {
+                const isActive = activeCard === index;
+
+                return (
+                  <button
+                    key={stat.value}
+                    id={`stat-tab-${index}`}
+                    type="button"
+                    role="tab"
+                    aria-selected={isActive}
+                    aria-controls="stat-detail-panel"
+                    tabIndex={isActive ? 0 : -1}
+                    onClick={() => setActiveCard(index)}
+                    onKeyDown={(event) => {
+                      const direction = event.key === 'ArrowLeft' ? 1 : event.key === 'ArrowRight' ? -1 : 0;
+                      if (!direction) return;
+                      event.preventDefault();
+                      const nextIndex = (index + direction + stats.length) % stats.length;
+                      setActiveCard(nextIndex);
+                      document.getElementById(`stat-tab-${nextIndex}`)?.focus();
+                    }}
+                    className="relative z-10 flex flex-col items-center gap-2 rounded-md py-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-700/40"
+                  >
+                    <span className={`relative flex h-8 w-8 items-center justify-center rounded-full border text-xs font-bold transition-colors duration-300 motion-reduce:transition-none ${isActive ? 'border-emerald-600 bg-white text-white' : 'border-emerald-900/15 bg-white text-[#718078]'}`}>
+                      {isActive && (
+                        <motion.span
+                          layoutId="active-stat-indicator"
+                          className="absolute inset-0 rounded-full bg-emerald-600"
+                          transition={{ duration: shouldReduceMotion ? 0 : 0.5, ease: 'easeInOut' }}
+                        />
+                      )}
+                      <span className="relative z-10">0{index + 1}</span>
+                    </span>
+                    <span className={`text-[11px] font-medium sm:text-xs ${isActive ? 'text-emerald-900' : 'text-[#8a938d]'}`}>{stat.label}</span>
+                  </button>
+                );
+              })}
+            </div>
+
+            <div
+              id="stat-detail-panel"
+              role="tabpanel"
+              aria-labelledby={`stat-tab-${activeCard}`}
+              className="mx-auto mt-5 flex min-h-[150px] max-w-[740px] flex-col items-center justify-center border-t border-emerald-900/[0.07] px-1 pt-5 text-center sm:px-4"
+            >
+              <AnimatePresence mode="wait" initial={false}>
+                <motion.div
+                  key={activeCard}
+                  initial={shouldReduceMotion ? false : { opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={shouldReduceMotion ? undefined : { opacity: 0, y: -8 }}
+                  transition={{ duration: shouldReduceMotion ? 0 : 0.3, ease: 'easeOut' }}
+                  aria-live="polite"
+                >
+                  <div className="flex flex-wrap items-baseline justify-center gap-x-3 gap-y-1">
+                    <h3 id="stat-detail-heading" className="text-lg font-bold text-[#214f3d] sm:text-xl">{stats[activeCard].label}</h3>
+                    <span dir="ltr" className="text-2xl font-extrabold text-emerald-800 sm:text-3xl">{stats[activeCard].value}</span>
+                  </div>
+                  <p className="mx-auto mt-3 max-w-[650px] text-sm leading-[1.8] text-[#53665c] sm:text-base">
+                    {stats[activeCard].description}
+                  </p>
+                </motion.div>
+              </AnimatePresence>
+            </div>
           </div>
 
           <div className="mt-16 border-t border-[#d9d2bd] pt-9">
