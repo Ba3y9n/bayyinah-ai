@@ -20,7 +20,7 @@ export default {
         }
       },
       fontFamily: {
-        sans: ['"Readex Pro"', 'sans-serif'],
+        sans: ['"Cairo"', 'sans-serif'],
       },
       boxShadow: {
         'subtle': '0 4px 20px -2px rgba(6, 63, 54, 0.05)',

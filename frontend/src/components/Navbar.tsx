@@ -19,11 +19,11 @@ export const Navbar: React.FC<NavbarProps> = ({ activeTab, setActiveTab }) => {
   }, []);
 
   const tabs = [
-    { id: 'home', label: 'ط§ظ„ط±ط¦ظٹط³ظٹط©' },
-    { id: 'verify', label: 'ط§ظ„طھط­ظ‚ظ‚' },
-    { id: 'sources', label: 'ط§ظ„ظ…طµط§ط¯ط± ط§ظ„ظ…ط¹طھظ…ط¯ط©' },
-    { id: 'knowledge-domains', label: 'ط·ط¨ظ‚ط© ط§ظ„ط¨ط­ط« ظˆط§ظ„طھط­ظ‚ظ‚' },
-    { id: 'health', label: 'ط­ط§ظ„ط© ط§ظ„ظ†ط¸ط§ظ…' },
+    { id: 'home', label: 'الرئيسية' },
+    { id: 'verify', label: 'التحقق' },
+    { id: 'sources', label: 'المصادر المعتمدة' },
+    { id: 'knowledge-domains', label: 'طبقة البحث والتحقق' },
+    { id: 'health', label: 'حالة النظام' },
   ];
 
   const handleTabClick = (tabId: string) => {
@@ -35,8 +35,8 @@ export const Navbar: React.FC<NavbarProps> = ({ activeTab, setActiveTab }) => {
     <header 
       className={`fixed top-0 w-full z-50 transition-all duration-300 ${
         scrolled 
-          ? 'bg-white/80 backdrop-blur-md shadow-sm border-b border-gray-100 py-3' 
-          : 'bg-transparent py-5'
+          ? 'bg-[#071f1d]/85 backdrop-blur-md shadow-xl border-b border-white/10 py-3' 
+          : 'bg-[#071f1d]/80 backdrop-blur-sm py-5'
       }`}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between relative">
@@ -47,21 +47,21 @@ export const Navbar: React.FC<NavbarProps> = ({ activeTab, setActiveTab }) => {
         >
           <img 
             src="/bayyinah-logo.png" 
-            alt="ط¨ظٹظ‘ظ†ط© AI" 
+            alt="بيّنة AI" 
             className="h-9 w-auto object-contain transition-transform duration-300 group-hover:scale-105" 
           />
         </div>
 
         {/* Desktop Navigation */}
-        <nav className="hidden lg:flex items-center justify-center gap-8 absolute left-1/2 -translate-x-1/2">
+        <nav className="hidden lg:flex flex-1 items-center justify-center gap-8">
           {tabs.map((tab) => (
             <button
               key={tab.id}
               onClick={() => handleTabClick(tab.id)}
               className={`text-[15px] font-medium transition-colors ${
                 activeTab === tab.id
-                  ? 'text-bayyinah-emerald font-semibold'
-                  : 'text-bayyinah-secondary-text hover:text-bayyinah-emerald'
+                  ? 'text-white font-semibold'
+                  : 'text-white/70 hover:text-white'
               }`}
             >
               {tab.label}

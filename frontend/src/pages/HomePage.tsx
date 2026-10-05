@@ -9,10 +9,11 @@ interface HomePageProps {
 }
 
 // 1. Hero Orbit Component (Rule 37)
+
 const HeroOrbit = () => {
   const [activeIndex, setActiveIndex] = useState(0);
   const [isHovered, setIsHovered] = useState(false);
-  
+
   const steps = [
     { id: 'content', label: 'محتوى', icon: <FileText className="w-5 h-5" />, desc: 'تستقبل بيّنة النص أو الصورة أو الفيديو أو الرابط.' },
     { id: 'claim', label: 'ادعاء', icon: <Layers className="w-5 h-5" />, desc: 'تفكك المحتوى وتحدد الادعاءات التي تحتاج إلى تحقق.' },
@@ -31,63 +32,58 @@ const HeroOrbit = () => {
   }, [isHovered, steps.length]);
 
   return (
-    <div 
-      className="relative w-[340px] h-[340px] md:w-[480px] md:h-[480px] mx-auto lg:mr-auto lg:ml-0 flex items-center justify-center"
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-    >
-      {/* Center Element: بيّنة AI */}
-      <div className="absolute z-30 w-24 h-24 md:w-32 md:h-32 rounded-full bg-white backdrop-blur-md border-2 border-bayyinah-soft-emerald/60 flex flex-col items-center justify-center text-center p-2 shadow-[0_0_40px_rgba(53,185,154,0.3)]">
-        <span className="text-bayyinah-dark-text font-bold text-base md:text-lg tracking-wide">بيّنة AI</span>
-        <span className="text-[10px] md:text-xs text-bayyinah-soft-emerald mt-0.5">محرك التحقق</span>
+    <div className="flex flex-col items-center w-full">
+      <div
+        className="relative w-[320px] h-[320px] md:w-[440px] md:h-[440px] flex items-center justify-center"
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+      >
+        <div className="absolute inset-0 rounded-full border border-white/10 bg-white/5 backdrop-blur-[1px]" />
+        <div className="absolute inset-[18%] rounded-full border border-dashed border-white/15" />
+        <div className="absolute inset-[33%] rounded-full border border-white/10" />
+
+        <div className="absolute z-30 w-24 h-24 md:w-32 md:h-32 rounded-full bg-white flex flex-col items-center justify-center text-center p-2 shadow-[0_0_40px_rgba(255,255,255,0.35)] border border-[#D2EFE9]">
+          <span className="text-[#0a2d2b] font-bold text-base md:text-lg tracking-wide">بيّنة AI</span>
+          <span className="text-[10px] md:text-xs text-[#1b5f59] mt-0.5">محرك التحقق</span>
+        </div>
+
+        {steps.map((step, idx) => {
+          const angle = (idx * (360 / steps.length) - 90) * (Math.PI / 180);
+          const radius = window.innerWidth < 768 ? 120 : 170;
+          const x = Math.cos(angle) * radius;
+          const y = Math.sin(angle) * radius;
+          const isActive = activeIndex === idx;
+
+          return (
+            <div
+              key={step.id}
+              className="absolute z-20 flex flex-col items-center"
+              style={{
+                transform: `translate(${x}px, ${y}px)`,
+                left: '50%', top: '50%'
+              }}
+            >
+              <motion.button
+                onClick={() => setActiveIndex(idx)}
+                className={`w-11 h-11 md:w-14 md:h-14 rounded-full flex items-center justify-center transition-all duration-500 cursor-pointer border border-[#DDEFEA]
+                  ${isActive ? 'bg-[#0f8b7e] text-white shadow-[0_0_30px_rgba(15,139,126,0.75)] scale-110' : 'bg-white text-[#10201D] hover:bg-[#EAF7F4] shadow-sm'}`}
+                whileHover={{ scale: 1.15 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                {step.icon}
+              </motion.button>
+              <div className={`mt-1.5 font-bold transition-all duration-300 ${isActive ? 'text-white text-base drop-shadow-md' : 'text-white/75 text-xs'}`}>
+                {step.label}
+              </div>
+            </div>
+          );
+        })}
       </div>
 
-      {/* Orbit Nodes (6 nodes - Rule 37) */}
-      {steps.map((step, idx) => {
-        const angle = (idx * (360 / steps.length) - 90) * (Math.PI / 180);
-        const radius = window.innerWidth < 768 ? 135 : 195; 
-        const x = Math.cos(angle) * radius;
-        const y = Math.sin(angle) * radius;
-        const isActive = activeIndex === idx;
-
-        return (
-          <div 
-            key={step.id}
-            className="absolute z-20 flex flex-col items-center"
-            style={{ 
-              transform: `translate(${x}px, ${y}px)`,
-              left: '50%', top: '50%'
-            }}
-          >
-            <motion.button
-              onClick={() => setActiveIndex(idx)}
-              className={`w-11 h-11 md:w-14 md:h-14 rounded-full flex items-center justify-center transition-all duration-500 backdrop-blur-md cursor-pointer border-2
-                ${isActive ? 'bg-bayyinah-emerald text-bayyinah-dark-text border-bayyinah-soft-emerald shadow-[0_0_30px_rgba(53,185,154,0.9)] scale-115' : 'bg-white text-bayyinah-dark-text hover:bg-bayyinah-emerald/40 hover:border-bayyinah-emerald border-bayyinah-emerald/40'}`}
-              whileHover={{ scale: 1.15 }}
-              whileTap={{ scale: 0.95 }}
-            >
-              {step.icon}
-            </motion.button>
-            <div className={`mt-1.5 font-bold transition-all duration-300 ${isActive ? 'text-bayyinah-dark-text text-base drop-shadow-md' : 'text-bayyinah-dark-text/70 text-xs'}`}>
-              {step.label}
-            </div>
-            
-            {/* Tooltip Card */}
-            <AnimatePresence>
-              {isActive && (
-                <motion.div
-                  initial={{ opacity: 0, y: 10, scale: 0.9 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.9 }}
-                  className="absolute top-16 md:top-20 w-48 md:w-56 p-4 rounded-xl bg-white backdrop-blur-xl border border-white/20 text-bayyinah-dark-text shadow-2xl text-center z-50 pointer-events-none"
-                >
-                  <p className="text-xs md:text-sm font-medium leading-relaxed drop-shadow-sm">{step.desc}</p>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
-        );
-      })}
+      <div className="mt-8 p-5 bg-white/95 rounded-2xl shadow-[0_12px_30px_rgba(0,0,0,0.12)] border border-white/40 max-w-md w-full text-center z-40 transition-all duration-300 transform min-h-[92px] flex flex-col justify-center backdrop-blur-sm">
+        <p className="text-lg font-bold text-[#0b5d53] mb-2">{steps[activeIndex].label}</p>
+        <p className="text-sm md:text-base text-[#10201D]/80 leading-relaxed">{steps[activeIndex].desc}</p>
+      </div>
     </div>
   );
 };
@@ -117,140 +113,31 @@ const CountUp = ({ to, duration = 2 }: { to: number | string; duration?: number 
 };
 
 // 3. Why Bayyinah Section
+
 const WhyBayyinah = () => {
-  const [activeStep, setActiveStep] = useState(0);
-  
   const steps = [
-    { title: 'الفهم الذكي قبل التحقق', desc: 'لا تتعامل بيّنة مع المحتوى ككتلة نصية فقط، بل تفهم السياق وتحدد الادعاءات التي تحتاج إلى تحقق.', icon: <Layout className="w-6 h-6"/> },
-    { title: 'المصدر أولًا', desc: 'تبحث بيّنة في المصادر المعتمدة والمرتبطة بنوع المحتوى والادعاء، بعيدًا عن التخمين.', icon: <Database className="w-6 h-6"/> },
-    { title: 'الدليل ظاهر', desc: 'لا تكتفي بيّنة بالنتيجة، بل تعرض الدليل والمصدر والمرجع والرابط ليتمكن المستخدم من مراجعتها.', icon: <BookOpen className="w-6 h-6"/> },
-    { title: 'الأمانة العلمية', desc: 'إذا لم تجد بيّنة دليلًا كافيًا، لا تنشئ يقينًا من الفراغ، بل توضّح حدود ما تم التوصل إليه.', icon: <ShieldCheck className="w-6 h-6"/> },
-    { title: 'معالجة متعددة الوسائط', desc: 'يمكن التحقق من: النص، الصورة، الفيديو، الرابط.', icon: <Link2 className="w-6 h-6"/> }
+    { title: 'الفهم الذكي قبل التحقق', desc: 'لا تتعامل بيّنة مع المحتوى ككتلة نصية فقط، بل تفهم السياق وتحدد الادعاءات التي تحتاج إلى تحقق.', icon: <Layout className="w-8 h-8"/> },
+    { title: 'المصدر أولًا', desc: 'تبحث بيّنة في المصادر المعتمدة والمرتبطة بنوع المحتوى والادعاء، بعيدًا عن التخمين.', icon: <Database className="w-8 h-8"/> },
+    { title: 'الدليل ظاهر', desc: 'لا تكتفي بيّنة بالنتيجة، بل تعرض الدليل والمصدر والمرجع والرابط ليتمكن المستخدم من مراجعتها.', icon: <BookOpen className="w-8 h-8"/> },
+    { title: 'الأمانة العلمية', desc: 'إذا لم تجد بيّنة دليلًا كافيًا، لا تنشئ يقينًا من الفراغ، بل توضّح حدود ما تم التوصل إليه.', icon: <ShieldCheck className="w-8 h-8"/> },
+    { title: 'معالجة متعددة الوسائط', desc: 'يمكن التحقق من: النص، الصورة، الفيديو، الرابط.', icon: <Link2 className="w-8 h-8"/> }
   ];
 
   return (
-    <div className="flex flex-col lg:flex-row gap-16 items-center">
-      <div className="flex-1 flex flex-col gap-6 w-full">
-        {steps.map((step, idx) => {
-          const isActive = activeStep === idx;
-          return (
-            <button
-              key={idx}
-              onClick={() => setActiveStep(idx)}
-              className={`flex items-start gap-4 p-6 rounded-2xl transition-all duration-300 text-right border ${
-                isActive 
-                  ? 'bg-bayyinah-emerald text-bayyinah-dark-text border-bayyinah-soft-emerald shadow-elevated' 
-                  : 'bg-white border-gray-100 hover:border-bayyinah-emerald/30'
-              }`}
-            >
-              <div className={`mt-1 p-2 rounded-xl transition-colors ${isActive ? 'bg-white/20 text-bayyinah-dark-text' : 'bg-bayyinah-ivory text-bayyinah-emerald'}`}>
-                {step.icon}
-              </div>
-              <div>
-                <h3 className={`text-lg font-bold mb-2 ${isActive ? 'text-bayyinah-dark-text' : 'text-bayyinah-dark-text'}`}>
-                  0{idx + 1} — {step.title}
-                </h3>
-                <AnimatePresence>
-                  {isActive && (
-                    <motion.p 
-                      initial={{ height: 0, opacity: 0 }}
-                      animate={{ height: 'auto', opacity: 1 }}
-                      exit={{ height: 0, opacity: 0 }}
-                      className="text-sm md:text-base text-bayyinah-dark-text/90 leading-relaxed overflow-hidden"
-                    >
-                      {step.desc}
-                    </motion.p>
-                  )}
-                </AnimatePresence>
-              </div>
-            </button>
-          );
-        })}
-      </div>
-      
-      <div className="flex-1 w-full bg-white rounded-3xl p-8 lg:p-16 relative overflow-hidden min-h-[400px] flex items-center justify-center border border-gray-100 shadow-sm">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-bayyinah-ivory to-transparent"></div>
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={activeStep}
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.95 }}
-            transition={{ duration: 0.4 }}
-            className="relative z-10 w-full"
-          >
-            {/* Visual representation based on step */}
-            {activeStep === 0 && (
-              <div className="flex flex-col gap-4 text-bayyinah-dark-text">
-                <div className="bg-bayyinah-ivory p-4 rounded-xl border border-gray-200">كتلة المحتوى الأصلية...</div>
-                <div className="flex justify-center"><ArrowLeft className="w-5 h-5 -rotate-90 text-bayyinah-emerald" /></div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="bg-white p-4 rounded-xl text-center text-sm font-medium border border-bayyinah-emerald/30 shadow-sm text-bayyinah-emerald">ادعاء 1</div>
-                  <div className="bg-white p-4 rounded-xl text-center text-sm font-medium border border-bayyinah-emerald/30 shadow-sm text-bayyinah-emerald">ادعاء 2</div>
-                </div>
-              </div>
-            )}
-            {activeStep === 1 && (
-              <div className="flex flex-col items-center gap-6 text-bayyinah-dark-text">
-                <Database className="w-16 h-16 text-bayyinah-emerald mb-2" />
-                <div className="flex flex-col w-full gap-3">
-                  <div className="bg-bayyinah-ivory p-4 rounded-xl border border-bayyinah-emerald border-dashed text-center">بحث في القرآن الكريم</div>
-                  <div className="bg-bayyinah-ivory p-4 rounded-xl border border-bayyinah-emerald border-dashed text-center">بحث في السنة النبوية</div>
-                </div>
-              </div>
-            )}
-            {activeStep === 2 && (
-              <div className="flex flex-col gap-4 text-bayyinah-dark-text w-full max-w-sm mx-auto">
-                <div className="bg-bayyinah-ivory p-4 rounded-xl flex items-center justify-between border border-gray-200">
-                  <span>المصدر</span>
-                  <span className="text-bayyinah-emerald font-bold">صحيح البخاري</span>
-                </div>
-                <div className="w-px h-6 bg-bayyinah-emerald/30 mx-auto"></div>
-                <div className="bg-bayyinah-ivory p-4 rounded-xl flex items-center justify-between border border-gray-200">
-                  <span>المرجع</span>
-                  <span className="text-bayyinah-emerald font-bold">حديث رقم 1</span>
-                </div>
-                <div className="w-px h-6 bg-bayyinah-emerald/30 mx-auto"></div>
-                <div className="bg-white p-4 rounded-xl flex flex-col gap-2 border border-bayyinah-emerald shadow-sm text-center">
-                  <span className="text-xs text-bayyinah-secondary-text">النتيجة</span>
-                  <span className="font-bold text-bayyinah-emerald-dark">ثابت بحسب المصدر</span>
-                </div>
-              </div>
-            )}
-            {activeStep === 3 && (
-              <div className="flex flex-col items-center justify-center gap-6 text-bayyinah-dark-text h-full">
-                <div className="w-24 h-24 rounded-full border-4 border-dashed border-bayyinah-emerald/50 flex items-center justify-center relative bg-bayyinah-ivory">
-                  <ShieldCheck className="w-10 h-10 text-bayyinah-emerald" />
-                  <motion.div className="absolute inset-0 border-4 border-bayyinah-emerald rounded-full border-t-transparent" animate={{ rotate: 360 }} transition={{ duration: 4, repeat: Infinity, ease: "linear" }} />
-                </div>
-                <div className="text-center font-medium bg-white px-6 py-3 rounded-xl border border-gray-200 shadow-sm">
-                  عرض الأدلة المتوفرة بشفافية
-                </div>
-              </div>
-            )}
-            {activeStep === 4 && (
-              <div className="grid grid-cols-2 gap-4 text-bayyinah-dark-text">
-                <div className="bg-bayyinah-ivory p-6 rounded-xl flex flex-col items-center gap-3 border border-gray-200 hover:border-bayyinah-emerald/50 transition-colors cursor-default">
-                  <FileText className="w-8 h-8 text-bayyinah-emerald" />
-                  <span>نص</span>
-                </div>
-                <div className="bg-bayyinah-ivory p-6 rounded-xl flex flex-col items-center gap-3 border border-gray-200 hover:border-bayyinah-emerald/50 transition-colors cursor-default">
-                  <ImageIcon className="w-8 h-8 text-bayyinah-emerald" />
-                  <span>صورة</span>
-                </div>
-                <div className="bg-bayyinah-ivory p-6 rounded-xl flex flex-col items-center gap-3 border border-gray-200 hover:border-bayyinah-emerald/50 transition-colors cursor-default">
-                  <FileVideo className="w-8 h-8 text-bayyinah-emerald" />
-                  <span>فيديو</span>
-                </div>
-                <div className="bg-bayyinah-ivory p-6 rounded-xl flex flex-col items-center gap-3 border border-gray-200 hover:border-bayyinah-emerald/50 transition-colors cursor-default">
-                  <Link2 className="w-8 h-8 text-bayyinah-emerald" />
-                  <span>رابط</span>
-                </div>
-              </div>
-            )}
-          </motion.div>
-        </AnimatePresence>
-      </div>
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      {steps.map((step, idx) => (
+        <motion.div
+          key={idx}
+          whileHover={{ y: -5, scale: 1.02 }}
+          className="bg-white p-8 rounded-3xl shadow-sm border border-gray-100 hover:border-bayyinah-emerald/40 transition-all duration-300 flex flex-col items-start gap-4 cursor-default"
+        >
+          <div className="p-4 bg-bayyinah-ivory text-bayyinah-emerald rounded-2xl">
+            {step.icon}
+          </div>
+          <h3 className="text-xl font-bold text-bayyinah-dark-text mt-2">{step.title}</h3>
+          <p className="text-bayyinah-secondary-text leading-relaxed font-light">{step.desc}</p>
+        </motion.div>
+      ))}
     </div>
   );
 };
@@ -353,95 +240,48 @@ export const HomePage: React.FC<HomePageProps> = ({ onStartVerification, setActi
     <div className="flex flex-col bg-bayyinah-ivory text-bayyinah-dark-text overflow-x-hidden">
       
       {/* 1. HERO SECTION */}
-      <section className="relative min-h-[90vh] flex items-center pt-20 overflow-hidden">
-        {/* Background Image Layer exactly as Dawr reference */}
-        <div className="absolute inset-0 z-0 bg-bayyinah-deep-emerald">
-          <img 
-            src="/hero-bg.jpg" 
-            alt="Islamic Skyline" 
-            className="w-full h-full object-cover object-center mix-blend-overlay opacity-60"
-          />
-          <div className="absolute inset-0 bg-gradient-to-r from-bayyinah-deep-emerald/90 via-bayyinah-deep-emerald/60 to-transparent"></div>
-        </div>
-        
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 w-full flex flex-col-reverse lg:flex-row items-center gap-12 lg:gap-8">
-          
-          {/* Right Content (RTL) - Typography */}
-          <div className="flex-1 flex flex-col items-start text-right">
-            <motion.div
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-md border border-white/20 text-bayyinah-soft-emerald px-4 py-1.5 rounded-full text-xs font-semibold mb-6 shadow-sm"
-            >
-              <ShieldCheck className="w-4 h-4 text-bayyinah-soft-emerald" />
-              
-            </motion.div>
+      <section className="relative min-h-[90vh] flex flex-col items-center pt-28 pb-16 overflow-hidden bg-[#0a302d]">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_rgba(60,162,146,0.18),_rgba(10,48,45,0.96)_55%,_rgba(4,17,16,1)_100%)]" />
+        <div className="absolute inset-0 opacity-60" style={{ backgroundImage: 'linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px)', backgroundSize: '40px 40px' }} />
 
-            <motion.h1 
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6 }}
-              className="text-4xl md:text-6xl lg:text-7xl font-bold mb-6 text-bayyinah-dark-text leading-[1.2] drop-shadow-md"
-            >
-              تحقّق قبل<br/>أن تنشر.
-            </motion.h1>
-            
-            <motion.p 
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.2 }}
-              className="text-lg md:text-2xl text-bayyinah-dark-text/90 max-w-xl mb-6 leading-relaxed font-light drop-shadow-sm"
-            >
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 w-full flex flex-col items-center justify-center gap-12 text-center">
+          <motion.div
+            initial={{ opacity: 0, y: 24 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            className="max-w-3xl"
+          >
+            <h1 className="text-shadow-soft text-4xl md:text-6xl lg:text-7xl font-black text-white leading-[1.15] tracking-tight mb-4">
+              تحقّق قبل أن تنشر.
+            </h1>
+            <p className="text-lg md:text-2xl text-white/80 max-w-2xl mx-auto leading-relaxed font-medium">
               بيّنة تساعدك على التحقق من الادعاءات الإسلامية بالرجوع إلى المصادر المعتمدة وإظهار الدليل.
-            </motion.p>
+            </p>
+          </motion.div>
 
-            <motion.p
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.3 }}
-              className="text-sm text-bayyinah-soft-emerald/90 max-w-lg mb-8 font-medium bg-white/5 border border-white/10 p-3.5 rounded-2xl"
-            >
-              «بيّنة لا تطلب منك أن تثق بالذكاء الاصطناعي؛ بل تمكّنك من رؤية المصدر بنفسك.»
-            </motion.p>
-            
-            <motion.div 
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.4 }}
-              className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto"
-            >
-              <button 
-                onClick={onStartVerification}
-                className="bg-bayyinah-emerald hover:bg-bayyinah-soft-emerald text-bayyinah-dark-text px-8 py-4 rounded-xl font-bold text-lg transition-colors flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(53,185,154,0.4)] border border-white/10 cursor-pointer"
-              >
-                ابدأ التحقق
-                <ArrowLeft className="w-5 h-5" />
-              </button>
-              <button 
-                onClick={() => setActiveTab('judge-demo')}
-                className="bg-transparent border border-white/30 hover:border-white hover:bg-white/10 text-bayyinah-dark-text px-8 py-4 rounded-xl font-medium text-lg transition-colors cursor-pointer flex items-center justify-center gap-2"
-              >
-                <span>عرض الحكّام (Demo)</span>
-                <ArrowLeft className="w-5 h-5" />
-              </button>
-            </motion.div>
-
-            <div className="mt-8 text-xs text-bayyinah-dark-text/60 flex items-center gap-2">
-              <AlertCircle className="w-4 h-4 text-bayyinah-soft-emerald shrink-0" />
-              <span>بيّنة نظام ذكاء اصطناعي للتحقق والمساعدة، وليست جهة إفتاء.</span>
-            </div>
-          </div>
-
-          {/* Left Content (RTL) - Interactive Orbit */}
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.8, delay: 0.3 }}
-            className="flex-1 w-full flex justify-center lg:justify-end"
+            transition={{ duration: 0.8, delay: 0.2 }}
+            className="w-full flex justify-center"
           >
             <HeroOrbit />
           </motion.div>
 
+          <motion.div
+            initial={{ opacity: 0, y: 18 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.35 }}
+            className="flex justify-center"
+          >
+            <button
+              onClick={onStartVerification}
+              className="bg-[#0f8b7e] hover:bg-[#0c776d] text-white px-10 py-4 rounded-2xl font-bold text-xl transition-all shadow-[0_0_24px_rgba(15,139,126,0.35)] cursor-pointer flex items-center justify-center gap-3"
+            >
+              ابدأ التحقق
+              <ArrowLeft className="w-6 h-6" />
+            </button>
+          </motion.div>
         </div>
       </section>
 
@@ -478,15 +318,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onStartVerification, setActi
                   من محتوى الأحاديث على Instagram في إحدى الدراسات المنشورة عام 2025 لم يتضمن بيانًا لحالة الحديث من حيث الأصالة.
                 </p>
               </div>
-              <a 
-                href="https://dawa.center" 
-                target="_blank" 
-                rel="noopener noreferrer" 
-                className="mt-6 text-xs text-bayyinah-emerald hover:underline font-bold flex items-center gap-1"
-              >
-                <span>دراسة توثيق المحتوى الرقمي 2025</span>
-                <ArrowLeft className="w-3.5 h-3.5" />
-              </a>
+
             </div>
 
             {/* Stat 2 */}
@@ -499,15 +331,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onStartVerification, setActi
                   من العينة المدروسة في دراسة أخرى منشورة عام 2025 لم تتضمن حالة توثيق الحديث.
                 </p>
               </div>
-              <a 
-                href="https://islamic-content.com" 
-                target="_blank" 
-                rel="noopener noreferrer" 
-                className="mt-6 text-xs text-bayyinah-emerald hover:underline font-bold flex items-center gap-1"
-              >
-                <span>دراسة عينة المنصات الرقمية 2025</span>
-                <ArrowLeft className="w-3.5 h-3.5" />
-              </a>
+
             </div>
 
             {/* Stat 3 */}
@@ -520,15 +344,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onStartVerification, setActi
                   مادة وحديثًا مما اشتهر على ألسنة الناس في كتاب "كشف الخفاء ومزيل الإلباس" للإمام العجلوني.
                 </p>
               </div>
-              <a 
-                href="https://shamela.ws" 
-                target="_blank" 
-                rel="noopener noreferrer" 
-                className="mt-6 text-xs text-bayyinah-emerald hover:underline font-bold flex items-center gap-1"
-              >
-                <span>كشف الخفاء ومزيل الإلباس</span>
-                <ArrowLeft className="w-3.5 h-3.5" />
-              </a>
+
             </div>
           </div>
 
@@ -539,27 +355,29 @@ export const HomePage: React.FC<HomePageProps> = ({ onStartVerification, setActi
               <p className="text-base text-bayyinah-secondary-text">لا تعني هذه الأرقام أن كل ما يُنشر على وسائل التواصل غير صحيح. بل تكشف مشكلة أكثر تحديدًا:</p>
             </div>
             
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-              <div className="group bg-white p-5 rounded-2xl border border-gray-100 hover:border-bayyinah-emerald/40 hover:shadow-subtle hover:-translate-y-1 transition-all duration-300">
-                <span className="text-bayyinah-emerald font-bold mb-2 block text-lg">01</span>
-                <h4 className="text-bayyinah-dark-text font-bold text-sm leading-relaxed">هل تم توثيقه؟</h4>
-              </div>
-              <div className="group bg-white p-5 rounded-2xl border border-gray-100 hover:border-bayyinah-emerald/40 hover:shadow-subtle hover:-translate-y-1 transition-all duration-300">
-                <span className="text-bayyinah-emerald font-bold mb-2 block text-lg">02</span>
-                <h4 className="text-bayyinah-dark-text font-bold text-sm leading-relaxed">ما مصدره؟</h4>
-              </div>
-              <div className="group bg-white p-5 rounded-2xl border border-gray-100 hover:border-bayyinah-emerald/40 hover:shadow-subtle hover:-translate-y-1 transition-all duration-300">
-                <span className="text-bayyinah-emerald font-bold mb-2 block text-lg">03</span>
-                <h4 className="text-bayyinah-dark-text font-bold text-sm leading-relaxed">هل النص مطابق؟</h4>
-              </div>
-              <div className="group bg-white p-5 rounded-2xl border border-gray-100 hover:border-bayyinah-emerald/40 hover:shadow-subtle hover:-translate-y-1 transition-all duration-300">
-                <span className="text-bayyinah-emerald font-bold mb-2 block text-lg">04</span>
-                <h4 className="text-bayyinah-dark-text font-bold text-sm leading-relaxed">ما درجة ثبوته؟</h4>
-              </div>
-              <div className="group bg-white p-5 rounded-2xl border border-gray-100 hover:border-bayyinah-emerald/40 hover:shadow-subtle hover:-translate-y-1 transition-all duration-300">
-                <span className="text-bayyinah-emerald font-bold mb-2 block text-lg">05</span>
-                <h4 className="text-bayyinah-dark-text font-bold text-sm leading-relaxed">هل توجد مصادر أخرى؟</h4>
-              </div>
+            <div className="flex flex-col lg:flex-row items-center justify-between gap-2 lg:gap-4 mt-8">
+              {[
+                { num: '01', text: 'هل تم توثيقه؟' },
+                { num: '02', text: 'ما مصدره؟' },
+                { num: '03', text: 'هل النص مطابق؟' },
+                { num: '04', text: 'ما درجة ثبوته؟' },
+                { num: '05', text: 'هل توجد مصادر أخرى؟' },
+              ].map((item, i) => (
+                <React.Fragment key={i}>
+                  <motion.div 
+                    whileHover={{ scale: 1.05, y: -5 }}
+                    className="flex-1 w-full bg-white p-6 rounded-2xl border border-gray-100 hover:border-bayyinah-emerald shadow-sm hover:shadow-elevated transition-all duration-300 cursor-default text-center"
+                  >
+                    <span className="text-bayyinah-emerald font-bold mb-3 block text-xl">{item.num}</span>
+                    <h4 className="text-bayyinah-dark-text font-bold text-base leading-relaxed">{item.text}</h4>
+                  </motion.div>
+                  {i < 4 && (
+                    <div className="hidden lg:flex items-center text-gray-300">
+                      <ArrowLeft className="w-6 h-6" />
+                    </div>
+                  )}
+                </React.Fragment>
+              ))}
             </div>
           </div>
 
@@ -600,7 +418,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onStartVerification, setActi
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-100px" }}
               transition={{ duration: 0.6 }}
-              className="relative"
+              className="relative bg-white p-10 rounded-3xl border border-gray-100 shadow-sm hover:shadow-elevated transition-all duration-300 hover:border-bayyinah-emerald/30"
             >
               <div className="absolute right-0 top-0 w-1.5 h-full bg-gradient-to-b from-bayyinah-emerald to-transparent rounded-full"></div>
               <div className="pr-8 py-4">
@@ -623,7 +441,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onStartVerification, setActi
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-100px" }}
               transition={{ duration: 0.6, delay: 0.2 }}
-              className="bg-white p-10 rounded-3xl border border-gray-100 shadow-sm relative overflow-hidden flex flex-col justify-between"
+              className="bg-white p-10 rounded-3xl border border-gray-100 shadow-sm hover:shadow-elevated transition-all duration-300 hover:border-bayyinah-emerald/30 relative overflow-hidden flex flex-col justify-between"
             >
               <div>
                 <span className="text-xs font-bold tracking-widest text-bayyinah-soft-emerald uppercase block mb-3">رؤيتنا</span>
@@ -647,13 +465,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onStartVerification, setActi
       </section>
 
       {/* 6. IMMERSIVE CTA */}
-      <section className="relative py-32 bg-bayyinah-deep-emerald text-bayyinah-dark-text overflow-hidden">
-        {/* Background Visuals */}
-        <div className="absolute inset-0 z-0 opacity-10">
-          <div className="absolute right-0 top-1/2 w-full h-px bg-gradient-to-l from-white to-transparent transform -translate-y-1/2"></div>
-          <div className="absolute right-1/4 top-0 w-px h-full bg-gradient-to-b from-white to-transparent"></div>
-        </div>
-
+      <section className="relative py-32 bg-bayyinah-emerald/10 text-bayyinah-dark-text overflow-hidden">
         <div className="max-w-4xl mx-auto px-4 text-center relative z-10">
           <motion.h2 
             initial={{ opacity: 0, scale: 0.95 }}
@@ -661,14 +473,14 @@ export const HomePage: React.FC<HomePageProps> = ({ onStartVerification, setActi
             viewport={{ once: true }}
             className="text-4xl md:text-6xl font-bold mb-6 text-bayyinah-dark-text"
           >
-            قبل أن تشارك... <span className="text-bayyinah-gold">تحقّق.</span>
+            قبل أن تشارك... <span className="text-bayyinah-emerald">تحقّق.</span>
           </motion.h2>
           <motion.p 
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
             viewport={{ once: true }}
             transition={{ delay: 0.2 }}
-            className="text-xl md:text-2xl text-bayyinah-dark-text/70 mb-12 font-light leading-relaxed max-w-2xl mx-auto"
+            className="text-xl md:text-2xl text-bayyinah-dark-text/70 mb-12 font-medium leading-relaxed max-w-2xl mx-auto"
           >
             أرسل المحتوى الذي تريد التحقق منه، ودع بيّنة تقودك من الادعاء إلى المصدر والدليل.
           </motion.p>
@@ -678,7 +490,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onStartVerification, setActi
             viewport={{ once: true }}
             transition={{ delay: 0.4 }}
             onClick={onStartVerification}
-            className="bg-white hover:bg-bayyinah-ivory text-bayyinah-deep-emerald px-12 py-5 rounded-2xl font-bold text-xl transition-all shadow-[0_0_40px_rgba(255,255,255,0.15)] hover:shadow-[0_0_60px_rgba(255,255,255,0.25)] flex items-center gap-3 mx-auto"
+            className="bg-bayyinah-emerald hover:bg-bayyinah-soft-emerald text-white px-12 py-5 rounded-2xl font-bold text-xl transition-all shadow-[0_0_40px_rgba(8,127,104,0.2)] hover:shadow-[0_0_60px_rgba(8,127,104,0.3)] flex items-center gap-3 mx-auto"
           >
             ابدأ التحقق
             <ArrowLeft className="w-6 h-6" />
