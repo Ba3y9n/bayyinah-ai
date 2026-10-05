@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence, useAnimation, useReducedMotion } from 'framer-motion';
 import { NavTab } from '../components/Navbar';
 import { ArrowLeft, ArrowRight, ArrowDown, Search, FileText, CheckCircle, Database, Link2, ShieldCheck, AlertCircle, Layout, BookOpen, Layers, Image as ImageIcon, Video as FileVideo } from 'lucide-react';
@@ -235,6 +235,9 @@ export const HomePage: React.FC<HomePageProps> = ({ onStartVerification, setActi
   const [activeCard, setActiveCard] = useState(0);
   const [activeQuestion, setActiveQuestion] = useState(0);
   const shouldReduceMotion = useReducedMotion() ?? false;
+  const verificationSectionRef = useRef<HTMLElement | null>(null);
+  const verificationSectionVisible = useRef(false);
+  const manualPauseUntil = useRef(0);
 
   const stats = [
     {
@@ -258,12 +261,47 @@ export const HomePage: React.FC<HomePageProps> = ({ onStartVerification, setActi
   ];
 
   const verificationQuestions = [
-    { num: '01', text: 'هل تم توثيقه؟', detail: 'تأكد من وجود إحالة يمكن الرجوع إليها، لا مجرد نسبة عامة.' },
-    { num: '02', text: 'ما مصدره؟', detail: 'ارجع إلى المرجع الأصلي، وتحقق من اسم المصدر وموضع النص.' },
-    { num: '03', text: 'هل النص مطابق؟', detail: 'قارن النص المتداول بما ورد في مصدره، وانتبه للاختصار أو التغيير.' },
-    { num: '04', text: 'ما درجة ثبوته؟', detail: 'اعرض الحكم كما ورد في مرجع متخصص، مع مصدره وسياقه.' },
-    { num: '05', text: 'هل توجد مصادر أخرى؟', detail: 'قارن النتيجة بمراجع معتمدة أخرى عند الحاجة.' }
+    { num: '01', text: 'هل تم توثيقه؟', detail: 'تأكد من وجود إحالة يمكن الرجوع إليها، لا مجرد نسبة عامة.', icon: <CheckCircle className="h-6 w-6" /> },
+    { num: '02', text: 'ما مصدره؟', detail: 'ارجع إلى المرجع الأصلي، وتحقق من اسم المصدر وموضع النص.', icon: <Database className="h-6 w-6" /> },
+    { num: '03', text: 'هل النص مطابق؟', detail: 'قارن النص المتداول بما ورد في مصدره، وانتبه للاختصار أو التغيير.', icon: <FileText className="h-6 w-6" /> },
+    { num: '04', text: 'ما درجة ثبوته؟', detail: 'اعرض الحكم كما ورد في مرجع متخصص، مع مصدره وسياقه.', icon: <ShieldCheck className="h-6 w-6" /> },
+    { num: '05', text: 'هل توجد مصادر أخرى؟', detail: 'قارن النتيجة بمراجع معتمدة أخرى عند الحاجة.', icon: <BookOpen className="h-6 w-6" /> }
   ];
+
+  const desktopJourneyPath = 'M 900 70 C 850 15, 750 15, 700 70 C 650 125, 550 125, 500 70 C 450 15, 350 15, 300 70 C 250 125, 150 125, 100 70';
+  const desktopJourneyPoints = [
+    [900, 70], [855, 37], [800, 41], [745, 37], [700, 70],
+    [655, 103], [600, 99], [545, 103], [500, 70],
+    [455, 37], [400, 41], [345, 37], [300, 70],
+    [255, 103], [200, 99], [145, 103], [100, 70]
+  ];
+
+  useEffect(() => {
+    if (shouldReduceMotion) return;
+
+    const section = verificationSectionRef.current;
+    if (!section) return;
+
+    const observer = new IntersectionObserver(([entry]) => {
+      verificationSectionVisible.current = entry.isIntersecting;
+    }, { threshold: 0.2 });
+    observer.observe(section);
+
+    const interval = window.setInterval(() => {
+      if (!verificationSectionVisible.current || Date.now() < manualPauseUntil.current) return;
+      setActiveQuestion((current) => (current + 1) % verificationQuestions.length);
+    }, 2300);
+
+    return () => {
+      observer.disconnect();
+      window.clearInterval(interval);
+    };
+  }, [shouldReduceMotion, verificationQuestions.length]);
+
+  const selectVerificationQuestion = (index: number) => {
+    manualPauseUntil.current = Date.now() + 7000;
+    setActiveQuestion(index);
+  };
 
   return (
     <div className="flex flex-col bg-bayyinah-ivory text-bayyinah-dark-text overflow-x-hidden">
@@ -551,54 +589,247 @@ export const HomePage: React.FC<HomePageProps> = ({ onStartVerification, setActi
             </div>
           </div>
 
-          <div className="mt-16 border-t border-[#d9d2bd] pt-9">
-            <div className="max-w-4xl text-right">
-              <span className="text-xs font-bold text-[#8b7135]">من الرقم إلى التحقق</span>
-              <h3 className="mt-2 text-2xl font-bold text-[#123d34] md:text-3xl">ماذا ينبغي أن نسأل؟</h3>
-              <p className="mt-3 max-w-3xl text-sm leading-relaxed text-[#69736d] md:text-base">
-                لا تعني هذه الأرقام أن كل ما يُنشر على وسائل التواصل غير صحيح؛ بل تدعونا إلى أسئلة أوضح قبل مشاركة المحتوى.
-              </p>
-            </div>
+        </div>
+      </section>
 
-            <div className="mt-7 grid grid-cols-2 gap-x-4 md:grid-cols-5 md:gap-x-7" aria-label="أسئلة التحقق">
+      <section
+        ref={verificationSectionRef}
+        className="relative isolate overflow-hidden py-20 text-white md:py-24"
+        style={{ background: 'radial-gradient(circle at 10% 20%, rgba(55,255,170,0.2), transparent 30%), radial-gradient(circle at 90% 75%, rgba(35,210,140,0.14), transparent 35%), linear-gradient(135deg, #087653 0%, #006747 45%, #004c38 100%)' }}
+      >
+        <div aria-hidden="true" className="pointer-events-none absolute inset-0 overflow-hidden">
+          <motion.span
+            animate={shouldReduceMotion ? { rotate: 0 } : { rotate: 360 }}
+            transition={{ duration: 70, repeat: shouldReduceMotion ? 0 : Infinity, ease: 'linear' }}
+            className="absolute -right-52 -top-44 h-[600px] w-[600px] rounded-full border border-emerald-100/10"
+          />
+          <motion.span
+            animate={shouldReduceMotion ? { rotate: 0 } : { rotate: -360 }}
+            transition={{ duration: 82, repeat: shouldReduceMotion ? 0 : Infinity, ease: 'linear' }}
+            className="absolute -bottom-72 -left-48 h-[700px] w-[700px] rounded-full border border-emerald-100/[0.08]"
+          />
+          <span className="absolute -right-28 top-1/3 h-80 w-80 rounded-full border border-emerald-100/[0.06]" />
+          <motion.span
+            animate={shouldReduceMotion ? { y: 0, opacity: 0.12 } : { y: [0, -12, 0], opacity: [0.1, 0.2, 0.1] }}
+            transition={{ duration: 7, repeat: shouldReduceMotion ? 0 : Infinity, ease: 'easeInOut' }}
+            className="absolute right-[17%] top-[22%] h-1.5 w-1.5 rounded-full bg-[#5ef2b1]"
+          />
+          <motion.span
+            animate={shouldReduceMotion ? { y: 0, opacity: 0.12 } : { y: [0, 10, 0], opacity: [0.1, 0.18, 0.1] }}
+            transition={{ duration: 9, repeat: shouldReduceMotion ? 0 : Infinity, ease: 'easeInOut' }}
+            className="absolute bottom-[24%] left-[21%] h-1 w-1 rounded-full bg-[#5ef2b1]"
+          />
+        </div>
+
+        <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <motion.header
+            initial={shouldReduceMotion ? false : { opacity: 0, y: 12 }}
+            whileInView={shouldReduceMotion ? undefined : { opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.35 }}
+            transition={{ duration: 0.4 }}
+            className="mx-auto max-w-3xl text-right"
+          >
+            <span className="inline-flex items-center gap-3 text-sm font-medium text-white/75">
+              <span className="h-px w-8 bg-[#5ef2b1]/65" />
+              من الرقم إلى التحقق
+            </span>
+            <h2 className="mt-4 text-3xl font-extrabold leading-tight text-white sm:text-4xl md:text-5xl">
+              ماذا ينبغي أن <span className="text-[#5ef2b1]">نسأل؟</span>
+            </h2>
+            <p className="mt-4 text-sm leading-[1.85] text-white/80 sm:text-base md:text-lg">
+              لا تعني هذه الأرقام أن كل ما يُنشر على وسائل التواصل غير صحيح؛ بل تدعونا إلى أسئلة أوضح قبل مشاركة المحتوى.
+            </p>
+          </motion.header>
+
+          <div className="relative mx-auto mt-10 max-w-6xl md:mt-14">
+            <svg className="pointer-events-none absolute inset-x-0 top-5 hidden h-[130px] w-full overflow-visible md:block" viewBox="0 0 1000 140" preserveAspectRatio="none" aria-hidden="true">
+              <path d={desktopJourneyPath} fill="none" stroke="rgba(94,242,177,0.3)" strokeWidth="2.5" />
+              {!shouldReduceMotion && (
+                <motion.path
+                  d={desktopJourneyPath}
+                  fill="none"
+                  stroke="#5ef2b1"
+                  strokeWidth="3"
+                  strokeLinecap="round"
+                  strokeDasharray="34 1150"
+                  animate={{ strokeDashoffset: [0, -1184] }}
+                  transition={{ duration: 11.5, repeat: Infinity, ease: 'linear' }}
+                />
+              )}
+              {!shouldReduceMotion && (
+                <motion.circle
+                  r="5"
+                  fill="#b3ffdc"
+                  style={{ filter: 'drop-shadow(0 0 7px rgba(94,242,177,0.9))' }}
+                  initial={{ cx: desktopJourneyPoints[0][0], cy: desktopJourneyPoints[0][1] }}
+                  animate={{
+                    cx: desktopJourneyPoints.map(([x]) => x),
+                    cy: desktopJourneyPoints.map(([, y]) => y)
+                  }}
+                  transition={{ duration: 11.5, repeat: Infinity, ease: 'linear' }}
+                />
+              )}
+            </svg>
+
+            {verificationQuestions.slice(0, 4).map((_, index) => (
+              <motion.span
+                key={`desktop-arrow-${index}`}
+                aria-hidden="true"
+                animate={shouldReduceMotion ? { x: 0, scale: 1 } : { x: [0, -4, 0], scale: [1, 1.04, 1] }}
+                transition={{ duration: 2.2, delay: index * 0.12, repeat: shouldReduceMotion ? 0 : Infinity, ease: 'easeInOut' }}
+                className="absolute top-[68px] z-20 hidden h-9 w-9 items-center justify-center rounded-full border border-[#5ef2b1]/45 bg-[#006747] text-white shadow-[0_0_18px_rgba(94,242,177,0.18)] md:flex"
+                style={{ right: `${18 + index * 20}%` }}
+              >
+                <ArrowLeft className="h-4 w-4" />
+              </motion.span>
+            ))}
+
+            <div className="relative z-10 grid grid-cols-1 md:grid-cols-5 md:gap-2" role="tablist" aria-label="مراحل التحقق">
               {verificationQuestions.map((question, index) => {
                 const isActive = activeQuestion === index;
 
                 return (
-                  <button
-                    key={question.num}
-                    type="button"
-                    aria-pressed={isActive}
-                    onClick={() => setActiveQuestion(index)}
-                    className={`min-h-[104px] border-b-2 py-4 text-right transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#9b8246]/50 ${
-                      isActive ? 'border-[#b49a5b]' : 'border-[#e4e4dd] hover:border-[#c9d8ce]'
-                    }`}
-                  >
-                    <span className="mb-3 block font-mono text-xs text-[#a68b4d]">{question.num}</span>
-                    <span className={`block text-sm font-bold leading-relaxed md:text-base ${isActive ? 'text-[#123d34]' : 'text-[#68716c]'}`}>
-                      {question.text}
-                    </span>
-                  </button>
+                  <React.Fragment key={question.num}>
+                    <motion.button
+                      id={`verification-step-${index}`}
+                      type="button"
+                      role="tab"
+                      aria-selected={isActive}
+                      aria-controls="verification-detail-panel"
+                      tabIndex={isActive ? 0 : -1}
+                      onClick={() => selectVerificationQuestion(index)}
+                      onFocus={() => { manualPauseUntil.current = Date.now() + 7000; }}
+                      onKeyDown={(event) => {
+                        const direction = event.key === 'ArrowLeft' || event.key === 'ArrowDown'
+                          ? 1
+                          : event.key === 'ArrowRight' || event.key === 'ArrowUp'
+                            ? -1
+                            : 0;
+                        if (!direction) return;
+                        event.preventDefault();
+                        const nextIndex = (index + direction + verificationQuestions.length) % verificationQuestions.length;
+                        selectVerificationQuestion(nextIndex);
+                        document.getElementById(`verification-step-${nextIndex}`)?.focus();
+                      }}
+                      initial={shouldReduceMotion ? false : { opacity: 0, y: 12 }}
+                      whileInView={shouldReduceMotion ? undefined : { opacity: 1, y: 0 }}
+                      viewport={{ once: true, amount: 0.25 }}
+                      transition={{ duration: shouldReduceMotion ? 0 : 0.35, delay: shouldReduceMotion ? 0 : index * 0.08 }}
+                      whileHover={shouldReduceMotion ? undefined : { y: -4 }}
+                      className="group flex min-h-[200px] w-full flex-col items-center rounded-2xl px-2 py-2 text-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#5ef2b1]/70 md:min-h-[218px]"
+                    >
+                      <span className={`mb-3 font-mono text-xs transition-colors ${isActive ? 'text-[#a4ffd2]' : 'text-white/55 group-hover:text-white/80'}`}>
+                        {question.num}
+                      </span>
+                      <motion.span
+                        animate={isActive && !shouldReduceMotion ? { scale: [1, 1.04, 1] } : { scale: 1 }}
+                        transition={{ duration: 2.1, repeat: isActive && !shouldReduceMotion ? Infinity : 0, ease: 'easeInOut' }}
+                        className={`flex h-24 w-24 items-center justify-center rounded-[26px] border backdrop-blur-xl transition-[border-color,background-color,box-shadow] duration-300 motion-reduce:transition-none sm:h-[100px] sm:w-[100px] ${isActive
+                          ? 'border-[#5ef2b1]/75 bg-[#ffffff]/15 text-[#b3ffdc] shadow-[0_0_0_1px_rgba(94,242,177,0.35),0_0_28px_rgba(94,242,177,0.22)]'
+                          : 'border-[#a4ffd2]/25 bg-white/[0.07] text-white/85 shadow-[0_8px_30px_rgba(0,0,0,0.1)] group-hover:border-[#5ef2b1]/55 group-hover:bg-white/[0.1]'
+                        }`}
+                      >
+                        {question.icon}
+                      </motion.span>
+                      <span className={`mt-4 max-w-[170px] text-sm font-semibold leading-relaxed transition-colors sm:text-base ${isActive ? 'text-white' : 'text-white/70 group-hover:text-white/90'}`}>
+                        {question.text}
+                      </span>
+                      <span className={`mt-2 h-0.5 rounded-full bg-[#5ef2b1] transition-all duration-300 motion-reduce:transition-none ${isActive ? 'w-8 opacity-100' : 'w-0 opacity-0'}`} />
+                    </motion.button>
+
+                    {index < verificationQuestions.length - 1 && (
+                      <div className="relative flex h-12 items-center justify-center md:hidden" aria-hidden="true">
+                        <svg className="absolute inset-0 h-full w-full" viewBox="0 0 100 56" preserveAspectRatio="none">
+                          <path d="M50 0 C 48 15, 52 41, 50 56" fill="none" stroke="rgba(94,242,177,0.3)" strokeWidth="2" />
+                          {!shouldReduceMotion && (
+                            <motion.path
+                              d="M50 0 C 48 15, 52 41, 50 56"
+                              fill="none"
+                              stroke="#5ef2b1"
+                              strokeWidth="2.5"
+                              strokeDasharray="7 80"
+                              animate={{ strokeDashoffset: [0, -87] }}
+                              transition={{ duration: 2.3, delay: index * 0.08, repeat: Infinity, ease: 'linear' }}
+                            />
+                          )}
+                          {!shouldReduceMotion && (
+                            <motion.circle
+                              r="4"
+                              fill="#b3ffdc"
+                              style={{ filter: 'drop-shadow(0 0 5px rgba(94,242,177,0.9))' }}
+                              animate={{ cx: [50, 49, 50, 51, 50], cy: [0, 14, 28, 42, 56] }}
+                              transition={{ duration: 2.3, delay: index * 0.08, repeat: Infinity, ease: 'easeInOut' }}
+                            />
+                          )}
+                        </svg>
+                        <motion.span
+                          animate={shouldReduceMotion ? { y: 0, scale: 1 } : { y: [0, 3, 0], scale: [1, 1.04, 1] }}
+                          transition={{ duration: 2.2, delay: index * 0.12, repeat: shouldReduceMotion ? 0 : Infinity, ease: 'easeInOut' }}
+                          className="relative z-10 flex h-9 w-9 items-center justify-center rounded-full border border-[#5ef2b1]/45 bg-[#006747] text-white shadow-[0_0_16px_rgba(94,242,177,0.18)]"
+                        >
+                          <ArrowDown className="h-4 w-4" />
+                        </motion.span>
+                      </div>
+                    )}
+                  </React.Fragment>
                 );
               })}
             </div>
-
-            <AnimatePresence mode="wait" initial={false}>
-              <motion.p
-                key={activeQuestion}
-                initial={{ opacity: 0, y: 6 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -6 }}
-                transition={{ duration: 0.2 }}
-                aria-live="polite"
-                className="mt-5 max-w-3xl text-right text-sm leading-relaxed text-[#65716a] md:text-base"
-              >
-                <span className="ml-2 text-[#b49a5b]">—</span>
-                {verificationQuestions[activeQuestion].detail}
-              </motion.p>
-            </AnimatePresence>
           </div>
 
+          <motion.div
+            id="verification-detail-panel"
+            role="tabpanel"
+            aria-labelledby={`verification-step-${activeQuestion}`}
+            initial={shouldReduceMotion ? false : { opacity: 0, y: 10 }}
+            whileInView={shouldReduceMotion ? undefined : { opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.2 }}
+            transition={{ duration: shouldReduceMotion ? 0 : 0.4 }}
+            className="mx-auto mt-8 max-w-4xl rounded-[28px] border border-[#78ffbe]/25 bg-[#004c38]/35 p-5 shadow-[0_18px_50px_rgba(0,42,30,0.12)] backdrop-blur-[18px] sm:p-8"
+          >
+            <div className="relative h-3 overflow-visible rounded-full bg-white/[0.12]" aria-label={`التقدم ${((activeQuestion + 1) * 20)}%`}>
+              <motion.span
+                className="absolute right-0 top-0 h-full rounded-full bg-gradient-to-l from-[#54f3b0] to-[#00c77b] shadow-[0_0_16px_rgba(84,243,176,0.35)]"
+                animate={{ width: `${(activeQuestion + 1) * 20}%` }}
+                transition={{ duration: shouldReduceMotion ? 0 : 0.7, ease: [0.22, 1, 0.36, 1] }}
+              />
+              <span
+                className="absolute top-1/2 h-4 w-4 -translate-y-1/2 rounded-full border-2 border-[#c5ffe3] bg-[#54f3b0] shadow-[0_0_14px_rgba(84,243,176,0.8)] transition-[right] duration-700 motion-reduce:transition-none"
+                style={{ right: `calc(${(activeQuestion + 1) * 20}% - 8px)` }}
+              />
+            </div>
+
+            <div className="mt-7 min-h-[170px] sm:min-h-[150px]">
+              <AnimatePresence mode="wait" initial={false}>
+                <motion.div
+                  key={activeQuestion}
+                  initial={shouldReduceMotion ? false : { opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={shouldReduceMotion ? undefined : { opacity: 0, y: -8 }}
+                  transition={{ duration: shouldReduceMotion ? 0 : 0.35, ease: 'easeOut' }}
+                  aria-live="polite"
+                  className="flex min-h-[170px] flex-col items-center justify-center text-center sm:min-h-[150px] sm:flex-row sm:gap-6 sm:text-right"
+                >
+                  <motion.span
+                    animate={shouldReduceMotion ? { scale: 1 } : { scale: [1, 1.04, 1] }}
+                    transition={{ duration: 2.2, repeat: shouldReduceMotion ? 0 : Infinity, ease: 'easeInOut' }}
+                    className="mb-4 flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl border border-[#78ffbe]/35 bg-white/[0.08] text-[#aaffd3] shadow-[0_0_22px_rgba(94,242,177,0.12)] sm:mb-0"
+                  >
+                    {verificationQuestions[activeQuestion].icon}
+                  </motion.span>
+                  <div>
+                    <div className="flex flex-wrap items-baseline justify-center gap-x-3 gap-y-1 sm:justify-start">
+                      <span className="font-mono text-sm text-[#aaffd3]/75">{verificationQuestions[activeQuestion].num}</span>
+                      <h3 className="text-xl font-bold text-white sm:text-2xl">{verificationQuestions[activeQuestion].text}</h3>
+                    </div>
+                    <p className="mt-3 max-w-2xl text-sm leading-[1.85] text-white/80 sm:text-base">
+                      {verificationQuestions[activeQuestion].detail}
+                    </p>
+                  </div>
+                </motion.div>
+              </AnimatePresence>
+            </div>
+          </motion.div>
         </div>
       </section>
 
