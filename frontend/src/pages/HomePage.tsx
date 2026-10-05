@@ -340,14 +340,14 @@ export const HomePage: React.FC<HomePageProps> = ({ onStartVerification, setActi
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, amount: 0.35 }}
             transition={{ duration: 0.45 }}
-            className="mx-auto max-w-3xl text-center"
+            className="ml-auto max-w-3xl text-right"
           >
             <span className="text-xs font-bold text-emerald-800">واقع المحتوى المتداول</span>
             <h2 className="mt-4 text-4xl font-extrabold leading-tight text-[#123d34] md:text-5xl">
               سرعة الانتشار...
               <span className="mt-1 block text-emerald-700">وغياب التحقق</span>
             </h2>
-            <p className="mx-auto mt-5 max-w-3xl text-base leading-[1.8] text-[#53665c] md:text-lg">
+            <p className="ml-auto mt-5 max-w-3xl text-base leading-[1.8] text-[#53665c] md:text-lg">
               مع الانتشار السريع للمحتوى الرقمي، أصبح الوصول إلى المحتوى الإسلامي المتداول أسهل، لكن التحقق من مصدره ودرجة ثبوته قد يستغرق وقتًا أطول.
             </p>
           </motion.div>
@@ -417,6 +417,12 @@ export const HomePage: React.FC<HomePageProps> = ({ onStartVerification, setActi
                             animate={shouldReduceMotion ? { strokeDashoffset: 0 } : { strokeDashoffset: [0, -40] }}
                             transition={{ duration: 5, delay: shouldReduceMotion ? 0 : index * 2.5, repeat: shouldReduceMotion ? 0 : Infinity, ease: 'linear' }}
                           />
+                          <motion.circle
+                            r="3.5"
+                            fill="#20a96d"
+                            animate={shouldReduceMotion ? { cx: 32, cy: 28 } : { cx: [32, 26, 32, 38, 32], cy: [0, 14, 28, 42, 56] }}
+                            transition={{ duration: 4.8, delay: shouldReduceMotion ? 0 : index * 2.4, repeat: shouldReduceMotion ? 0 : Infinity, ease: 'easeInOut' }}
+                          />
                         </svg>
                         <svg className="absolute inset-0 hidden h-full w-full overflow-visible md:block" viewBox="0 0 100 220" preserveAspectRatio="none">
                           <path
@@ -434,6 +440,17 @@ export const HomePage: React.FC<HomePageProps> = ({ onStartVerification, setActi
                             strokeLinecap="round"
                             animate={shouldReduceMotion ? { strokeDashoffset: 0 } : { strokeDashoffset: [0, -44] }}
                             transition={{ duration: 5, delay: shouldReduceMotion ? 0 : index * 2.5, repeat: shouldReduceMotion ? 0 : Infinity, ease: 'linear' }}
+                          />
+                          <motion.circle
+                            r="3.5"
+                            fill="#20a96d"
+                            animate={shouldReduceMotion
+                              ? { cx: 50, cy: 110 }
+                              : {
+                                  cx: [100, 77, 50, 23, 0],
+                                  cy: index === 0 ? [110, 58, 43, 58, 110] : [110, 162, 177, 162, 110]
+                                }}
+                            transition={{ duration: 4.8, delay: shouldReduceMotion ? 0 : index * 2.4, repeat: shouldReduceMotion ? 0 : Infinity, ease: 'easeInOut' }}
                           />
                         </svg>
                         <span className={`absolute left-1/2 top-1/2 z-10 flex h-9 w-9 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border border-emerald-600/25 bg-white text-emerald-800 shadow-[0_3px_14px_rgba(16,185,129,0.12)] transition duration-300 motion-reduce:transition-none ${shouldReduceMotion ? '' : 'group-hover/connector:scale-110'} group-hover/connector:border-emerald-500/60 group-hover/connector:shadow-[0_4px_20px_rgba(16,185,129,0.22)]`}>
@@ -526,7 +543,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onStartVerification, setActi
                     <h3 id="stat-detail-heading" className="text-lg font-bold text-[#214f3d] sm:text-xl">{stats[activeCard].label}</h3>
                     <span dir="ltr" className="text-2xl font-extrabold text-emerald-800 sm:text-3xl">{stats[activeCard].value}</span>
                   </div>
-                  <p className="mx-auto mt-3 max-w-[650px] text-sm leading-[1.8] text-[#53665c] sm:text-base">
+                  <p className="mx-auto mt-3 max-w-[650px] rounded-md border-r-4 border-emerald-500 bg-emerald-50/70 px-4 py-3 text-sm leading-[1.8] text-[#43594d] sm:text-base">
                     {stats[activeCard].description}
                   </p>
                 </motion.div>
