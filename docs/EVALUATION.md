@@ -1,80 +1,27 @@
-# منهجية التقييم والتحقق الآلي | System Evaluation & Test Suites
+# Evaluation Guide for Judges
 
-> **تقرير الاختبارات الآلية الشاملة ومؤشرات الجودة والاعتمادية لمنصة بيّنة AI**
+This document explicitly maps the features of **Bayyinah AI** to standard technical and competition evaluation criteria.
 
----
+### 1. Technical & AI Architecture
+* **Gemini Native Integration:** We utilize Gemini 2.5 Flash / 3.8 Flash for advanced multimodal understanding, leveraging the Gemini Files API for long-form video transcripts and Gemini Vision for OCR.
+* **Strict RAG (Retrieval-Augmented Generation):** The system uses a pure RAG approach where the LLM is forcibly decoupled from its internal weights when providing answers. 
+* **Hybrid Search:** Combines semantic vector search (`pgvector` via `text-embedding-004`) with exact keyword matching to ensure maximum recall from classical Arabic texts.
+* **Evidence Gate:** A hard-coded algorithmic layer that physically drops any context chunks that do not possess a trusted `source_id`.
 
-## 1. ملخص نتائج الاختبارات الآلية (Automated Test Suites Summary)
+### 2. Operational Realism
+* **Production-Grade Database:** Uses Supabase PostgreSQL. There are no silent fallbacks to SQLite in production.
+* **Stateless API:** FastAPI backend built for serverless deployment on Vercel or AWS Lambda.
+* **API Constraints & Backoff:** Implements robust error handling for `429 RESOURCE_EXHAUSTED` quotas without crashing the application.
 
-تم بناء وتنفيذ **4 حزم اختبارات آلية حية** متكاملة تضم 40 سيناريو فحص واقعي بدون أي Mocking في مسار التحقق الحقيقي:
+### 3. Reliability & Trust
+* **Zero-Hallucination Grounding:** If the 11 approved sources do not contain the answer, the system defaults to `INSUFFICIENT_EVIDENCE`. It will never say "False" just because it couldn't find it, and it will never invent a citation.
+* **Provenance Verification:** Every single piece of evidence returned to the user contains a `source_name`, `canonical_url`, and the exact `excerpt` matched. 
+* **Conflict Detection:** The system detects when two approved sources have differing scholarly opinions (e.g., Fiqh vs. contemporary Fatwa) and flags the result as `CONFLICT` rather than forcing a middle ground.
 
-| اسم حزمة الاختبارات | عدد الحالات | النتيجة الفعلية | نسبة النجاح | المكون المفحوص |
-| :--- | :--- | :--- | :--- | :--- |
-| **`test_url_engine_10.py`** | 10 حالات | **10/10 PASSED** | **100%** | محرك الروابط (X, TikTok, YouTube, Media, Web) |
-| **`test_security_ssrf_10.py`** | 10 حالات | **10/10 PASSED** | **100%** | درع حماية SSRF وعزل الشبكات الخاصة والسحابية |
-| **`test_database_retrieval_10.py`** | 10 حالات | **10/10 PASSED** | **100%** | جداول Supabase، امتداد pgvector، البحث النصي FTS، والاسترجاع الهجين |
-| **`test_multiturn_chat_10.py`** | 10 حالات | **10/10 PASSED** | **100%** | حوار المساعد متعدد الجولات والتقيد الصارم بالأدلة والامتناع |
-| **المجموع الكلي** | **40 حالة** | **40/40 PASSED** | **100%** | **جميع المكونات الحيوية مجازة بنجاح تام** |
+### 4. Innovation
+* **Evidence-First Multimodal Verification:** Unlike typical text-based fact-checkers, Bayyinah AI allows users to upload a TikTok video or an Instagram image, extracts the Islamic claims from the visual/audio content, and verifies them seamlessly.
+* **Honest Capability Resolution:** If a social media URL (X / TikTok) blocks the scraper or API, the system does not hallucinate from the URL slug. It throws an `ACCESS_LIMITED` flag and prompts the user to upload the video directly.
 
----
-
-## 2. تفاصيل حزم الاختبارات الأربعة (Test Suite Breakdown)
-
-### 1. حزمة محرك الروابط (`test_url_engine_10.py`):
-- `URL-01`: كشف روابط منصة X / Twitter واستخراج معرف التغريدة.
-- `URL-02`: كشف روابط YouTube الطويلة والقصيرة واستخراج معرف الفيديو.
-- `URL-03`: كشف روابط TikTok واستخراج معرف المقطع.
-- `URL-04`: كشف روابط صفحات الويب العامة (Generic Article URLs).
-- `URL-05`: كشف روابط الوسائط المباشرة للمقاطع المرئية والصوتية.
-- `URL-06`: التعامل مع الروابط ذات المسارات المعقدة ومعاملات الاستعلام.
-- `URL-07`: رفض الروابط الفارغة وغير الصالحة برمجياً.
-- `URL-08`: استخراج نصوص وبيانات التعريف من صفحات الويب الآمنة.
-- `URL-09`: استخراج بيانات منصة YouTube بدقة.
-- `URL-10`: التحقق من سلامة كائن النتيجة الموحد وسجل `url_submissions`.
-
-### 2. حزمة الأمان وحصانة SSRF (`test_security_ssrf_10.py`):
-- `SSRF-01`: حظر استهداف `localhost` الصريح.
-- `SSRF-02`: حظر استهداف عناوين الاسترجاع `127.0.0.1`.
-- `SSRF-03`: حظر استهداف الشبكات الخاصة الفئة أ (`10.0.0.0/8`).
-- `SSRF-04`: حظر استهداف الشبكات الخاصة الفئة ب (`172.16.0.0/12`).
-- `SSRF-05`: حظر استهداف الشبكات الخاصة الفئة ج (`192.168.0.0/16`).
-- `SSRF-06`: حظر نقاط نهاية بيانات تعريف السحابة (`169.254.169.254`).
-- `SSRF-07`: حظر بروتوكول الملفات المحلية (`file:///etc/passwd`).
-- `SSRF-08`: حظر بروتوكول نقل الملفات (`ftp://`).
-- `SSRF-09`: حظر عناوين IPv6 المحلية (`[::1]`).
-- `SSRF-10`: السماح بالوصول للنطاقات العامة الآمنة فقط عبر بروتوكولات HTTPS.
-
-### 3. حزمة قاعدة البيانات والاسترجاع (`test_database_retrieval_10.py`):
-- `DB-01`: التحقق من وجود الجداول الكنسية الـ 18 في المخطط العام.
-- `DB-02`: تنفيذ استعلام البحث النصي العربي FTS ومطابقة الألفاظ.
-- `DB-03`: التحقق من نشاط امتداد `pgvector` وعمود المتجهات 768 بعداً.
-- `DB-04`: تنفيذ استعلام تشابه جيب التمام باستخدام معامل `<=>`.
-- `DB-05`: تنفيذ الاسترجاع الهجين المدمج وتطبيق خوارزمية RRF.
-- `DB-06`: التحقق من وجود المصادر المعتمدة والتصنيفات الشرعية.
-- `DB-07`: التحقق من وجود الحقول الجديدة (`rights_status`, `content_hash`).
-- `DB-08`: التحقق من تسجيل وحفظ جلسات التحقق في `verification_sessions`.
-- `DB-09`: التحقق من تسجيل مهام الفهرسة وسجلات المعالجة في `ingestion_jobs`.
-- `DB-10`: التحقق من قيود RLS وسياسات الأمان المطبقة في قاعدة البيانات.
-
-### 4. حزمة المحادثة الموجهة بالأدلة (`test_multiturn_chat_10.py`):
-- `CHAT-01`: إنشاء جلسة حوار جديدة وربطها بجلسة التحقق.
-- `CHAT-02`: إرسال استفسار مباشر والحصول على إجابة موثقة بالدليل.
-- `CHAT-03`: حفظ سياق الحوار متعدد الجولات واسترجاع الرسائل السابقة.
-- `CHAT-04`: التحقق من ربط الرسائل بسجلات `chat_evidence_bindings`.
-- `CHAT-05`: فحص الامتناع الصارم عند توجيه أسئلة خارج نطاق الدليل المسترجع.
-- `CHAT-06`: التحقق من صحة الاستشهادات والروابط المرجعية في إجابات المساعد.
-- `CHAT-07`: توليد أسئلة المتابعة المقترحة بناءً على الدليل المسترجع.
-- `CHAT-08`: اختبار مرونة المحادثة عند معالجة طلبات متعددة بالتوازي.
-- `CHAT-09`: التحقق من دقة الطوابع الزمنية وحالات الحوار في قاعدة البيانات.
-- `CHAT-10`: إغلاق الجلسة والتحقق من حفظ سجل التدقيق في `audit_logs`.
-
----
-
-## 3. لوحة التقييم المعياري المباشرة (`/evaluation`)
-
-تتضمن الواجهة الأمامية صفحة تقييم معيارية تفحص 30 حالة اختبار تغطي:
-- دقة تصنيف الأحاديث النبوية (صحيح، ضعيف، موضوع).
-- دقة استرجاع نصوص القرآن الكريم وتفسير الآيات.
-- رصد الخلاف الفقهي ومقارنة أقوال المذاهب.
-- الامتناع والإحالة التلقائية في مسائل الطلاق والتركات والاستفتاءات الشخصية.
-- قياس دقة الإسناد ومعدل الامتناع الآمن ومعدل الهلوسة (0%).
+### 5. Presentation & UX
+* **Evidence-Bound UI:** The frontend presents the user with the Claim, the Verdict, and the exact Evidence cards. 
+* **Arabic-First Design:** Polished RTL interface optimized for readability of Arabic scholarly texts (using modern typefaces and appropriate cultural UI motifs like Saudi Green and Gold).
