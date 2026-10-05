@@ -278,8 +278,8 @@ export const HomePage: React.FC<HomePageProps> = ({ onStartVerification, setActi
           </motion.div>
 
           <motion.div
-            initial={{ opacity: 0, scale: 0.92 }}
-            animate={{ opacity: 1, scale: 1 }}
+            initial={{ opacity: 0, scale: 0.92, y: 12 }}
+            animate={{ opacity: 1, scale: 1, y: 12 }}
             transition={{ duration: 0.8, delay: 0.15 }}
             className="w-full lg:w-[52%] flex justify-start"
           >
