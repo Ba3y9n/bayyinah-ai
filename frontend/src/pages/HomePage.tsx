@@ -247,18 +247,9 @@ export const HomePage: React.FC<HomePageProps> = ({ onStartVerification, setActi
         />
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_rgba(12,93,82,0.15),_rgba(8,26,22,0.82)_55%,_rgba(7,17,14,0.9)_100%)]" />
 
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 w-full flex flex-col lg:flex-row items-center justify-between gap-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 w-full flex flex-col lg:flex-row-reverse items-center justify-between gap-8">
           <motion.div
-            initial={{ opacity: 0, scale: 0.92 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.8, delay: 0.15 }}
-            className="w-full lg:w-[52%] flex justify-start"
-          >
-            <HeroOrbit />
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, x: -20 }}
+            initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.6 }}
             className="w-full lg:w-[48%] text-right"
@@ -284,6 +275,15 @@ export const HomePage: React.FC<HomePageProps> = ({ onStartVerification, setActi
                 <ArrowLeft className="w-6 h-6" />
               </button>
             </motion.div>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, scale: 0.92 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.8, delay: 0.15 }}
+            className="w-full lg:w-[52%] flex justify-start"
+          >
+            <HeroOrbit />
           </motion.div>
         </div>
       </section>
