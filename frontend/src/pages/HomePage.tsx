@@ -869,7 +869,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onStartVerification, setActi
       <section
         ref={verificationSectionRef}
         className="relative isolate overflow-hidden py-20 text-white md:py-24"
-        style={{ background: 'radial-gradient(circle at 10% 20%, rgba(55,255,170,0.2), transparent 30%), radial-gradient(circle at 90% 75%, rgba(35,210,140,0.14), transparent 35%), linear-gradient(135deg, #076c4b 0%, #005a3d 45%, #004531 100%)' }}
+        style={{ background: 'radial-gradient(circle at 10% 20%, rgba(55,255,170,0.2), transparent 30%), radial-gradient(circle at 90% 75%, rgba(35,210,140,0.14), transparent 35%), linear-gradient(135deg, #056444 0%, #005339 45%, #003e2c 100%)' }}
       >
         <div aria-hidden="true" className="pointer-events-none absolute inset-0 overflow-hidden">
           <motion.span
