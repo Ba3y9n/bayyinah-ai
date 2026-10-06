@@ -1,11 +1,12 @@
 import concurrent.futures
 import time
 from typing import List, Dict, Any, Optional
-from ..models.schemas import EvidenceItem, KnowledgeSearchRequest
-from ..services.knowledge_retrieval_service import knowledge_retrieval_service
+from ..models.schemas import EvidenceItem
+from ..models.knowledge_schemas import KnowledgeSearchRequest
+from ..knowledge.retrieval_service import knowledge_retrieval_service
 from ..services.search_service import search_service
 from ..services.evidence_gate import evidence_gate
-from ..ingestion.adapter_registry import get_all_adapters
+from ..ingestion.source_adapters.adapter_registry import get_all_adapters
 from ..ingestion.official_allowlist import OFFICIAL_SOURCE_ALLOWLIST
 import logging
 
