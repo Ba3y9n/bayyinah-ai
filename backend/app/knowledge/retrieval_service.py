@@ -1,6 +1,6 @@
 import time
 import logging
-logger = logging.getLogger(name)
+logger = logging.getLogger(__name__)
 from datetime import datetime, timezone
 from typing import List, Dict, Any, Optional
 from sqlalchemy.orm import Session
