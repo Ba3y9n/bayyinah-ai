@@ -1,0 +1,9 @@
+services:
+  - type: web
+    name: bayyinah-ai
+    env: python
+    buildCommand: apt-get update && apt-get install -y tesseract-ocr tesseract-ocr-ara && pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+
+
+    
