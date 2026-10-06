@@ -617,6 +617,122 @@ const HowItWorks = () => {
   );
 };
 
+const MissionVisionOrbit = () => {
+  const [activeIndex, setActiveIndex] = useState(0);
+  const [isVisible, setIsVisible] = useState(false);
+  const sectionRef = useRef<HTMLDivElement | null>(null);
+  const pauseUntil = useRef(0);
+  const shouldReduceMotion = useReducedMotion() ?? false;
+  const steps = [
+    { label: 'الفهم', description: 'تستقبل المحتوى وتحلله', icon: <FileText className="h-4 w-4" /> },
+    { label: 'الاستخراج', description: 'تحدد الادعاءات', icon: <Layers className="h-4 w-4" /> },
+    { label: 'البحث', description: 'تبحث في المصادر', icon: <Search className="h-4 w-4" /> },
+    { label: 'الجمع', description: 'تجمع الأدلة', icon: <Database className="h-4 w-4" /> },
+    { label: 'التحقق', description: 'تقارن الادعاء بالدليل', icon: <ShieldCheck className="h-4 w-4" /> },
+    { label: 'النتيجة', description: 'تحدد حالة النتيجة', icon: <CheckCircle className="h-4 w-4" /> },
+    { label: 'الدليل', description: 'تعرض المصدر والمرجع', icon: <BookOpen className="h-4 w-4" /> }
+  ];
+
+  useEffect(() => {
+    const section = sectionRef.current;
+    if (!section) return;
+    const observer = new IntersectionObserver(([entry]) => setIsVisible(entry.isIntersecting), { threshold: 0.2 });
+    observer.observe(section);
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    if (!isVisible || shouldReduceMotion) return;
+    const delay = Math.max(activeIndex === 0 ? 1100 : 2600, pauseUntil.current - Date.now());
+    const timeout = window.setTimeout(() => {
+      if (document.hidden) return;
+      setActiveIndex((current) => (current + 1) % steps.length);
+    }, delay);
+    return () => window.clearTimeout(timeout);
+  }, [activeIndex, isVisible, shouldReduceMotion, steps.length]);
+
+  const selectStep = (index: number) => {
+    pauseUntil.current = Date.now() + 7000;
+    setActiveIndex(index);
+  };
+
+  return (
+    <div ref={sectionRef} className="flex w-full flex-col items-center">
+      <div className="relative aspect-square w-full max-w-[520px]">
+        <svg className="pointer-events-none absolute inset-0 h-full w-full" viewBox="0 0 520 520" aria-hidden="true">
+          <circle cx="260" cy="260" r="210" fill="none" stroke="rgba(0,107,77,.09)" strokeWidth="1" />
+          <motion.circle cx="260" cy="260" r="182" fill="none" stroke="rgba(201,150,22,.35)" strokeWidth="1.2" strokeDasharray="2 9" animate={shouldReduceMotion ? { rotate: 0 } : { rotate: 360 }} transition={{ duration: 60, repeat: shouldReduceMotion ? 0 : Infinity, ease: 'linear' }} style={{ transformOrigin: '260px 260px' }} />
+          <motion.circle cx="260" cy="260" r="166" fill="none" stroke="rgba(77,224,160,.2)" strokeWidth="1" strokeDasharray="92 952" animate={shouldReduceMotion ? { rotate: 0 } : { rotate: -360 }} transition={{ duration: 44, repeat: shouldReduceMotion ? 0 : Infinity, ease: 'linear' }} style={{ transformOrigin: '260px 260px' }} />
+          <circle cx="260" cy="260" r="182" fill="none" stroke="rgba(0,107,77,.15)" strokeWidth="1" />
+          {!shouldReduceMotion && <motion.g animate={{ rotate: 360 }} transition={{ duration: 18.2, repeat: Infinity, ease: 'linear' }} style={{ transformOrigin: '260px 260px' }}><circle cx="260" cy="78" r="4" fill="#d6a72a" style={{ filter: 'drop-shadow(0 0 6px rgba(214,167,42,.45))' }} /></motion.g>}
+          {shouldReduceMotion && <circle cx="260" cy="78" r="4" fill="#c89418" />}
+          {steps.map((_, index) => {
+            const angle = (index * 360 / steps.length - 90) * Math.PI / 180;
+            const x = 260 + Math.cos(angle) * 182;
+            const y = 260 + Math.sin(angle) * 182;
+            return <circle key={`orbit-node-${index}`} cx={x} cy={y} r={activeIndex === index ? 4 : 2} fill={activeIndex === index ? '#d6a72a' : 'rgba(0,107,77,.24)'} />;
+          })}
+        </svg>
+
+        {steps.map((step, index) => {
+          const angle = (index * 360 / steps.length - 90) * Math.PI / 180;
+          const left = 50 + Math.cos(angle) * 35;
+          const top = 50 + Math.sin(angle) * 35;
+          const isActive = activeIndex === index;
+          return (
+            <div key={step.label} className="absolute z-10 -translate-x-1/2 -translate-y-1/2" style={{ left: `${left}%`, top: `${top}%` }}>
+              <motion.button
+                type="button"
+                aria-label={`${String(index + 1).padStart(2, '0')} ${step.label}: ${step.description}`}
+                aria-current={isActive ? 'step' : undefined}
+                aria-pressed={isActive}
+                onClick={() => selectStep(index)}
+                onKeyDown={(event) => {
+                  const direction = event.key === 'ArrowLeft' || event.key === 'ArrowDown' ? 1 : event.key === 'ArrowRight' || event.key === 'ArrowUp' ? -1 : 0;
+                  if (!direction) return;
+                  event.preventDefault();
+                  const nextIndex = (index + direction + steps.length) % steps.length;
+                  selectStep(nextIndex);
+                  document.getElementById(`mission-orbit-step-${nextIndex}`)?.focus();
+                }}
+                id={`mission-orbit-step-${index}`}
+                initial={shouldReduceMotion ? false : { opacity: 0, scale: 0.94 }}
+                whileInView={shouldReduceMotion ? undefined : { opacity: 1, scale: 1 }}
+                viewport={{ once: true, amount: 0.2 }}
+                transition={{ duration: shouldReduceMotion ? 0 : 0.35, delay: shouldReduceMotion ? 0 : index * 0.08 }}
+                whileHover={shouldReduceMotion ? undefined : { y: -3, scale: 1.03 }}
+                className="group flex w-[82px] flex-col items-center text-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#c89418]/70 sm:w-[96px]"
+              >
+              <span className={`relative flex h-10 w-10 items-center justify-center rounded-full border text-white transition-all duration-300 sm:h-12 sm:w-12 ${isActive ? 'scale-105 border-[#d9a928] bg-gradient-to-br from-[#00976a] to-[#006f50] shadow-[0_0_0_6px_rgba(77,224,160,.09),0_0_22px_rgba(55,225,155,.25),0_0_30px_rgba(215,170,45,.13)]' : 'border-[#d9a928]/60 bg-gradient-to-br from-[#00976a] to-[#006f50] shadow-[0_8px_22px_rgba(0,100,70,.13)] group-hover:border-[#d9a928]'} `}>
+                {isActive && !shouldReduceMotion && <motion.span aria-hidden="true" className="absolute inset-0 rounded-full border border-[#d9a928]" animate={{ scale: [1, 1.35], opacity: [0.35, 0] }} transition={{ duration: 2, repeat: Infinity, ease: 'easeOut' }} />}
+                {step.icon}
+                <span className="absolute -right-1.5 -top-1.5 flex h-5 min-w-5 items-center justify-center rounded-full border border-[#c89418]/55 bg-gradient-to-b from-[#fff8dc] to-[#e5bd4e] px-1 font-mono text-[9px] font-bold text-[#075640]">{String(index + 1).padStart(2, '0')}</span>
+              </span>
+              <span className={`mt-1.5 text-[10px] font-bold leading-tight sm:text-xs ${isActive ? 'text-[#006b4d]' : 'text-[#315747]'}`}>{step.label}</span>
+              <span className="mt-0.5 text-[8px] leading-tight text-[#53665c] sm:text-[9px]">{step.description}</span>
+              </motion.button>
+            </div>
+          );
+        })}
+
+        <div className="absolute left-1/2 top-1/2 z-0 -translate-x-1/2 -translate-y-1/2">
+          <motion.div key={activeIndex} animate={shouldReduceMotion ? { scale: 1 } : { scale: [1, 1.025, 1] }} transition={{ duration: shouldReduceMotion ? 0 : 0.7, ease: 'easeOut' }} className="relative flex h-[108px] w-[108px] items-center justify-center rounded-full border border-[#c89418]/45 bg-white/90 shadow-[0_0_0_9px_rgba(77,224,160,.08),0_0_0_18px_rgba(0,107,77,.035),0_12px_34px_rgba(0,90,60,.08)] backdrop-blur-xl sm:h-[156px] sm:w-[156px]">
+            <div className="absolute inset-2 rounded-full border border-[#4de0a0]/25" />
+            <img src="/bayyinah-logo.png" alt="شعار بيّنة" className="relative z-10 h-auto w-[88px] object-contain sm:w-[132px]" />
+          </motion.div>
+        </div>
+      </div>
+
+      <motion.div initial={shouldReduceMotion ? false : { opacity: 0, y: 12 }} whileInView={shouldReduceMotion ? undefined : { opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.2 }} transition={{ duration: shouldReduceMotion ? 0 : 0.45, delay: 0.2 }} className="relative mt-8 w-[min(520px,92%)] rounded-[22px] border border-[#d2a02e]/55 bg-gradient-to-br from-white/95 to-[#fffaf0]/85 px-6 py-4 text-center shadow-[0_10px_35px_rgba(0,100,70,.08),0_0_22px_rgba(215,170,45,.08)] sm:px-8 sm:py-5">
+        <span aria-hidden="true" className="absolute right-3 top-2 text-3xl leading-none text-[#c89418]/75">“</span>
+        <span aria-hidden="true" className="absolute bottom-1 left-3 text-3xl leading-none text-[#c89418]/75">”</span>
+        <p className="text-lg font-extrabold leading-relaxed text-[#005c43] sm:text-[22px]">الذكاء الاصطناعي <span className="text-[#00835d]">يساعدك</span></p>
+        <p className="mt-1 text-sm font-semibold leading-relaxed text-[#174c3d] sm:text-base">في الوصول إلى الدليل، والمصدر هو الذي تتبعه.</p>
+      </motion.div>
+    </div>
+  );
+};
+
 
 // --- MAIN PAGE EXPORT ---
 export const HomePage: React.FC<HomePageProps> = ({ onStartVerification, setActiveTab }) => {
@@ -1258,92 +1374,89 @@ export const HomePage: React.FC<HomePageProps> = ({ onStartVerification, setActi
         </div>
       </section>
 
-      {/* 5. MISSION & VISION (Rules 53 & 54) */}
-      <section className="py-24 bg-bayyinah-ivory border-t border-gray-100">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid lg:grid-cols-2 gap-16">
-            {/* Mission (Rule 53) */}
-            <motion.div 
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-100px" }}
-              transition={{ duration: 0.6 }}
-              className="relative bg-white p-10 rounded-3xl border border-gray-100 shadow-sm hover:shadow-elevated transition-all duration-300 hover:border-bayyinah-emerald/30"
-            >
-              <div className="absolute right-0 top-0 w-1.5 h-full bg-gradient-to-b from-bayyinah-emerald to-transparent rounded-full"></div>
-              <div className="pr-8 py-4">
-                <span className="text-xs font-bold tracking-widest text-bayyinah-emerald uppercase block mb-3">رسالتنا</span>
-                <h3 className="text-2xl md:text-3xl font-bold text-bayyinah-dark-text leading-tight mb-4">
-                  أن نجعل الوصول إلى المحتوى الإسلامي الموثوق أكثر وضوحًا، وأسهل تحققًا، وأقرب إلى الدليل.
-                </h3>
-                <p className="text-base text-bayyinah-secondary-text leading-relaxed font-light mb-6">
-                  نسعى إلى توظيف الذكاء الاصطناعي في خدمة المحتوى الإسلامي من خلال البحث، والتحقق، والوصول إلى المصادر، وتقديم المعرفة بطريقة واضحة يمكن للمستخدم تتبعها ومراجعتها.
-                </p>
-                <div className="p-4 rounded-2xl bg-white border border-bayyinah-emerald/30 text-bayyinah-deep-emerald font-bold text-sm">
-                  «الذكاء الاصطناعي يساعدك في الوصول إلى الدليل، والمصدر هو الذي تتبعه.»
-                </div>
-              </div>
-            </motion.div>
+      {/* 5. MISSION & VISION */}
+      <section className="relative isolate overflow-hidden border-t border-emerald-900/[0.05] py-16 md:py-20" style={{ background: 'radial-gradient(circle at 50% 45%, rgba(85,230,165,.13), transparent 32%), radial-gradient(circle at 5% 90%, rgba(0,120,80,.08), transparent 30%), radial-gradient(circle at 95% 10%, rgba(215,165,35,.07), transparent 28%), linear-gradient(180deg, #ffffff 0%, #f7fcf9 50%, #eef9f3 100%)' }}>
+        <div aria-hidden="true" className="pointer-events-none absolute inset-0 overflow-hidden">
+          <span className="absolute -right-40 top-[16%] h-[440px] w-[440px] rounded-full border border-emerald-900/[0.045]" />
+          <span className="absolute -left-36 bottom-[-180px] h-[460px] w-[460px] rounded-full border border-[#c99616]/[0.08]" />
+          <span className="absolute right-[22%] top-[24%] h-1.5 w-1.5 rounded-full bg-[#c99616]/25" />
+        </div>
+        <div className="relative z-10 mx-auto grid max-w-[1500px] grid-cols-1 items-center gap-8 px-4 sm:px-6 md:grid-cols-2 md:gap-10 lg:grid-cols-[minmax(280px,.85fr)_minmax(420px,1.4fr)_minmax(300px,.95fr)] lg:gap-8 lg:px-10">
+          <motion.div initial={shouldReduceMotion ? false : { opacity: 0, x: -18 }} whileInView={shouldReduceMotion ? undefined : { opacity: 1, x: 0 }} viewport={{ once: true, amount: 0.2 }} transition={{ duration: shouldReduceMotion ? 0 : 0.55, delay: shouldReduceMotion ? 0 : 0.1 }} className="relative order-1 overflow-hidden rounded-[26px] border border-[#c99b19]/35 bg-gradient-to-br from-white/90 to-[#f5fff9]/70 p-6 shadow-[0_18px_55px_rgba(0,90,60,.08)] backdrop-blur-2xl sm:p-8 lg:order-1">
+            <span className="absolute right-0 top-8 h-12 w-[2px] bg-gradient-to-b from-[#e5c15a] to-transparent" />
+            <span className="inline-flex items-center gap-2 rounded-full border border-[#c99616]/40 bg-gradient-to-br from-[#00845e] to-[#006c4e] px-4 py-1.5 text-sm font-bold text-white shadow-sm"><span className="h-1.5 w-1.5 rounded-full bg-[#e5c15a]" />رسالتنا</span>
+            <h3 className="mt-6 text-[22px] font-bold leading-[1.8] text-[#063f30] sm:text-[26px] lg:text-[28px]">
+              أن نجعل الوصول إلى<br />المحتوى الإسلامي<br />الموثوق <span className="text-[#a77b0e]">أكثر وضوحًا</span>،<br /><span className="text-[#a77b0e]">وأسهل تحققًا</span>،<br />وأقرب إلى الدليل.
+            </h3>
+          </motion.div>
 
-            {/* Vision (Rule 54) */}
-            <motion.div 
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-100px" }}
-              transition={{ duration: 0.6, delay: 0.2 }}
-              className="bg-white p-10 rounded-3xl border border-gray-100 shadow-sm hover:shadow-elevated transition-all duration-300 hover:border-bayyinah-emerald/30 relative overflow-hidden flex flex-col justify-between"
-            >
-              <div>
-                <span className="text-xs font-bold tracking-widest text-bayyinah-soft-emerald uppercase block mb-3">رؤيتنا</span>
-                <p className="text-xl md:text-2xl text-bayyinah-dark-text leading-relaxed font-light mb-8">
-                  أن تصبح منصة بيّنة AI مرجعًا ذكيًا عالميًا للتحقق من المحتوى الإسلامي، ونموذجًا للذكاء الاصطناعي المسؤول والآمن في خدمة المعرفة الإسلامية.
-                </p>
-              </div>
-              
-              <div className="pt-6 border-t border-gray-100 flex items-center justify-between text-xs md:text-sm font-medium text-bayyinah-emerald">
-                <span>المحتوى</span>
-                <ArrowLeft className="w-4 h-4 text-gray-300" />
-                <span>الادعاء</span>
-                <ArrowLeft className="w-4 h-4 text-gray-300" />
-                <span>المصدر</span>
-                <ArrowLeft className="w-4 h-4 text-gray-300" />
-                <span className="bg-bayyinah-emerald text-bayyinah-dark-text px-3 py-1.5 rounded-lg font-bold">الدليل</span>
-              </div>
-            </motion.div>
+          <motion.div initial={shouldReduceMotion ? false : { opacity: 0, x: 18 }} whileInView={shouldReduceMotion ? undefined : { opacity: 1, x: 0 }} viewport={{ once: true, amount: 0.2 }} transition={{ duration: shouldReduceMotion ? 0 : 0.55 }} className="relative order-2 overflow-hidden rounded-[26px] border border-[#c99b19]/35 bg-gradient-to-br from-white/85 to-[#f5fff9]/65 p-6 shadow-[0_18px_55px_rgba(0,90,60,.07)] backdrop-blur-2xl sm:p-8 lg:order-3">
+            <span className="absolute right-0 top-8 h-12 w-[2px] bg-gradient-to-b from-[#e5c15a] to-transparent" />
+            <span className="inline-flex items-center gap-2 rounded-full border border-[#c99616]/40 bg-gradient-to-br from-[#00845e] to-[#006c4e] px-4 py-1.5 text-sm font-bold text-white shadow-sm"><span className="h-1.5 w-1.5 rounded-full bg-[#e5c15a]" />رؤيتنا</span>
+            <p className="mt-6 text-lg font-medium leading-[1.95] text-[#173f34] sm:text-xl lg:text-[21px]">
+              أن تصبح منصة بيّنة AI مرجعًا ذكيًا عالميًا للتحقق من المحتوى الإسلامي، ونموذجًا للذكاء الاصطناعي المسؤول والآمن في خدمة المعرفة الإسلامية.
+            </p>
+          </motion.div>
+
+          <div className="relative order-3 flex min-w-0 flex-col items-center md:col-span-2 lg:order-2 lg:col-span-1">
+            <MissionVisionOrbit />
           </div>
         </div>
       </section>
 
-      {/* 6. IMMERSIVE CTA */}
-      <section className="relative py-32 bg-bayyinah-emerald/10 text-bayyinah-dark-text overflow-hidden">
-        <div className="max-w-4xl mx-auto px-4 text-center relative z-10">
-          <motion.h2 
-            initial={{ opacity: 0, scale: 0.95 }}
-            whileInView={{ opacity: 1, scale: 1 }}
-            viewport={{ once: true }}
-            className="text-4xl md:text-6xl font-bold mb-6 text-bayyinah-dark-text"
-          >
-            قبل أن تشارك... <span className="text-bayyinah-emerald">تحقّق.</span>
+      {/* 6. CALL TO ACTION */}
+      <section id="verification-cta" className="relative isolate flex min-h-[620px] items-center overflow-hidden py-28 text-[#063f30] md:py-24" style={{ background: 'radial-gradient(circle at 50% 45%, rgba(65,220,155,.07), transparent 34%), radial-gradient(circle at 5% 90%, rgba(0,140,95,.07), transparent 30%), radial-gradient(circle at 95% 85%, rgba(0,140,95,.06), transparent 30%), radial-gradient(circle at 50% 0%, rgba(218,170,45,.035), transparent 28%), linear-gradient(180deg, #ffffff 0%, #fdfefd 48%, #f4faf7 100%)' }}>
+        <svg className="pointer-events-none absolute inset-0 h-full w-full" viewBox="0 0 1200 620" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+          <ellipse cx="600" cy="310" rx="470" ry="230" fill="none" stroke="rgba(205,155,30,.16)" strokeWidth="1" />
+          <ellipse cx="600" cy="310" rx="530" ry="270" fill="none" stroke="rgba(50,190,130,.10)" strokeWidth="1" />
+          <path d="M0 530 C180 480 265 598 440 570 C650 535 740 475 930 540 C1045 580 1120 550 1200 510 V620 H0Z" fill="rgba(0,140,95,.025)" />
+          <path d="M0 545 C180 500 300 610 472 578 C670 540 800 500 970 552 C1080 585 1135 558 1200 535" fill="none" stroke="rgba(201,150,22,.18)" strokeWidth="1" />
+          {!shouldReduceMotion && <motion.circle r="3.5" fill="#c89418" style={{ filter: 'drop-shadow(0 0 6px rgba(220,175,55,.45))' }} animate={{ cx: [130, 420, 720, 1060, 130], cy: [175, 83, 155, 420, 175] }} transition={{ duration: 18, repeat: Infinity, ease: 'linear' }} />}
+          {shouldReduceMotion && <circle cx="130" cy="175" r="3.5" fill="#c89418" />}
+          <circle cx="188" cy="470" r="3" fill="rgba(201,150,22,.42)" />
+          <circle cx="1010" cy="170" r="3" fill="rgba(201,150,22,.4)" />
+        </svg>
+
+        <div className="pointer-events-none absolute inset-0 mx-auto max-w-[1400px]" aria-hidden="true">
+          {[
+            { icon: <FileText className="h-8 w-8" />, position: 'left-[7%] top-8 md:left-[13%] md:top-[14%] lg:left-[17%]', duration: 6.5, delay: 0.12 },
+            { icon: <FileVideo className="h-8 w-8" />, position: 'right-[7%] top-8 md:right-[13%] md:top-[14%] lg:right-[17%]', duration: 8, delay: 0.22 },
+            { icon: <ImageIcon className="h-8 w-8" />, position: 'bottom-8 left-[7%] md:bottom-[14%] md:left-[13%] lg:left-[17%]', duration: 7.5, delay: 0.32 },
+            { icon: <Link2 className="h-8 w-8" />, position: 'bottom-8 right-[7%] md:bottom-[14%] md:right-[13%] lg:right-[17%]', duration: 7, delay: 0.42 }
+          ].map((item, index) => (
+            <motion.div key={index} initial={shouldReduceMotion ? false : { opacity: 0, y: 10 }} whileInView={shouldReduceMotion ? undefined : { opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: shouldReduceMotion ? 0 : 0.45, delay: shouldReduceMotion ? 0 : item.delay }} whileHover={shouldReduceMotion ? undefined : { y: -4, scale: 1.03 }} className={`pointer-events-auto absolute ${item.position} flex h-[58px] w-[58px] items-center justify-center rounded-[18px] border border-emerald-800/15 bg-white/75 text-[#006b4d] shadow-[0_12px_30px_rgba(0,90,60,.07)] backdrop-blur-[14px] sm:h-[72px] sm:w-[72px] sm:rounded-[20px]`}>
+              <motion.span animate={shouldReduceMotion ? { y: 0, rotate: 0 } : { y: [0, -6, 0], rotate: [0, index % 2 ? -1 : 1, 0] }} transition={{ duration: item.duration, delay: item.delay, repeat: shouldReduceMotion ? 0 : Infinity, ease: 'easeInOut' }} className="relative flex items-center justify-center">
+                {item.icon}
+                <span className="absolute -bottom-3 h-px w-6 rounded-full bg-[#c89418]/70" />
+              </motion.span>
+            </motion.div>
+          ))}
+        </div>
+
+        <div className="relative z-10 mx-auto w-full max-w-4xl px-5 text-center sm:px-8">
+          <motion.h2 initial={shouldReduceMotion ? false : { opacity: 0, y: 18 }} whileInView={shouldReduceMotion ? undefined : { opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.4 }} transition={{ duration: shouldReduceMotion ? 0 : 0.62 }} className="text-[clamp(2.15rem,5.5vw,4rem)] font-extrabold leading-[1.25] text-[#063f30]">
+            <span className="block">قبل أن تشارك...</span>
+            <span className="relative mt-1 inline-block bg-gradient-to-l from-[#00845d] via-[#00a46e] to-[#a77b0e] bg-clip-text text-transparent">
+              تحقّق.
+              <motion.span initial={shouldReduceMotion ? { scaleX: 1 } : { scaleX: 0 }} whileInView={{ scaleX: 1 }} viewport={{ once: true }} transition={{ duration: shouldReduceMotion ? 0 : 0.65, delay: 0.4, ease: 'easeOut' }} className="absolute -bottom-1 left-[15%] right-[15%] h-[2px] origin-right rounded-full bg-gradient-to-l from-transparent via-[#c89418] to-transparent shadow-[0_0_8px_rgba(201,150,22,.22)]" />
+            </span>
           </motion.h2>
-          <motion.p 
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.2 }}
-            className="text-xl md:text-2xl text-bayyinah-dark-text/70 mb-12 font-medium leading-relaxed max-w-2xl mx-auto"
-          >
-            أرسل المحتوى الذي تريد التحقق منه، ودع بيّنة تقودك من الادعاء إلى المصدر والدليل.
+          <motion.p initial={shouldReduceMotion ? false : { opacity: 0, y: 10 }} whileInView={shouldReduceMotion ? undefined : { opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.4 }} transition={{ duration: shouldReduceMotion ? 0 : 0.45, delay: shouldReduceMotion ? 0 : 0.12 }} className="mx-auto mt-5 max-w-[740px] text-base font-medium leading-[1.9] text-[#174c3d]/85 sm:text-lg md:text-xl">
+            <span className="block">أرسل المحتوى الذي تريد التحقق منه، ودع بيّنة تقودك</span>
+            <span className="block">من الادعاء إلى المصدر والدليل.</span>
           </motion.p>
-          <motion.button 
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.4 }}
+          <motion.button
+            initial={shouldReduceMotion ? false : { opacity: 0, y: 10, scale: 0.97 }}
+            whileInView={shouldReduceMotion ? undefined : { opacity: 1, y: 0, scale: 1 }}
+            viewport={{ once: true, amount: 0.4 }}
+            transition={{ duration: shouldReduceMotion ? 0 : 0.45, delay: shouldReduceMotion ? 0 : 0.26 }}
+            whileHover={shouldReduceMotion ? undefined : { y: -3, scale: 1.015, borderColor: 'rgba(214,168,42,.95)', boxShadow: '0 14px 32px rgba(0,100,70,.19), 0 0 22px rgba(215,170,45,.12)' }}
+            whileTap={shouldReduceMotion ? undefined : { scale: 0.99 }}
             onClick={onStartVerification}
-            className="bg-bayyinah-emerald hover:bg-bayyinah-soft-emerald text-white px-12 py-5 rounded-2xl font-bold text-xl transition-all shadow-[0_0_40px_rgba(8,127,104,0.2)] hover:shadow-[0_0_60px_rgba(8,127,104,0.3)] flex items-center gap-3 mx-auto"
+            className="mx-auto mt-8 flex h-[62px] min-w-[235px] items-center justify-center gap-3 rounded-[20px] border border-[#d6a82a]/70 bg-gradient-to-br from-[#00845f] via-[#006d4e] to-[#005a42] px-9 text-lg font-bold text-white shadow-[0_12px_30px_rgba(0,100,70,.16),0_0_0_1px_rgba(215,170,45,.12),0_0_20px_rgba(215,170,45,.08)] transition-shadow duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00825d]/50 focus-visible:ring-offset-4"
           >
             ابدأ التحقق
-            <ArrowLeft className="w-6 h-6" />
+            <motion.span animate={shouldReduceMotion ? { x: 0 } : { x: [0, -2, 0] }} whileHover={shouldReduceMotion ? undefined : { x: -4 }} transition={{ duration: 2.2, repeat: shouldReduceMotion ? 0 : Infinity, ease: 'easeInOut' }}><ArrowLeft className="h-5 w-5" /></motion.span>
           </motion.button>
         </div>
       </section>
