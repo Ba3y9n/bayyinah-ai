@@ -264,7 +264,7 @@ export const VerificationPage: React.FC<VerificationPageProps> = ({
 
   /* ── State (ALL ORIGINAL — no changes) ─── */
   const [inputMode, setInputMode] = useState<InputMode>(
-    urlInput ? 'url' : imageBase64 ? 'image' : inputText ? 'text' : 'none'
+    urlInput ? 'url' : imageBase64 ? 'image' : 'text'
   );
   const [isProcessing, setIsProcessing] = useState(false);
   const [processingStep, setProcessingStep] = useState(1);
@@ -303,7 +303,7 @@ export const VerificationPage: React.FC<VerificationPageProps> = ({
   useEffect(() => {
     if (inputMode !== 'none' || shouldReduceMotion || userInteracting) return;
     const t = setInterval(() => {
-      setHighlightIndex((p) => (p + 1) % 4);
+      setHighlightIndex((p) => (p + 1) % 2);
     }, 3000);
     return () => clearInterval(t);
   }, [inputMode, shouldReduceMotion, userInteracting]);
@@ -540,7 +540,9 @@ export const VerificationPage: React.FC<VerificationPageProps> = ({
      SELECTION SCREEN — "ماذا تريد أن تتحقق منه؟"
   ════════════════════════════════════════════ */
   if (inputMode === 'none') {
+    // UI Modification: Temporarily hide 'url', 'image', 'video'
     const cards = [
+      /*
       {
         id: 'url' as const,
         title: 'رابط',
@@ -562,6 +564,7 @@ export const VerificationPage: React.FC<VerificationPageProps> = ({
         detail: 'MP4, MOV, WEBM',
         icon: FileVideo,
       },
+      */
       {
         id: 'pdf' as const,
         title: 'وثيقة PDF',
