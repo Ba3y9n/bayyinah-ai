@@ -47,7 +47,7 @@ def init_engine():
                 pool_pre_ping=True,
                 pool_size=10,
                 max_overflow=20,
-                connect_args={"connect_timeout": 15}
+                connect_args={"connect_timeout": 3}
             )
             # Verify connectivity
             with engine.connect() as conn:
@@ -75,7 +75,7 @@ def init_engine():
         if raw_url:
             try:
                 pg_url = _resolve_postgres_url(raw_url)
-                engine = create_engine(pg_url, echo=False, pool_pre_ping=True, connect_args={"connect_timeout": 10})
+                engine = create_engine(pg_url, echo=False, pool_pre_ping=True, connect_args={"connect_timeout": 3})
                 with engine.connect() as conn:
                     if conn.execute(text("SELECT 1;")).scalar() == 1:
                         active_db_type = "SUPABASE_POSTGRESQL"
