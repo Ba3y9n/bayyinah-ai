@@ -4,6 +4,7 @@ import { Footer } from './components/Footer';
 import { HomePage } from './pages/HomePage';
 import { VerificationPage } from './pages/VerificationPage';
 import { ResultPage } from './pages/ResultPage';
+import { TextResultPage } from './pages/TextResultPage';
 import { JudgeDemoPage } from './pages/JudgeDemoPage';
 import { SourcesPage } from './pages/SourcesPage';
 import { KnowledgeBasePage } from './pages/KnowledgeBasePage';
@@ -97,11 +98,20 @@ export function App() {
         {activeTab === 'verify' && (
           <>
             {currentVerificationResult ? (
-              <ResultPage
-                result={currentVerificationResult}
-                onNewVerification={handleNewVerification}
-                onOpenHelp={() => setActiveTab('health')}
-              />
+              // Use premium TextResultPage for text input, original for others
+              (!currentVerificationResult.input_type || currentVerificationResult.input_type === 'TEXT') ? (
+                <TextResultPage
+                  result={currentVerificationResult}
+                  onNewVerification={handleNewVerification}
+                  onOpenHelp={() => setActiveTab('health')}
+                />
+              ) : (
+                <ResultPage
+                  result={currentVerificationResult}
+                  onNewVerification={handleNewVerification}
+                  onOpenHelp={() => setActiveTab('health')}
+                />
+              )
             ) : (
               <VerificationPage
                 inputText={verifyingText}

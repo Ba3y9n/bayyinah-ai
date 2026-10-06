@@ -50,3 +50,39 @@
 .animate-glow {
   animation: pulseGlow 2.5s infinite ease-in-out;
 }
+
+/* ═══════════════════════════════════════════
+   TextResultPage — Premium Animations
+   ═══════════════════════════════════════════ */
+
+/* Status Ring drawing animation */
+@keyframes ring-draw {
+  from {
+    stroke-dashoffset: 553;
+    opacity: 0;
+  }
+  to {
+    stroke-dashoffset: 0;
+    opacity: 1;
+  }
+}
+
+/* SVG line drawing for journey path */
+@keyframes line-draw {
+  from {
+    stroke-dashoffset: 100%;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+/* Respect reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .animate-\[ring-draw_1\.2s_ease-out_forwards\],
+  .animate-\[ring-draw_1\.5s_ease-out_0\.6s_forwards\],
+  .animate-\[orbit_2s_ease-in-out_forwards\],
+  .animate-\[line-draw_2s_ease-out_forwards\] {
+    animation: none !important;
+  }
+}
