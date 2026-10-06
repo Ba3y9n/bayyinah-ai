@@ -25,6 +25,7 @@ export const Navbar: React.FC<NavbarProps> = ({ activeTab, setActiveTab }) => {
     { id: 'knowledge-domains', label: 'طبقة البحث والتحقق' },
     { id: 'health', label: 'حالة النظام' },
   ];
+  const visibleTabs = tabs.filter((tab) => tab.id !== 'knowledge-domains' && tab.id !== 'health');
 
   const handleTabClick = (tabId: string) => {
     setActiveTab(tabId as NavTab);
@@ -54,7 +55,7 @@ export const Navbar: React.FC<NavbarProps> = ({ activeTab, setActiveTab }) => {
 
         {/* Desktop Navigation */}
         <nav className="hidden lg:flex flex-1 items-center justify-center gap-8">
-          {tabs.map((tab) => (
+          {visibleTabs.map((tab) => (
             <button
               key={tab.id}
               onClick={() => handleTabClick(tab.id)}
@@ -81,7 +82,7 @@ export const Navbar: React.FC<NavbarProps> = ({ activeTab, setActiveTab }) => {
       {/* Mobile Menu */}
       {isMobileMenuOpen && (
         <div className="lg:hidden absolute top-full left-0 w-full bg-white border-b border-gray-100 shadow-lg flex flex-col py-4 px-6 gap-4">
-          {tabs.map((tab) => (
+          {visibleTabs.map((tab) => (
             <button
               key={tab.id}
               onClick={() => handleTabClick(tab.id)}
