@@ -256,53 +256,31 @@ class URLResolverService:
         }
 
     def _resolve_tiktok(self, url: str) -> Dict[str, Any]:
-        from .tiktok_acquisition_service import tiktok_acquisition_service
-        res = tiktok_acquisition_service.acquire_content(url)
         return {
-            "success": True,
+            "success": False,
             "original_url": url,
             "canonical_url": url,
             "platform": "TIKTOK",
-            "content_type": "video",
-            "content_id": res.get("video_id"),
-            "author": res.get("author", "مستخدم تيك توك"),
-            "title": res.get("title", "مقطع تيك توك"),
-            "description": f"مقطع تيك توك بواسطة: {res.get('author')}",
-            "thumbnail_url": None,
-            "duration": None,
-            "embed_url": None,
-            "resolution_status": "RESOLVED",
-            "extraction_status": "RESOLVED",
-            "analysis_capability": res.get("capability", "METADATA_ONLY"),
-            "extracted_text": res.get("extracted_text", f"مقطع تيك توك: {res.get('title')}"),
-            "requires_media_upload": res.get("requires_upload", True),
-            "notes": res.get("honest_notice", "تم التعرف على الفيديو. يمكنك رفع الفيديو مباشرة للفحص الشامل."),
-            "metadata": res
+            "resolution_status": "ACCESS_LIMITED",
+            "extraction_status": "ACCESS_LIMITED",
+            "analysis_capability": "NONE",
+            "error": "لا يمكن لبيّنة قراءة محتوى هذا الرابط مباشرة حاليًا. يرجى رفع الفيديو أو الصورة أو نسخ النص.",
+            "requires_media_upload": True,
+            "notes": "صلاحيات الوصول مقيدة من قبل المنصة."
         }
 
     def _resolve_x(self, url: str) -> Dict[str, Any]:
-        from .x_acquisition_service import x_acquisition_service
-        res = x_acquisition_service.acquire_content(url)
         return {
-            "success": True,
+            "success": False,
             "original_url": url,
             "canonical_url": url,
             "platform": "X",
-            "content_type": "social_post",
-            "content_id": res.get("tweet_id"),
-            "author": res.get("author", "كاتب المنشور"),
-            "title": res.get("title", "منشور منصة X"),
-            "description": res.get("extracted_text", ""),
-            "thumbnail_url": None,
-            "duration": None,
-            "embed_url": None,
-            "resolution_status": "RESOLVED",
-            "extraction_status": "RESOLVED",
-            "analysis_capability": res.get("capability", "ACCESS_LIMITATION"),
-            "extracted_text": res.get("extracted_text", ""),
-            "requires_media_upload": res.get("requires_upload", True),
-            "notes": res.get("honest_notice", "تم التعرف على المنشور. يمكنك نسخ النص أو رفع لقطة شاشة للفحص."),
-            "metadata": res
+            "resolution_status": "ACCESS_LIMITED",
+            "extraction_status": "ACCESS_LIMITED",
+            "analysis_capability": "NONE",
+            "error": "لا يمكن لبيّنة قراءة محتوى هذا الرابط مباشرة حاليًا. يرجى رفع الفيديو أو الصورة أو نسخ النص.",
+            "requires_media_upload": True,
+            "notes": "صلاحيات الوصول مقيدة من قبل المنصة."
         }
 
     def _resolve_pdf(self, url: str) -> Dict[str, Any]:

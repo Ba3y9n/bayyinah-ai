@@ -84,7 +84,8 @@ class PDFProcessor:
     def extract_pdf_pages(
         pdf_bytes: bytes,
         filename: str = "document.pdf",
-        max_bytes: int = 100 * 1024 * 1024
+        max_bytes: int = 50 * 1024 * 1024,
+        max_pages: int = 200
     ) -> List[Dict[str, Any]]:
         """
         Extracts pages from uploaded PDF document preserving page_number and text.
@@ -104,6 +105,9 @@ class PDFProcessor:
             total_pages = len(reader.pages)
             if total_pages == 0:
                 raise ValueError("ملف PDF لا يحتوي على أي صفحات.")
+            
+            if total_pages > max_pages:
+                raise ValueError(f"هذا الملف يحتوي على {total_pages} صفحة. الحد المسموح حاليًا {max_pages} صفحة.")
 
             pages: List[Dict[str, Any]] = []
             for p_idx, page in enumerate(reader.pages):

@@ -545,7 +545,7 @@ export const VerificationPage: React.FC<VerificationPageProps> = ({
         id: 'url' as const,
         title: 'رابط',
         description: 'لصق رابط ويب',
-        detail: 'يوتيوب، تيك توك، X، ويب',
+        detail: 'يوتيوب، منصات الويب المدعومة',
         icon: Link2,
       },
       {

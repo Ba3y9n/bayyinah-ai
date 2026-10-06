@@ -374,8 +374,6 @@ async def verify_url_content(payload: Dict[str, Any] = Body(...), db: Session = 
     verification_store[result.claim_id] = result
     return result
 
-@app.post("/api/verify/upload-image", response_model=VerificationResponse)
-@app.post("/api/verify/image", response_model=VerificationResponse)
 @app.post("/api/verify/ocr")
 @app.post("/api/verify/extract-image")
 async def extract_image_text(file: UploadFile = File(...)):
@@ -465,9 +463,23 @@ async def verify_video_upload(
 
     if not os.path.exists(file_path) or os.path.getsize(file_path) == 0:
         raise HTTPException(status_code=400, detail="ملف الفيديو فارغ.")
+        
+    file_size_bytes = os.path.getsize(file_path)
+    if file_size_bytes > 500 * 1024 * 1024:
+        raise HTTPException(status_code=400, detail="يتجاوز الفيديو الحد المسموح: 30 دقيقة و500 MB.")
 
     # Process video with Gemini Files API & Gemini 3.8 Flash
-    video_res = gemini_service.process_video_with_gemini(file_path, mime_type)
+    try:
+        video_res = gemini_service.process_video_with_gemini(file_path, mime_type)
+    except Exception as e:
+        error_msg = str(e).lower()
+        if "quota" in error_msg or "429" in error_msg:
+            raise HTTPException(status_code=429, detail="AI_QUOTA_EXCEEDED")
+        elif "too large" in error_msg or "size" in error_msg or "length" in error_msg:
+            raise HTTPException(status_code=400, detail="يتجاوز الفيديو الحد المسموح: 30 دقيقة و500 MB.")
+        else:
+            raise HTTPException(status_code=502, detail=f"تعذر معالجة المقطع المرئي وتحليله: {str(e)}")
+
     if not video_res.get("success"):
         raise HTTPException(
             status_code=502, 

@@ -102,11 +102,11 @@ def init_db():
     if engine and active_db_type == "LOCAL_SQLITE":
         Base.metadata.create_all(bind=engine)
 
-def get_db() -> Generator[Optional[Session], None, None]:
+def get_db() -> Generator[Session, None, None]:
     """FastAPI dependency for database session."""
     if not SessionLocal:
-        yield None
-        return
+        from fastapi import HTTPException
+        raise HTTPException(status_code=503, detail="DATABASE_UNAVAILABLE: تعذر الاتصال بقاعدة البيانات.")
     db = None
     try:
         db = SessionLocal()

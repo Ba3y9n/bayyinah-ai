@@ -353,7 +353,7 @@ class VerificationEngine:
                 status_ar = "ثابت بحسب المصدر"
                 reason = f"النص مطابق للمتن المعتمد وموثق في {top_ev.source_name}."
             else:
-                status_slug = "INSUFFICIENT"
+                status_slug = "INSUFFICIENT_EVIDENCE"
                 status_ar = "لم نجد دليلًا كافيًا"
                 reason = "لم نجد دليلًا كافيًا في المصادر التي تم فحصها."
 
@@ -479,14 +479,14 @@ class VerificationEngine:
         )
         if gate_res.get("abstention_required"):
             status_ar = "مجهول / غير ثابت بحسب البحث الحالي"
-            status_slug = "INSUFFICIENT"
+            status_slug = "INSUFFICIENT_EVIDENCE"
             reason = ABSTENTION_MESSAGE
 
         # Build canonical result object
         canonical_map = {
             "VERIFIED": CanonicalVerificationStatus.VERIFIED.value,
             "NOT_ESTABLISHED": CanonicalVerificationStatus.NOT_ESTABLISHED_BY_EXACT_WORDING.value,
-            "INSUFFICIENT": CanonicalVerificationStatus.INSUFFICIENT_EVIDENCE.value,
+            "INSUFFICIENT_EVIDENCE": CanonicalVerificationStatus.INSUFFICIENT_EVIDENCE.value,
             "CONFLICT": CanonicalVerificationStatus.SCHOLARLY_DISAGREEMENT.value,
             "SPECIALIST": CanonicalVerificationStatus.NEEDS_SPECIALIST.value,
             "WEAK": CanonicalVerificationStatus.WEAK.value,

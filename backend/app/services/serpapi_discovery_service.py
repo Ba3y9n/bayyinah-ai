@@ -95,9 +95,19 @@ class SerpAPIDiscoveryService:
                     fetch_res = adapter.fetch_page(link, timeout=6)
                     if fetch_res.get("success") and fetch_res.get("html"):
                         parsed = adapter.parse(fetch_res["html"], link)
-                        content = parsed.get("content") or snippet
+                        content = parsed.get("content")
                         reference = parsed.get("reference") or title
                         metadata = parsed.get("metadata", {})
+                        
+                        if not content or len(content.strip()) < 10:
+                            logger.debug(f"Discarding result due to empty extracted content from adapter: {link}")
+                            continue
+                    else:
+                        logger.debug(f"Discarding result because original page could not be fetched: {link}")
+                        continue
+                else:
+                    logger.debug(f"Discarding result because no adapter found for official source: {link}")
+                    continue
 
                 discovered_entries.append({
                     "url": link,
