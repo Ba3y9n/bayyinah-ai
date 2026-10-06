@@ -96,7 +96,7 @@ app.include_router(knowledge_router)
 app.include_router(admin_knowledge_router)
 
 DATA_DIR = os.path.join(os.path.dirname(__file__), "data")
-UPLOADS_DIR = os.path.join(DATA_DIR, "uploads")
+UPLOADS_DIR = "/tmp" if os.environ.get("VERCEL") else os.path.join(DATA_DIR, "uploads")
 os.makedirs(UPLOADS_DIR, exist_ok=True)
 verification_store: Dict[str, VerificationResponse] = {}
 
@@ -283,12 +283,19 @@ async def verify_url_content(payload: Dict[str, Any] = Body(...), db: Session = 
 
     resolution = url_resolver.resolve_url(raw_url)
     if not resolution.get("success"):
-        raise HTTPException(status_code=400, detail=resolution.get("error", "فشل تحليل الرابط المدخل."))
+        err_msg = resolution.get("error", "URL resolution failed")
+        error_code = "INVALID_URL"
+        if "SSRF" in err_msg: error_code = "ACCESS_LIMITED"
+        elif "Unsupported" in err_msg: error_code = "UNSUPPORTED_URL"
+        raise HTTPException(status_code=400, detail=f"{error_code}: {err_msg}")
 
     platform = resolution.get("platform", "GENERIC")
 
     if platform == "YOUTUBE":
-        acq_res = youtube_acquisition_service.acquire_youtube_content(raw_url)
+        try:
+            acq_res = youtube_acquisition_service.acquire_youtube_content(raw_url)
+        except Exception as e:
+            raise HTTPException(status_code=400, detail=f"FETCH_FAILED: {str(e)}")
         youtube_claims = acq_res.get("claims", [])
         
         multi_claims: List[MultiClaimItem] = []
@@ -388,43 +395,26 @@ async def extract_image_text(file: UploadFile = File(...)):
     storage_res = storage_service.save_file(contents, file.filename or "image.jpg", file.content_type or "image/jpeg")
     ocr_result = gemini_service.extract_text_from_image(contents, file.content_type or "image/jpeg")
     raw_ocr = ocr_result if isinstance(ocr_result, str) else ocr_result.get("extracted_text", "")
-    is_err = raw_ocr.strip() in ["تعذر قراءة المحتوى بشكل موثوق.", "تعذر استخراج النص من الصورة، يرجى رفع صورة أوضح أو إدخال النص يدويًا."]
+    
+    # Check if OCR failed or returned an Arabic error string
+    is_err = False
+    for bad in ["فشل", "لا يمكن", "خطأ"]:
+        if bad in raw_ocr:
+            is_err = True
+            
     extracted_text = "" if is_err else raw_ocr.strip()
 
     if not extracted_text:
-        err_msg = raw_ocr.strip() if is_err else "تعذر استخراج النص من الصورة، يرجى رفع صورة أوضح أو إدخال النص يدويًا."
-        return JSONResponse(
-            status_code=400,
-            content={"success": False, "error": err_msg}
-        )
-
-    return {
-        "success": True,
-        "extracted_text": extracted_text,
-        "file_url": storage_res.get("url"),
-        "filename": file.filename
-    }
-
-@app.post("/api/verify/upload-image", response_model=VerificationResponse)
-@app.post("/api/verify/image", response_model=VerificationResponse)
-async def verify_image_upload(file: UploadFile = File(...), db: Session = Depends(get_db)):
-    """
-    Direct image file upload and verification.
-    """
-    contents = await file.read()
-    if not contents:
-        raise HTTPException(status_code=400, detail="الملف المرفوع فارغ.")
-
-    storage_res = storage_service.save_file(contents, file.filename or "image.jpg", file.content_type or "image/jpeg")
-    ocr_result = gemini_service.extract_text_from_image(contents, file.content_type or "image/jpeg")
-    raw_ocr = ocr_result if isinstance(ocr_result, str) else ocr_result.get("extracted_text", "")
-    is_err = raw_ocr.strip() in ["تعذر قراءة المحتوى بشكل موثوق.", "تعذر استخراج النص من الصورة، يرجى رفع صورة أوضح أو إدخال النص يدويًا."]
-    extracted_text = "" if is_err else raw_ocr.strip()
+        print("[verify_image_upload] OCR failed, falling back to Gemini multimodal extraction")
+        detailed_res = gemini_service.extract_image_claims_detailed(contents, file.content_type or "image/jpeg")
+        if detailed_res.get("success") and detailed_res.get("extracted_text"):
+            extracted_text = detailed_res["extracted_text"]
 
     if not extracted_text:
-        err_msg = raw_ocr.strip() if is_err else "تعذر استخراج النص من الصورة، يرجى رفع صورة أوضح أو إدخال النص يدويًا."
-        raise HTTPException(status_code=400, detail=err_msg)
-
+        # Pass image to verify engine without text to force multimodal if needed, 
+        # or fail gracefully.
+        extracted_text = "IMAGE_CONTENT_NOT_EXTRACTED"
+        
     req = VerificationRequest(text=extracted_text)
     result = await verification_engine.verify(req, is_demo=False)
     result.input_type = "IMAGE"
