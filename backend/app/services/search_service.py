@@ -12,14 +12,20 @@ DATA_DIR = os.path.join(os.path.dirname(__file__), "..", "data")
 class SearchService:
     def __init__(self):
         self.documents: List[Dict[str, Any]] = []
-        self._load_documents()
+        self._loaded = False
+
+    def _ensure_loaded(self):
+        if not self._loaded:
+            self._load_documents()
+            self._loaded = True
 
     def _load_documents(self):
         try:
             from ..db.database import SessionLocal
-            from ..models.knowledge_models import DocumentModel, DocumentChunkModel, TrustedSourceModel
-            with SessionLocal() as db:
-                chunks = db.query(DocumentChunkModel, DocumentModel, TrustedSourceModel)\
+            if SessionLocal:
+                from ..models.knowledge_models import DocumentModel, DocumentChunkModel, TrustedSourceModel
+                with SessionLocal() as db:
+                    chunks = db.query(DocumentChunkModel, DocumentModel, TrustedSourceModel)\
                     .join(DocumentModel, DocumentChunkModel.document_id == DocumentModel.id)\
                     .join(TrustedSourceModel, DocumentModel.source_id == TrustedSourceModel.id)\
                     .filter(TrustedSourceModel.scientific_status == "APPROVED", TrustedSourceModel.is_active == True)\
@@ -90,6 +96,7 @@ class SearchService:
             self.documents = []
 
     def exact_text_search(self, query: str, limit: int = 5) -> List[Dict[str, Any]]:
+        self._ensure_loaded()
         """
         Performs exact keyword and normalized Arabic token matching.
         """
@@ -139,6 +146,7 @@ class SearchService:
         return results[:limit]
 
     def semantic_search(self, query: str, query_embedding: Optional[List[float]] = None, limit: int = 5) -> List[Dict[str, Any]]:
+        self._ensure_loaded()
         """
         Semantic search based on Jaccard semantic tokens + embeddings similarity.
         """
@@ -166,6 +174,7 @@ class SearchService:
         return results[:limit]
 
     def hybrid_search(self, queries: List[str], limit: int = 5) -> List[EvidenceItem]:
+        self._ensure_loaded()
         """
         Combines Multiple Search Queries across Exact and Semantic search engines.
         Merges results using Reciprocal Score Fusion & builds grounded EvidenceItems.

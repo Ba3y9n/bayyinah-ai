@@ -49,18 +49,14 @@ def init_engine():
                 max_overflow=20,
                 connect_args={"connect_timeout": 3}
             )
-            # Verify connectivity
-            with engine.connect() as conn:
-                res = conn.execute(text("SELECT 1;")).scalar()
-                if res == 1:
-                    active_db_type = "SUPABASE_POSTGRESQL"
-                    db_status_message = "CONNECTED"
-                    logger.info("Successfully connected to Supabase PostgreSQL.")
+            # Lazy connection: Do not connect on boot to prevent Vercel timeouts!
+            active_db_type = "SUPABASE_POSTGRESQL"
+            db_status_message = "CONFIGURED (Lazy Connect)"
+            logger.info("Supabase PostgreSQL configured.")
         except Exception as e:
             active_db_type = "ERROR"
-            db_status_message = f"DATABASE_UNAVAILABLE: Failed to connect to Supabase: {e}"
+            db_status_message = f"DATABASE_UNAVAILABLE: Failed to configure Supabase: {e}"
             logger.error(db_status_message)
-            # Production strictness: Do NOT silently switch to SQLite
             raise RuntimeError(db_status_message)
 
     elif mode == "sqlite":
@@ -76,10 +72,8 @@ def init_engine():
             try:
                 pg_url = _resolve_postgres_url(raw_url)
                 engine = create_engine(pg_url, echo=False, pool_pre_ping=True, connect_args={"connect_timeout": 3})
-                with engine.connect() as conn:
-                    if conn.execute(text("SELECT 1;")).scalar() == 1:
-                        active_db_type = "SUPABASE_POSTGRESQL"
-                        db_status_message = "CONNECTED"
+                active_db_type = "SUPABASE_POSTGRESQL"
+                db_status_message = "CONFIGURED (Lazy Connect)"
             except Exception as e:
                 logger.warning(f"Auto-mode: Supabase connection failed ({e}). Falling back to SQLite.")
         

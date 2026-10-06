@@ -8,7 +8,12 @@ DATA_DIR = os.path.join(os.path.dirname(__file__), "..", "data")
 class RegistryService:
     def __init__(self):
         self._sources: List[SourceRegistryItem] = []
-        self._load_sources()
+        self._loaded = False
+
+    def _ensure_loaded(self):
+        if not self._loaded:
+            self._load_sources()
+            self._loaded = True
 
     def _load_sources(self):
         try:
@@ -45,15 +50,18 @@ class RegistryService:
             self._sources = []
 
     def get_all_sources(self) -> List[SourceRegistryItem]:
+        self._ensure_loaded()
         return self._sources
 
     def get_source_by_id(self, source_id: str) -> Optional[SourceRegistryItem]:
+        self._ensure_loaded()
         for src in self._sources:
             if src.id == source_id:
                 return src
         return None
 
     def get_sources_by_category(self, category: str) -> List[SourceRegistryItem]:
+        self._ensure_loaded()
         if category == "all":
             return self._sources
         return [src for src in self._sources if src.category == category]
