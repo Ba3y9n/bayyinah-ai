@@ -90,6 +90,7 @@ export interface VerificationResponse {
     raw_url?: string;
   };
   media_metadata?: {
+      total_pages?: number;
     file_url?: string;
     original_filename?: string;
     extracted_text?: string;
@@ -112,6 +113,8 @@ export interface MultiClaimItem {
   timestamp_start?: string;
   timestamp_end?: string;
   is_visual?: boolean;
+  page_number?: number;
+  verification_result?: { status_slug: string; status_ar: string; reason: string; summary?: string; evidence: EvidenceItem[]; };
 }
 
 export interface EvidenceGraphNode {

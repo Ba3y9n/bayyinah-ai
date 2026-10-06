@@ -24,6 +24,7 @@ import {
 } from 'lucide-react';
 import { ShareCard } from '../components/ShareCard';
 import { EvidenceGraph } from '../components/EvidenceGraph';
+import { PDFResultViewer } from '../components/PDFResultViewer';
 
 interface ResultPageProps {
   result: VerificationResponse;
@@ -183,6 +184,14 @@ export const ResultPage: React.FC<ResultPageProps> = ({
         </div>
       )}
 
+      {/* PDF Specific View */}
+      {result.input_type === 'PDF' && (
+        <PDFResultViewer result={result} />
+      )}
+      
+      {/* Standard Text/Image/URL/Video View */}
+      {result.input_type !== 'PDF' && (
+        <>
       {/* Main Result Card */}
       <div className="bg-white rounded-3xl border border-gray-100 shadow-elevated overflow-hidden">
         
@@ -486,6 +495,8 @@ export const ResultPage: React.FC<ResultPageProps> = ({
         </p>
       </div>
 
+        </>
+      )}
     </div>
   );
 };

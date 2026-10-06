@@ -320,11 +320,21 @@ async def verify_url_content(payload: Dict[str, Any] = Body(...), db: Session = 
         if multi_claims:
             for claim_item in multi_claims:
                 if claim_item.claim_index == 1:
-                    claim_item.verification_result = result.result_object
+                    claim_item.verification_result = {
+                "status_slug": result.status_slug,
+                "status_ar": result.status,
+                "reason": result.reason,
+                "evidence": [e.dict() if hasattr(e, 'dict') else e.model_dump() for e in result.evidence] if result.evidence else []
+            }
                 else:
                     try:
                         sub_res = await verification_engine.verify(VerificationRequest(text=claim_item.claim_text), is_demo=False)
-                        claim_item.verification_result = sub_res.result_object
+                        claim_item.verification_result = {
+                        "status_slug": sub_res.status_slug,
+                        "status_ar": sub_res.status,
+                        "reason": sub_res.reason,
+                        "evidence": [e.dict() if hasattr(e, 'dict') else e.model_dump() for e in sub_res.evidence] if sub_res.evidence else []
+                    }
                     except Exception:
                         pass
 
@@ -517,11 +527,21 @@ async def verify_video_upload(
     # Attach verification results to multi_claims items
     for claim_item in multi_claims:
         if claim_item.claim_index == 1:
-            claim_item.verification_result = result.result_object
+            claim_item.verification_result = {
+                "status_slug": result.status_slug,
+                "status_ar": result.status,
+                "reason": result.reason,
+                "evidence": [e.dict() if hasattr(e, 'dict') else e.model_dump() for e in result.evidence] if result.evidence else []
+            }
         else:
             try:
                 sub_res = await verification_engine.verify(VerificationRequest(text=claim_item.claim_text), is_demo=False)
-                claim_item.verification_result = sub_res.result_object
+                claim_item.verification_result = {
+                        "status_slug": sub_res.status_slug,
+                        "status_ar": sub_res.status,
+                        "reason": sub_res.reason,
+                        "evidence": [e.dict() if hasattr(e, 'dict') else e.model_dump() for e in sub_res.evidence] if sub_res.evidence else []
+                    }
             except Exception:
                 pass
 
@@ -610,11 +630,21 @@ async def verify_pdf_upload(file: UploadFile = File(...), db: Session = Depends(
 
     for claim_item in multi_claims:
         if claim_item.claim_index == 1:
-            claim_item.verification_result = result.result_object
+            claim_item.verification_result = {
+                "status_slug": result.status_slug,
+                "status_ar": result.status,
+                "reason": result.reason,
+                "evidence": [e.dict() if hasattr(e, 'dict') else e.model_dump() for e in result.evidence] if result.evidence else []
+            }
         else:
             try:
                 sub_res = await verification_engine.verify(VerificationRequest(text=claim_item.claim_text), is_demo=False)
-                claim_item.verification_result = sub_res.result_object
+                claim_item.verification_result = {
+                        "status_slug": sub_res.status_slug,
+                        "status_ar": sub_res.status,
+                        "reason": sub_res.reason,
+                        "evidence": [e.dict() if hasattr(e, 'dict') else e.model_dump() for e in sub_res.evidence] if sub_res.evidence else []
+                    }
             except Exception as ex:
                 pass
 
