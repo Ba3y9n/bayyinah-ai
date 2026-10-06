@@ -385,119 +385,233 @@ const CountUp = ({ to, duration = 2 }: { to: number | string; duration?: number 
 // 3. Why Bayyinah Section
 
 const WhyBayyinah = () => {
+  const [activeIndex, setActiveIndex] = useState(0);
+  const [isVisible, setIsVisible] = useState(false);
+  const sectionRef = useRef<HTMLDivElement | null>(null);
+  const pauseUntil = useRef(0);
+  const shouldReduceMotion = useReducedMotion() ?? false;
   const steps = [
-    { title: 'الفهم الذكي قبل التحقق', desc: 'لا تتعامل بيّنة مع المحتوى ككتلة نصية فقط، بل تفهم السياق وتحدد الادعاءات التي تحتاج إلى تحقق.', icon: <Layout className="w-8 h-8"/> },
-    { title: 'المصدر أولًا', desc: 'تبحث بيّنة في المصادر المعتمدة والمرتبطة بنوع المحتوى والادعاء، بعيدًا عن التخمين.', icon: <Database className="w-8 h-8"/> },
-    { title: 'الدليل ظاهر', desc: 'لا تكتفي بيّنة بالنتيجة، بل تعرض الدليل والمصدر والمرجع والرابط ليتمكن المستخدم من مراجعتها.', icon: <BookOpen className="w-8 h-8"/> },
-    { title: 'الأمانة العلمية', desc: 'إذا لم تجد بيّنة دليلًا كافيًا، لا تنشئ يقينًا من الفراغ، بل توضّح حدود ما تم التوصل إليه.', icon: <ShieldCheck className="w-8 h-8"/> },
-    { title: 'معالجة متعددة الوسائط', desc: 'يمكن التحقق من: النص، الصورة، الفيديو، الرابط.', icon: <Link2 className="w-8 h-8"/> }
+    { title: 'الفهم الذكي قبل التحقق', desc: 'لا تتعامل بيّنة مع المحتوى ككتلة نصية فقط، بل تفهم السياق وتحدد الادعاءات التي تحتاج إلى تحقق.', icon: <Layout className="h-8 w-8" /> },
+    { title: 'المصادر أولًا', desc: 'تبحث بيّنة في المصادر المعتمدة والمرتبطة بنوع المحتوى والادعاء، بعيدًا عن التخمين.', icon: <Database className="h-8 w-8" /> },
+    { title: 'الدليل ظاهر', desc: 'لا تكتفي بيّنة بالنتيجة، بل تعرض الدليل والمصدر والمرجع والرابط ليتمكن المستخدم من مراجعتها.', icon: <BookOpen className="h-8 w-8" /> },
+    { title: 'معالجة متعددة الوسائط', desc: 'يمكن التحقق من: النص، الصورة، الفيديو، الرابط.', icon: <Link2 className="h-8 w-8" /> },
+    { title: 'الأمانة العلمية', desc: 'إذا لم تجد بيّنة دليلًا كافيًا، لا تنشئ يقينًا من الفراغ، بل توضّح حدود ما تم التوصل إليه.', icon: <ShieldCheck className="h-8 w-8" /> }
   ];
 
+  useEffect(() => {
+    const section = sectionRef.current;
+    if (!section) return;
+    const observer = new IntersectionObserver(([entry]) => setIsVisible(entry.isIntersecting), { threshold: 0.2 });
+    observer.observe(section);
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    if (!isVisible || shouldReduceMotion) return;
+    const interval = window.setInterval(() => {
+      if (document.hidden || Date.now() < pauseUntil.current) return;
+      setActiveIndex((current) => (current + 1) % steps.length);
+    }, 2600);
+    return () => window.clearInterval(interval);
+  }, [isVisible, shouldReduceMotion, steps.length]);
+
+  const selectStep = (index: number) => {
+    pauseUntil.current = Date.now() + 6000;
+    setActiveIndex(index);
+  };
+
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      {steps.map((step, idx) => (
-        <motion.div
-          key={idx}
-          whileHover={{ y: -5, scale: 1.02 }}
-          className="bg-white p-8 rounded-3xl shadow-sm border border-gray-100 hover:border-bayyinah-emerald/40 transition-all duration-300 flex flex-col items-start gap-4 cursor-default"
-        >
-          <div className="p-4 bg-bayyinah-ivory text-bayyinah-emerald rounded-2xl">
-            {step.icon}
-          </div>
-          <h3 className="text-xl font-bold text-bayyinah-dark-text mt-2">{step.title}</h3>
-          <p className="text-bayyinah-secondary-text leading-relaxed font-light">{step.desc}</p>
-        </motion.div>
-      ))}
+    <div ref={sectionRef} className="relative">
+      <div className="relative grid grid-cols-1 gap-3 md:gap-4 lg:grid-cols-[minmax(0,1fr)_48px_minmax(0,1fr)_48px_minmax(0,1fr)_48px_minmax(0,1fr)_48px_minmax(0,1fr)] lg:gap-2" role="list" aria-label="أسباب تميّز بيّنة">
+        {steps.map((step, index) => {
+          const isActive = activeIndex === index;
+          return (
+            <React.Fragment key={step.title}>
+              <motion.button
+                type="button"
+                aria-pressed={isActive}
+                onClick={() => selectStep(index)}
+                onKeyDown={(event) => {
+                  const direction = event.key === 'ArrowLeft' ? 1 : event.key === 'ArrowRight' ? -1 : 0;
+                  if (!direction) return;
+                  event.preventDefault();
+                  const nextIndex = (index + direction + steps.length) % steps.length;
+                  selectStep(nextIndex);
+                  document.getElementById(`why-bayyinah-${nextIndex}`)?.focus();
+                }}
+                id={`why-bayyinah-${index}`}
+                initial={shouldReduceMotion ? false : { opacity: 0, y: 12 }}
+                whileInView={shouldReduceMotion ? undefined : { opacity: 1, y: 0 }}
+                viewport={{ once: true, amount: 0.2 }}
+                transition={{ duration: shouldReduceMotion ? 0 : 0.4, delay: shouldReduceMotion ? 0 : index * 0.09 }}
+                whileHover={shouldReduceMotion ? undefined : { y: -4 }}
+                whileTap={shouldReduceMotion ? undefined : { scale: 0.99 }}
+                className={`relative z-10 flex min-h-[270px] w-full flex-col items-start overflow-hidden rounded-[25px] border p-6 text-right text-white shadow-[0_14px_35px_rgba(0,100,70,0.12)] transition-[border-color,box-shadow,opacity] duration-300 motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-700/50 lg:min-h-[300px] ${isActive ? 'border-[#89ffd0]/75 opacity-100 shadow-[0_16px_40px_rgba(0,130,90,.18),0_0_28px_rgba(70,240,165,.16)]' : 'border-[#5affbe]/35 opacity-90 hover:opacity-100'}`}
+                style={{ background: 'linear-gradient(145deg, #079669 0%, #007a59 48%, #006348 100%)' }}
+              >
+                <span className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-l from-transparent via-white/30 to-transparent" />
+                <span className="flex w-full items-center justify-between">
+                  <span className={`flex h-8 w-8 items-center justify-center rounded-full border font-mono text-xs font-bold transition-colors ${isActive ? 'border-white/70 bg-[#baffdf] text-[#00563d] shadow-[0_0_15px_rgba(154,255,210,.35)]' : 'border-white/40 bg-white/80 text-[#006348]'}`}>0{index + 1}</span>
+                  <motion.span animate={isActive && !shouldReduceMotion ? { y: [0, -2, 0] } : { y: 0 }} transition={{ duration: 1.2, repeat: isActive && !shouldReduceMotion ? Infinity : 0, ease: 'easeInOut' }} className={`relative flex h-[74px] w-[74px] items-center justify-center rounded-full border text-white backdrop-blur-md transition-all duration-300 ${isActive ? 'border-[#aaffd7]/70 bg-white/20 shadow-[0_0_0_7px_rgba(80,255,185,.07),0_0_0_14px_rgba(80,255,185,.035),0_0_25px_rgba(70,240,165,.24)]' : 'border-[#aaffd7]/30 bg-[#005e45]/35'}`}>
+                    {isActive && !shouldReduceMotion && <motion.span aria-hidden="true" className="absolute inset-0 rounded-full border border-[#bdffe2]" animate={{ scale: [1, 1.35], opacity: [0.35, 0] }} transition={{ duration: 2.1, repeat: Infinity, ease: 'easeOut' }} />}
+                    {step.icon}
+                  </motion.span>
+                </span>
+                <span className="mt-5 block min-h-[52px] text-base font-bold leading-relaxed sm:text-lg">{step.title}</span>
+                {isActive && <span className="mt-3 h-1 w-full overflow-hidden rounded-full bg-white/15"><motion.span key={`why-progress-${index}`} className="block h-full rounded-full bg-gradient-to-l from-[#9affd2] to-[#40e99c]" initial={{ width: '0%' }} animate={{ width: '100%' }} transition={{ duration: shouldReduceMotion ? 0 : 2.6, ease: 'linear' }} /></span>}
+                <p className="mt-3 text-sm leading-[1.8] text-white/85">{step.desc}</p>
+              </motion.button>
+              {index < steps.length - 1 && (
+                <div className="relative flex h-8 items-center justify-center lg:h-full" aria-hidden="true">
+                  <span className="absolute inset-y-0 w-px bg-emerald-800/15 lg:inset-y-1/2 lg:h-px lg:w-full lg:-translate-y-1/2" />
+                  {activeIndex === index && !shouldReduceMotion && <motion.span className="absolute top-0 h-full w-px origin-top bg-gradient-to-b from-[#8affca] to-[#20b779] lg:inset-y-1/2 lg:h-px lg:w-full lg:origin-right lg:-translate-y-1/2 lg:bg-gradient-to-l" initial={{ scaleY: 0, scaleX: 0 }} animate={{ scaleY: 1, scaleX: 1 }} transition={{ duration: 2.3, ease: 'linear' }} />}
+                  {activeIndex === index && !shouldReduceMotion && <motion.span className="absolute top-0 h-2 w-2 rounded-full bg-white shadow-[0_0_7px_rgba(255,255,255,.9),0_0_16px_rgba(70,255,180,.75)] lg:hidden" animate={{ y: [0, 24] }} transition={{ duration: 2.3, ease: 'linear' }} />}
+                  {activeIndex === index && !shouldReduceMotion && <motion.span className="absolute right-0 top-1/2 hidden h-2 w-2 -translate-y-1/2 rounded-full bg-white shadow-[0_0_7px_rgba(255,255,255,.9),0_0_16px_rgba(70,255,180,.75)] lg:block" animate={{ x: [0, -38] }} transition={{ duration: 2.3, ease: 'linear' }} />}
+                  <span className="relative z-10 flex h-7 w-7 items-center justify-center rounded-full border border-emerald-600/25 bg-white text-emerald-800 shadow-[0_0_16px_rgba(40,220,145,.12)]">
+                    <ArrowDown className="h-4 w-4 lg:hidden" />
+                    <ArrowLeft className="hidden h-4 w-4 lg:block" />
+                  </span>
+                </div>
+              )}
+            </React.Fragment>
+          );
+        })}
+      </div>
     </div>
   );
 };
 
 // 4. How It Works Timeline
 const HowItWorks = () => {
-  const [activeTab, setActiveTab] = useState(0);
-  
+  const [activeIndex, setActiveIndex] = useState(0);
+  const [isVisible, setIsVisible] = useState(false);
+  const sectionRef = useRef<HTMLDivElement | null>(null);
+  const pauseUntil = useRef(0);
+  const hasStarted = useRef(false);
+  const shouldReduceMotion = useReducedMotion() ?? false;
   const steps = [
-    { num: '01', title: 'يفهم المحتوى', short: 'الفهم' },
-    { num: '02', title: 'يستخرج الادعاء', short: 'الاستخراج' },
-    { num: '03', title: 'يبحث في المصادر', short: 'البحث' },
-    { num: '04', title: 'يجمع الأدلة', short: 'الجمع' },
-    { num: '05', title: 'يتحقق من المصدر', short: 'التحقق' },
-    { num: '06', title: 'تحدد حالة النتيجة', short: 'النتيجة' },
-    { num: '07', title: 'تعرض الدليل', short: 'الدليل' }
+    { num: '01', title: 'يفهم المحتوى', short: 'الفهم', desc: 'تستقبل بيّنة النص أو الصورة أو الفيديو وتقوم بتحليل البنية الأساسية للمحتوى باستخدام الذكاء الاصطناعي.', icon: <FileText className="h-5 w-5" /> },
+    { num: '02', title: 'يستخرج الادعاء', short: 'الاستخراج', desc: 'تستخرج الادعاءات الرئيسية وتتجاهل الحشو، ليتم التركيز على ما يتطلب التحقق المرجعي.', icon: <Layers className="h-5 w-5" /> },
+    { num: '03', title: 'يبحث في المصادر', short: 'البحث', desc: '', icon: <Search className="h-5 w-5" /> },
+    { num: '04', title: 'يجمع الأدلة', short: 'الجمع', desc: 'جمع الأدلة المتوافقة والمتعارضة من المصادر المعتمدة لبناء قاعدة حكم متوازنة.', icon: <Database className="h-5 w-5" /> },
+    { num: '05', title: 'يتحقق من المصدر', short: 'التحقق', desc: 'مقارنة الادعاء مع الدليل المستخرج والتأكد من عدم وجود اختلافات في سياق النقل.', icon: <ShieldCheck className="h-5 w-5" /> },
+    { num: '06', title: 'تحدد حالة النتيجة', short: 'النتيجة', desc: '', icon: <CheckCircle className="h-5 w-5" /> },
+    { num: '07', title: 'تعرض الدليل', short: 'الدليل', desc: '', icon: <BookOpen className="h-5 w-5" /> }
   ];
+  const visualSymbols = [[FileText, ImageIcon, FileVideo, Link2], [FileText, Layers, Search], [Search, Database, Database], [FileText, BookOpen, Database], [ShieldCheck, Database, CheckCircle], [FileText, CheckCircle, AlertCircle], [BookOpen, Link2, Database]];
+  const progressValues = [14, 28, 42, 57, 71, 85, 100];
+
+  useEffect(() => {
+    const section = sectionRef.current;
+    if (!section) return;
+    const observer = new IntersectionObserver(([entry]) => setIsVisible(entry.isIntersecting), { threshold: 0.18 });
+    observer.observe(section);
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    if (!isVisible || shouldReduceMotion) return;
+    const firstDelay = hasStarted.current ? 2900 : 1200;
+    const pauseRemaining = Math.max(0, pauseUntil.current - Date.now());
+    let timeout = 0;
+    const advance = () => {
+      if (document.hidden) {
+        timeout = window.setTimeout(advance, 1000);
+        return;
+      }
+      hasStarted.current = true;
+      setActiveIndex((current) => (current + 1) % steps.length);
+    };
+    timeout = window.setTimeout(advance, Math.max(firstDelay, pauseRemaining, activeIndex === steps.length - 1 ? 3900 : 0));
+    return () => window.clearTimeout(timeout);
+  }, [activeIndex, isVisible, shouldReduceMotion, steps.length]);
+
+  const selectStep = (index: number) => {
+    pauseUntil.current = Date.now() + 7000;
+    hasStarted.current = true;
+    setActiveIndex(index);
+  };
 
   return (
-    <div className="w-full mt-16">
-      {/* Horizontal Timeline Navigation */}
-      <div className="relative mb-12 flex items-center justify-between overflow-x-auto pb-6 hide-scrollbar" role="tablist">
-        <div className="absolute top-1/2 left-0 right-0 h-px bg-gray-200 -translate-y-1/2 z-0 min-w-[800px]"></div>
-        <div className="absolute top-1/2 right-0 h-0.5 bg-bayyinah-emerald -translate-y-1/2 z-0 transition-all duration-500 ease-out" style={{ width: `${(activeTab / (steps.length - 1)) * 100}%`, minWidth: '0' }}></div>
-        
-        {steps.map((step, idx) => {
-          const isActive = activeTab === idx;
-          const isPast = activeTab > idx;
-          return (
-            <button 
-              key={idx}
-              onClick={() => setActiveTab(idx)}
-              className="relative z-10 flex flex-col items-center gap-3 min-w-[120px] cursor-pointer group focus:outline-none focus:ring-2 focus:ring-bayyinah-emerald/50 rounded-lg p-2" aria-selected={isActive} role="tab"
-            >
-              <div className={`w-4 h-4 rounded-full transition-all duration-300 border-2 ${
-                isActive ? 'bg-bayyinah-emerald border-bayyinah-emerald scale-150 shadow-[0_0_15px_rgba(8,127,104,0.5)]' 
-                : isPast ? 'bg-bayyinah-emerald border-bayyinah-emerald' 
-                : 'bg-white border-gray-300 group-hover:border-bayyinah-emerald'
-              }`} />
-              <div className="text-center">
-                <span className={`block text-xs font-bold mb-1 transition-colors ${isActive || isPast ? 'text-bayyinah-emerald' : 'text-gray-400'}`}>{step.num}</span>
-                <span className={`block text-sm font-medium transition-colors ${isActive ? 'text-bayyinah-dark-text' : 'text-gray-500'}`}>{step.short}</span>
-              </div>
-            </button>
-          );
-        })}
+    <div ref={sectionRef} className="mt-12 w-full md:mt-14">
+      <div className="relative mx-auto mb-10 max-w-6xl md:mb-12">
+        <svg className="pointer-events-none absolute inset-x-0 top-[27px] hidden h-6 w-full overflow-visible lg:block" viewBox="0 0 1000 48" preserveAspectRatio="none" aria-hidden="true">
+          <path d="M928 24 H72" stroke="rgba(180,255,220,.28)" strokeWidth="1.5" />
+          <motion.path d="M928 24 H72" stroke="rgba(111,255,194,.65)" strokeWidth="2" strokeLinecap="round" initial={{ pathLength: 0 }} animate={{ pathLength: progressValues[activeIndex] / 100 }} transition={{ duration: shouldReduceMotion ? 0 : 0.65, ease: 'easeInOut' }} />
+          {!shouldReduceMotion && activeIndex < steps.length - 1 && <motion.circle key={`timeline-dot-${activeIndex}`} r="5" fill="#e5fff3" style={{ filter: 'drop-shadow(0 0 5px rgba(255,255,255,.8)) drop-shadow(0 0 12px rgba(70,255,180,.75))' }} initial={{ cx: 928 - activeIndex * (856 / 7), cy: 24 }} animate={{ cx: 928 - (activeIndex + 1) * (856 / 7), cy: 24 }} transition={{ duration: 2.9, ease: 'linear' }} />}
+        </svg>
+        <svg className="pointer-events-none absolute bottom-0 left-1/2 h-full w-10 -translate-x-1/2 lg:hidden" viewBox="0 0 40 700" preserveAspectRatio="none" aria-hidden="true">
+          <path d="M20 30 V670" stroke="rgba(180,255,220,.28)" strokeWidth="1.5" />
+          <motion.path d="M20 30 V670" stroke="rgba(111,255,194,.65)" strokeWidth="2" strokeLinecap="round" initial={{ pathLength: 0 }} animate={{ pathLength: progressValues[activeIndex] / 100 }} transition={{ duration: shouldReduceMotion ? 0 : 0.65, ease: 'easeInOut' }} />
+          {!shouldReduceMotion && activeIndex < steps.length - 1 && <motion.circle key={`mobile-timeline-dot-${activeIndex}`} cx="20" r="5" fill="#e5fff3" style={{ filter: 'drop-shadow(0 0 5px rgba(255,255,255,.8)) drop-shadow(0 0 12px rgba(70,255,180,.75))' }} initial={{ cy: 30 + activeIndex * (640 / 7) }} animate={{ cy: 30 + (activeIndex + 1) * (640 / 7) }} transition={{ duration: 2.9, ease: 'linear' }} />}
+        </svg>
+        <div className="relative grid grid-cols-1 gap-1 lg:grid-cols-7" role="list" aria-label="مراحل عمل بيّنة">
+          {steps.map((step, index) => {
+            const isActive = activeIndex === index;
+            const isPast = activeIndex > index;
+            return (
+              <motion.button
+                key={step.num}
+                id={`how-step-${index}`}
+                type="button"
+                aria-current={isActive ? 'step' : undefined}
+                aria-pressed={isActive}
+                onClick={() => selectStep(index)}
+                onKeyDown={(event) => {
+                  const direction = event.key === 'ArrowLeft' || event.key === 'ArrowDown' ? 1 : event.key === 'ArrowRight' || event.key === 'ArrowUp' ? -1 : 0;
+                  if (!direction) return;
+                  event.preventDefault();
+                  const nextIndex = (index + direction + steps.length) % steps.length;
+                  selectStep(nextIndex);
+                  document.getElementById(`how-step-${nextIndex}`)?.focus();
+                }}
+                initial={shouldReduceMotion ? false : { opacity: 0, y: 10 }}
+                whileInView={shouldReduceMotion ? undefined : { opacity: 1, y: 0 }}
+                viewport={{ once: true, amount: 0.2 }}
+                transition={{ duration: shouldReduceMotion ? 0 : 0.35, delay: shouldReduceMotion ? 0 : 0.2 + index * 0.07 }}
+                whileHover={shouldReduceMotion ? undefined : { y: -3 }}
+                className={`group relative z-10 flex min-h-[96px] flex-row items-center gap-3 rounded-xl px-3 py-2 text-right text-white transition-[opacity] duration-300 motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#aaffd4]/70 lg:min-h-[116px] lg:flex-col lg:justify-start lg:gap-2 lg:px-1 lg:pt-2 ${isActive ? 'opacity-100' : 'opacity-65 hover:opacity-100'}`}
+              >
+                <motion.span animate={isActive || (activeIndex === steps.length - 1 && !shouldReduceMotion) ? { scale: [1, 1.08, 1] } : { scale: 1 }} transition={{ duration: activeIndex === steps.length - 1 ? 0.55 : 2.1, delay: activeIndex === steps.length - 1 ? index * 0.1 : 0, repeat: isActive && activeIndex !== steps.length - 1 && !shouldReduceMotion ? Infinity : 0, ease: 'easeInOut' }} className={`relative flex h-12 w-12 shrink-0 items-center justify-center rounded-full border transition-all duration-300 lg:h-14 lg:w-14 ${isActive ? 'scale-[1.08] border-[#b7ffdf] bg-gradient-to-br from-[#20c987] to-[#087c59] text-white shadow-[0_0_0_8px_rgba(80,255,185,.08),0_0_0_16px_rgba(80,255,185,.04),0_0_26px_rgba(70,240,165,.3)]' : isPast ? 'border-[#8fffc9]/55 bg-[#086348]/60 text-[#b6ffde]' : 'border-[#82ffc1]/35 bg-[#004b39]/30 text-[#b6ffde] group-hover:border-[#b7ffdf]/70'}`}>
+                  {isActive && !shouldReduceMotion && <motion.span aria-hidden="true" className="absolute inset-0 rounded-full border border-[#b7ffdf]" animate={{ scale: [1, 1.35], opacity: [0.35, 0] }} transition={{ duration: 2.1, repeat: Infinity, ease: 'easeOut' }} />}
+                  {step.icon}
+                </motion.span>
+                <span className="min-w-0 text-right lg:text-center"><span className={`block font-mono text-xs ${isActive ? 'text-[#c4ffe4]' : 'text-white/55'}`}>{step.num}</span><span className={`mt-1 block text-sm font-semibold leading-tight lg:text-xs xl:text-sm ${isActive ? 'text-white' : 'text-white/80'}`}>{step.short}</span></span>
+              </motion.button>
+            );
+          })}
+        </div>
       </div>
 
-      {/* Active Panel Content */}
-      <div className="bg-white border border-gray-100 rounded-3xl p-8 lg:p-12 shadow-sm min-h-[300px] flex flex-col justify-center relative overflow-hidden">
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={activeTab}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            transition={{ duration: 0.3 }}
-            className="flex flex-col items-center text-center max-w-3xl mx-auto"
-          >
-            <h3 className="text-2xl font-bold text-bayyinah-dark-text mb-4">
-              {steps[activeTab].num} — {steps[activeTab].title}
-            </h3>
-            
-            {/* Visuals per step */}
-            <div className="mt-8 w-full">
-              {activeTab === 0 && <p className="text-lg text-bayyinah-secondary-text">تستقبل بيّنة النص أو الصورة أو الفيديو وتقوم بتحليل البنية الأساسية للمحتوى باستخدام الذكاء الاصطناعي.</p>}
-              {activeTab === 1 && <p className="text-lg text-bayyinah-secondary-text">تستخرج الادعاءات الرئيسية وتتجاهل الحشو، ليتم التركيز على ما يتطلب التحقق المرجعي.</p>}
-              {activeTab === 2 && (
-                <div className="flex justify-center gap-4">
-                  <div className="px-6 py-3 bg-bayyinah-ivory text-bayyinah-emerald font-semibold rounded-lg border border-bayyinah-emerald/20">بحث دلالي (Semantic)</div>
-                  <div className="px-6 py-3 bg-bayyinah-ivory text-bayyinah-emerald font-semibold rounded-lg border border-bayyinah-emerald/20">بحث نصي (Full Text)</div>
-                </div>
-              )}
-              {activeTab === 3 && <p className="text-lg text-bayyinah-secondary-text">جمع الأدلة المتوافقة والمتعارضة من المصادر المعتمدة لبناء قاعدة حكم متوازنة.</p>}
-              {activeTab === 4 && <p className="text-lg text-bayyinah-secondary-text">مقارنة الادعاء مع الدليل المستخرج والتأكد من عدم وجود اختلافات في سياق النقل.</p>}
-              {activeTab === 5 && (
-                <div className="flex flex-wrap justify-center gap-3">
-                  <span className="px-4 py-2 bg-bayyinah-emerald text-bayyinah-dark-text rounded-lg text-sm">ثابت بحسب المصدر</span>
-                  <span className="px-4 py-2 bg-red-600 text-bayyinah-dark-text rounded-lg text-sm">لم يثبت بهذا اللفظ</span>
-                  <span className="px-4 py-2 bg-gray-600 text-bayyinah-dark-text rounded-lg text-sm">لم نجد دليلًا كافيًا</span>
-                </div>
-              )}
-              {activeTab === 6 && (
-                <div className="flex items-center justify-center gap-2 text-bayyinah-emerald font-bold">
-                  <span>المصدر</span> <ArrowLeft className="w-4 h-4" /> <span>المرجع</span> <ArrowLeft className="w-4 h-4" /> <span>الدليل</span> <ArrowLeft className="w-4 h-4" /> <span className="text-bayyinah-dark-text">النتيجة</span>
-                </div>
-              )}
-            </div>
-          </motion.div>
-        </AnimatePresence>
+      <div className="relative min-h-[330px] overflow-hidden rounded-[24px] border border-[#b4ffdc]/25 bg-gradient-to-br from-white/[0.11] to-white/[0.045] p-5 shadow-[0_20px_60px_rgba(0,50,35,.16)] backdrop-blur-[18px] sm:p-8 lg:min-h-[310px] lg:p-10">
+        <div className="grid min-h-[270px] grid-cols-1 items-center gap-7 md:grid-cols-[minmax(0,1.1fr)_minmax(250px,.9fr)] md:gap-10">
+          <AnimatePresence mode="wait" initial={false}>
+            <motion.div key={`details-${activeIndex}`} initial={shouldReduceMotion ? false : { opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={shouldReduceMotion ? undefined : { opacity: 0, y: -6 }} transition={{ duration: shouldReduceMotion ? 0 : 0.42, ease: 'easeOut' }} aria-live="polite" className="order-1 flex min-h-[220px] flex-col justify-center md:order-2">
+              <span className="w-fit rounded-full border border-[#aaffd4]/35 bg-white/[0.09] px-3 py-1 font-mono text-sm font-bold text-[#baffdf]">{steps[activeIndex].num}</span>
+              <h3 className="mt-4 text-xl font-bold text-white sm:text-2xl">{steps[activeIndex].title}</h3>
+              {activeIndex === 2 ? (
+                <div className="mt-4 flex flex-wrap gap-2"><span className="rounded-lg border border-[#aaffd4]/25 bg-white/[0.08] px-3 py-2 text-sm text-white/85">بحث دلالي (Semantic)</span><span className="rounded-lg border border-[#aaffd4]/25 bg-white/[0.08] px-3 py-2 text-sm text-white/85">بحث نصي (Full Text)</span></div>
+              ) : activeIndex === 5 ? (
+                <div className="mt-4 flex flex-wrap gap-2"><span className="rounded-lg border border-[#aaffd4]/30 bg-[#35dc98]/15 px-3 py-2 text-sm text-white">ثابت بحسب المصدر</span><span className="rounded-lg border border-white/15 bg-white/[0.08] px-3 py-2 text-sm text-white/85">لم يثبت بهذا اللفظ</span><span className="rounded-lg border border-white/15 bg-white/[0.08] px-3 py-2 text-sm text-white/85">لم نجد دليلًا كافيًا</span></div>
+              ) : activeIndex === 6 ? (
+                <div className="mt-4 flex flex-wrap items-center gap-2 text-sm font-semibold text-[#c4ffe4]"><span>المصدر</span><ArrowLeft className="h-4 w-4" /><span>المرجع</span><ArrowLeft className="h-4 w-4" /><span>الدليل</span><ArrowLeft className="h-4 w-4" /><span>النتيجة</span></div>
+              ) : <p className="mt-3 max-w-2xl text-sm leading-[1.9] text-white/80 sm:text-base">{steps[activeIndex].desc}</p>}
+              <div className="mt-7"><div className="mb-2 flex items-center justify-between text-xs text-white/70"><span>تقدم المراحل</span><span dir="ltr" className="font-mono text-[#baffdf]">{progressValues[activeIndex]}%</span></div><div className="h-2 overflow-hidden rounded-full bg-white/[0.14]"><motion.div className="h-full rounded-full bg-gradient-to-l from-[#40e99c] to-[#9affd2] shadow-[0_0_14px_rgba(84,243,176,.32)]" animate={{ width: `${progressValues[activeIndex]}%` }} transition={{ duration: shouldReduceMotion ? 0 : 0.65, ease: 'easeInOut' }} /></div></div>
+            </motion.div>
+          </AnimatePresence>
+
+          <AnimatePresence mode="wait" initial={false}>
+            <motion.div key={`visual-${activeIndex}`} initial={shouldReduceMotion ? false : { opacity: 0, scale: 0.97 }} animate={{ opacity: 1, scale: 1 }} exit={shouldReduceMotion ? undefined : { opacity: 0, scale: 0.97 }} transition={{ duration: shouldReduceMotion ? 0 : 0.45, ease: 'easeOut' }} aria-hidden="true" className="relative order-2 mx-auto flex h-[190px] w-full max-w-[320px] items-center justify-center md:order-1 md:h-[220px]">
+              <div className="absolute h-36 w-36 rounded-full border border-[#aaffd4]/15 md:h-44 md:w-44" /><div className="absolute h-28 w-28 rounded-full border border-dashed border-[#aaffd4]/25 md:h-36 md:w-36" />
+              {!shouldReduceMotion && <motion.span className="absolute h-2 w-2 rounded-full bg-[#caffea] shadow-[0_0_12px_rgba(154,255,210,.85)]" animate={{ offsetDistance: ['0%', '100%'] }} transition={{ duration: 14 + activeIndex, repeat: Infinity, ease: 'linear' }} style={{ offsetPath: 'ellipse(74px 74px at 50% 50%)' }} />}
+              <div className="relative z-10 flex h-[76px] w-[76px] items-center justify-center rounded-[22px] border border-[#aaffd4]/35 bg-white/[0.13] text-[#c5ffe5] shadow-[0_12px_36px_rgba(0,32,23,.2)] backdrop-blur-lg">{steps[activeIndex].icon}</div>
+              {visualSymbols[activeIndex].map((Symbol, index) => {
+                const positions = ['right-3 top-6', 'bottom-5 right-10', 'bottom-5 left-10', 'left-3 top-6'];
+                return <motion.span key={`${activeIndex}-${index}`} animate={shouldReduceMotion ? { y: 0 } : { y: [0, index % 2 === 0 ? -4 : 4, 0] }} transition={{ duration: 3 + index * 0.4, repeat: shouldReduceMotion ? 0 : Infinity, ease: 'easeInOut' }} className={`absolute ${positions[index]} flex h-10 w-10 items-center justify-center rounded-xl border border-[#aaffd4]/25 bg-[#00543d]/75 text-[#baffdf] shadow-lg backdrop-blur-md`}><Symbol className="h-5 w-5" /></motion.span>;
+              })}
+            </motion.div>
+          </AnimatePresence>
+        </div>
       </div>
     </div>
   );
@@ -1108,25 +1222,38 @@ export const HomePage: React.FC<HomePageProps> = ({ onStartVerification, setActi
       </section>
 
       {/* 3. WHY BAYYINAH (Rule 41) */}
-      <section className="py-24 bg-bayyinah-ivory border-t border-gray-100 overflow-hidden">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="mb-16">
-            <h2 className="text-3xl md:text-5xl font-bold text-bayyinah-dark-text mb-4">لماذا بيّنة؟</h2>
-            <p className="text-xl text-bayyinah-secondary-text font-light">لأن التحقق لا يبدأ من الإجابة... بل من الدليل.</p>
-          </div>
-          
+      <section className="relative isolate overflow-hidden border-t border-emerald-900/[0.06] py-20 md:py-24" style={{ background: 'radial-gradient(circle at 10% 20%, rgba(40,220,145,.08), transparent 30%), radial-gradient(circle at 90% 80%, rgba(40,220,145,.07), transparent 30%), linear-gradient(180deg, #ffffff 0%, #fbfefc 48%, #f3fbf6 100%)' }}>
+        <div aria-hidden="true" className="pointer-events-none absolute inset-0 overflow-hidden">
+          <span className="absolute -right-32 top-[26%] h-[430px] w-[430px] rounded-full border border-emerald-900/[0.045]" />
+          <span className="absolute -right-16 top-[33%] h-[300px] w-[300px] rounded-full border border-emerald-900/[0.035]" />
+          <span className="absolute -left-40 bottom-[-180px] h-[520px] w-[520px] rounded-full border border-emerald-900/[0.04]" />
+          <span className="absolute left-[14%] top-[32%] h-1.5 w-1.5 rounded-full bg-emerald-600/10" />
+          <span className="absolute right-[24%] bottom-[18%] h-1 w-1 rounded-full bg-emerald-600/10" />
+        </div>
+        <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <motion.header initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.35 }} transition={{ duration: 0.45 }} className="mb-12 text-center md:mb-14">
+            <h2 className="text-3xl font-extrabold text-[#123d34] md:text-5xl">لماذا <span className="bg-gradient-to-l from-[#18895e] to-[#37bc83] bg-clip-text text-transparent">بيّنة؟</span></h2>
+            <p className="mt-4 text-base font-light text-[#53665c] sm:text-xl">لأن التحقق لا يبدأ من الإجابة... بل من الدليل.</p>
+          </motion.header>
           <WhyBayyinah />
         </div>
       </section>
 
       {/* 4. HOW IT WORKS (Rule 42) */}
-      <section id="how-it-works" className="py-24 bg-white overflow-hidden">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-4">
-            <h2 className="text-3xl md:text-5xl font-bold text-bayyinah-dark-text mb-4">كيف تعمل بيّنة؟</h2>
-            <p className="text-xl text-bayyinah-secondary-text font-light">من المحتوى المتداول إلى سلسلة دليل واضحة.</p>
-          </div>
-          
+      <section id="how-it-works" className="relative isolate overflow-hidden py-20 text-white md:py-24" style={{ background: 'radial-gradient(circle at 15% 20%, rgba(65,255,185,.15), transparent 30%), radial-gradient(circle at 85% 75%, rgba(60,220,160,.12), transparent 32%), linear-gradient(135deg, #087455 0%, #006649 45%, #00543d 100%)' }}>
+        <div aria-hidden="true" className="pointer-events-none absolute inset-0 overflow-hidden">
+          <span className="absolute -right-52 -top-52 h-[620px] w-[620px] rounded-full border border-emerald-100/[0.09]" />
+          <span className="absolute -right-28 -top-28 h-[420px] w-[420px] rounded-full border border-emerald-100/[0.07]" />
+          <span className="absolute -bottom-64 -left-44 h-[680px] w-[680px] rounded-full border border-emerald-100/[0.08]" />
+          <motion.span animate={{ y: [0, -8, 0], opacity: [0.12, 0.22, 0.12] }} transition={{ duration: 19, repeat: Infinity, ease: 'easeInOut' }} className="absolute right-[18%] top-[18%] h-1.5 w-1.5 rounded-full bg-[#baffdf]" />
+          <motion.span animate={{ y: [0, 11, 0], opacity: [0.08, 0.18, 0.08] }} transition={{ duration: 23, repeat: Infinity, ease: 'easeInOut' }} className="absolute bottom-[22%] left-[17%] h-1 w-1 rounded-full bg-[#baffdf]" />
+          <motion.span animate={{ x: [0, 9, 0], opacity: [0.08, 0.16, 0.08] }} transition={{ duration: 17, repeat: Infinity, ease: 'easeInOut' }} className="absolute left-[43%] top-[13%] h-1 w-1 rounded-full bg-[#baffdf]" />
+        </div>
+        <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <motion.header initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.35 }} transition={{ duration: 0.4 }} className="mx-auto max-w-3xl text-center">
+            <h2 className="text-3xl font-extrabold text-white sm:text-4xl md:text-5xl">كيف تعمل <span className="bg-gradient-to-l from-[#7dffc8] to-[#31e995] bg-clip-text text-transparent">بيّنة؟</span></h2>
+            <p className="mt-4 text-base font-light text-white/80 sm:text-xl">من المحتوى المتداول إلى سلسلة دليل واضحة.</p>
+          </motion.header>
           <HowItWorks />
         </div>
       </section>
