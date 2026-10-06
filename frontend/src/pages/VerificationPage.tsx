@@ -569,7 +569,109 @@ export const VerificationPage: React.FC<VerificationPageProps> = ({
         detail: 'PDF',
         icon: FileText,
       },
+      {
+        id: 'text' as const,
+        title: 'نص',
+        description: 'الصق نصًا للتحقق منه',
+        detail: 'نصوص مباشرة',
+        icon: FileText,
+      },
     ];
+
+    const renderCard = (card: any, index: number) => {
+      const CardIcon = card.icon;
+      const isHighlighted = !userInteracting && highlightIndex === index;
+
+      return (
+        <motion.button
+          key={card.id}
+          type="button"
+          onClick={() => {
+            setInputMode(card.id);
+            setErrorMessage(null);
+          }}
+          onMouseEnter={() => { handleCardInteract(); setHighlightIndex(index); }}
+          onFocus={() => { handleCardInteract(); setHighlightIndex(index); }}
+          onMouseLeave={() => handleCardInteract()}
+          initial={shouldReduceMotion ? false : { opacity: 0, y: 14, scale: 0.985 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          whileHover={shouldReduceMotion ? undefined : { y: -5 }}
+          whileTap={shouldReduceMotion ? undefined : { scale: 0.98 }}
+          transition={{
+            duration: shouldReduceMotion ? 0 : 0.5,
+            delay: shouldReduceMotion ? 0 : index * 0.08,
+            ease: 'easeOut',
+          }}
+          className="group relative flex min-h-[185px] w-full items-center gap-6 overflow-hidden rounded-[28px] p-7 text-right transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00835d]/45 focus-visible:ring-offset-2 sm:min-h-[200px] sm:p-8"
+          style={{
+            background:
+              'linear-gradient(135deg, rgba(255,255,255,0.98) 0%, rgba(245,253,249,0.90) 100%)',
+            border: isHighlighted
+              ? '1px solid rgba(210,165,35,0.75)'
+              : '1px solid rgba(210,165,35,0.45)',
+            boxShadow: isHighlighted
+              ? '0 22px 50px rgba(0,105,72,0.10), 0 0 0 1px rgba(210,165,40,0.20), 0 0 20px rgba(84,220,160,0.08)'
+              : '0 16px 40px rgba(0,95,65,0.07), 0 4px 14px rgba(0,95,65,0.04)',
+            backdropFilter: 'blur(14px)',
+          }}
+        >
+          {/* Subtle geometric ring behind icon */}
+          <span
+            className="pointer-events-none absolute -right-12 -top-12 h-36 w-36 rounded-full border border-[#c89418]/08 opacity-[0.08] transition-transform duration-500 group-hover:scale-110"
+            aria-hidden="true"
+          />
+
+          {/* Icon circle */}
+          <span
+            className="flex shrink-0 items-center justify-center rounded-full border text-[#005b42] transition-transform duration-300 group-hover:scale-105"
+            style={{
+              width: 88,
+              height: 88,
+              background:
+                'radial-gradient(circle, rgba(255,255,255,1) 0%, rgba(235,250,242,0.85) 100%)',
+              border: isHighlighted
+                ? '1px solid rgba(210,165,40,0.70)'
+                : '1px solid rgba(210,165,40,0.55)',
+              boxShadow: isHighlighted
+                ? '0 0 14px rgba(84,220,160,0.18)'
+                : '0 2px 8px rgba(0,90,60,0.07)',
+            }}
+          >
+            <CardIcon
+              className="transition-transform duration-300 group-hover:scale-110"
+              style={{ width: 36, height: 36 }}
+              strokeWidth={1.6}
+            />
+          </span>
+
+          {/* Text content */}
+          <span className="min-w-0 flex-1">
+            <span className="block text-xl font-bold text-[#005b42] sm:text-2xl">
+              {card.title}
+            </span>
+            <span className="mt-1.5 block text-base text-[rgba(0,70,50,0.72)]">
+              {card.description}
+            </span>
+            <span className="mt-2 block text-xs font-medium text-[rgba(0,90,60,0.50)]">
+              {card.detail}
+            </span>
+          </span>
+
+          {/* Arrow indicator */}
+          <span
+            className="flex shrink-0 items-center justify-center rounded-full border border-[#006a4e]/16 transition-all duration-300 group-hover:-translate-x-1 group-hover:border-[#006a4e]/30"
+            style={{
+              width: 44,
+              height: 44,
+              background: 'rgba(255,255,255,0.9)',
+              boxShadow: '0 2px 8px rgba(0,90,60,0.07)',
+            }}
+          >
+            <ArrowLeft className="h-4 w-4 text-[#005b42]" />
+          </span>
+        </motion.button>
+      );
+    };
 
     return (
       <main
@@ -633,100 +735,14 @@ export const VerificationPage: React.FC<VerificationPageProps> = ({
 
           {/* ── 2×2 Card Grid ── */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-[24px] max-w-[1050px] mx-auto">
-            {cards.map((card, index) => {
-              const CardIcon = card.icon;
-              const isHighlighted = !userInteracting && highlightIndex === index;
-
-              return (
-                <motion.button
-                  key={card.id}
-                  type="button"
-                  onClick={() => {
-                    setInputMode(card.id);
-                    setErrorMessage(null);
-                  }}
-                  onMouseEnter={() => { handleCardInteract(); setHighlightIndex(index); }}
-                  onFocus={() => { handleCardInteract(); setHighlightIndex(index); }}
-                  onMouseLeave={() => handleCardInteract()}
-                  initial={shouldReduceMotion ? false : { opacity: 0, y: 14, scale: 0.985 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  whileHover={shouldReduceMotion ? undefined : { y: -5 }}
-                  whileTap={shouldReduceMotion ? undefined : { scale: 0.98 }}
-                  transition={{
-                    duration: shouldReduceMotion ? 0 : 0.5,
-                    delay: shouldReduceMotion ? 0 : index * 0.08,
-                    ease: 'easeOut',
-                  }}
-                  className="group relative flex min-h-[185px] items-center gap-6 overflow-hidden rounded-[28px] p-7 text-right transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00835d]/45 focus-visible:ring-offset-2 sm:min-h-[200px] sm:p-8"
-                  style={{
-                    background:
-                      'linear-gradient(135deg, rgba(255,255,255,0.98) 0%, rgba(245,253,249,0.90) 100%)',
-                    border: isHighlighted
-                      ? '1px solid rgba(210,165,35,0.75)'
-                      : '1px solid rgba(210,165,35,0.45)',
-                    boxShadow: isHighlighted
-                      ? '0 22px 50px rgba(0,105,72,0.10), 0 0 0 1px rgba(210,165,40,0.20), 0 0 20px rgba(84,220,160,0.08)'
-                      : '0 16px 40px rgba(0,95,65,0.07), 0 4px 14px rgba(0,95,65,0.04)',
-                    backdropFilter: 'blur(14px)',
-                  }}
-                >
-                  {/* Subtle geometric ring behind icon */}
-                  <span
-                    className="pointer-events-none absolute -right-12 -top-12 h-36 w-36 rounded-full border border-[#c89418]/08 opacity-[0.08] transition-transform duration-500 group-hover:scale-110"
-                    aria-hidden="true"
-                  />
-
-                  {/* Icon circle */}
-                  <span
-                    className="flex shrink-0 items-center justify-center rounded-full border text-[#005b42] transition-transform duration-300 group-hover:scale-105"
-                    style={{
-                      width: 88,
-                      height: 88,
-                      background:
-                        'radial-gradient(circle, rgba(255,255,255,1) 0%, rgba(235,250,242,0.85) 100%)',
-                      border: isHighlighted
-                        ? '1px solid rgba(210,165,40,0.70)'
-                        : '1px solid rgba(210,165,40,0.55)',
-                      boxShadow: isHighlighted
-                        ? '0 0 14px rgba(84,220,160,0.18)'
-                        : '0 2px 8px rgba(0,90,60,0.07)',
-                    }}
-                  >
-                    <CardIcon
-                      className="transition-transform duration-300 group-hover:scale-110"
-                      style={{ width: 36, height: 36 }}
-                      strokeWidth={1.6}
-                    />
-                  </span>
-
-                  {/* Text content */}
-                  <span className="min-w-0 flex-1">
-                    <span className="block text-xl font-bold text-[#005b42] sm:text-2xl">
-                      {card.title}
-                    </span>
-                    <span className="mt-1.5 block text-base text-[rgba(0,70,50,0.72)]">
-                      {card.description}
-                    </span>
-                    <span className="mt-2 block text-xs font-medium text-[rgba(0,90,60,0.50)]">
-                      {card.detail}
-                    </span>
-                  </span>
-
-                  {/* Arrow indicator */}
-                  <span
-                    className="flex shrink-0 items-center justify-center rounded-full border border-[#006a4e]/16 transition-all duration-300 group-hover:-translate-x-1 group-hover:border-[#006a4e]/30"
-                    style={{
-                      width: 44,
-                      height: 44,
-                      background: 'rgba(255,255,255,0.9)',
-                      boxShadow: '0 2px 8px rgba(0,90,60,0.07)',
-                    }}
-                  >
-                    <ArrowLeft className="h-4 w-4 text-[#005b42]" />
-                  </span>
-                </motion.button>
-              );
-            })}
+            {cards.slice(0, 4).map((card, index) => renderCard(card, index))}
+          </div>
+          
+          {/* ── 5th Card (Centered) ── */}
+          <div className="mt-[24px] flex justify-center max-w-[1050px] mx-auto">
+            <div className="w-full sm:w-[calc(50%-12px)]">
+               {renderCard(cards[4], 4)}
+            </div>
           </div>
 
           {/* ── Info strip ── */}

@@ -59,13 +59,15 @@ export const Navbar: React.FC<NavbarProps> = ({ activeTab, setActiveTab }) => {
             <button
               key={tab.id}
               onClick={() => handleTabClick(tab.id)}
-              className={`text-[15px] font-medium transition-colors ${
+              aria-current={activeTab === tab.id ? 'page' : undefined}
+              className={`relative py-2 text-[15px] font-medium transition-colors ${
                 activeTab === tab.id
-                  ? 'text-[#0d1a1a] font-semibold'
-                  : 'text-gray-700 hover:text-[#0d1a1a]'
+                  ? 'font-semibold text-[#005c43]'
+                  : 'text-gray-700 hover:text-[#005c43]'
               }`}
             >
               {tab.label}
+              {activeTab === tab.id && <span className="absolute inset-x-0 -bottom-1 h-0.5 rounded-full bg-[#c89418]" />}
             </button>
           ))}
         </nav>
@@ -86,10 +88,11 @@ export const Navbar: React.FC<NavbarProps> = ({ activeTab, setActiveTab }) => {
             <button
               key={tab.id}
               onClick={() => handleTabClick(tab.id)}
-              className={`text-right text-[16px] py-2 transition-colors ${
+              aria-current={activeTab === tab.id ? 'page' : undefined}
+              className={`border-r-2 py-2 pr-3 text-right text-[16px] transition-colors ${
                 activeTab === tab.id
-                  ? 'text-bayyinah-emerald font-semibold'
-                  : 'text-bayyinah-dark-text'
+                  ? 'border-[#c89418] font-semibold text-[#005c43]'
+                  : 'border-transparent text-bayyinah-dark-text'
               }`}
             >
               {tab.label}
