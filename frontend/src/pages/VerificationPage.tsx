@@ -1,24 +1,29 @@
-import React, { useState } from 'react';
-import { 
-  Link2, 
-  Image as ImageIcon, 
-  FileVideo, 
-  FileText, 
-  ArrowLeft, 
-  ArrowRight, 
-  Loader2, 
-  Play, 
-  ShieldCheck, 
-  AlertCircle, 
+import React, { useState, useEffect, useRef } from 'react';
+import {
+  Link2,
+  Image as ImageIcon,
+  FileVideo,
+  FileText,
+  ArrowLeft,
+  ArrowRight,
+  Loader2,
+  Play,
+  ShieldCheck,
+  AlertCircle,
   CheckCircle2,
-  RefreshCw,
   Globe,
-  Youtube,
-  Clock
+  Clock,
+  Info,
+  UploadCloud,
+  ChevronLeft,
 } from 'lucide-react';
+import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { VerificationResponse } from '../types';
 import { api } from '../services/api';
 
+/* ─────────────────────────────────────────────
+   Types — preserved exactly
+───────────────────────────────────────────── */
 type InputMode = 'none' | 'url' | 'image' | 'video' | 'text' | 'pdf';
 
 interface VerificationPageProps {
@@ -33,15 +38,233 @@ interface VerificationPageProps {
   onCancel: () => void;
 }
 
+/* ─────────────────────────────────────────────
+   Decorative SVG — Gold divider
+───────────────────────────────────────────── */
+const GoldDivider = () => (
+  <div className="flex items-center justify-center gap-3 my-6" aria-hidden="true">
+    <span
+      className="block h-px flex-1 max-w-[120px]"
+      style={{ background: 'linear-gradient(to left, rgba(210,165,35,0.55), transparent)' }}
+    />
+    <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
+      <path d="M5 0L6.18 3.82L10 5L6.18 6.18L5 10L3.82 6.18L0 5L3.82 3.82Z" fill="#C99418" />
+    </svg>
+    <span
+      className="block h-px flex-1 max-w-[120px]"
+      style={{ background: 'linear-gradient(to right, rgba(210,165,35,0.55), transparent)' }}
+    />
+  </div>
+);
+
+/* ─────────────────────────────────────────────
+   Background decoration — waves & nodes
+───────────────────────────────────────────── */
+const BackgroundDecor = () => (
+  <div
+    className="pointer-events-none absolute inset-0 overflow-hidden"
+    aria-hidden="true"
+  >
+    {/* SVG curves bottom */}
+    <svg
+      className="absolute bottom-0 left-0 right-0 w-full opacity-60"
+      viewBox="0 0 1440 220"
+      preserveAspectRatio="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        d="M0,160 C240,100 480,200 720,150 C960,100 1200,180 1440,130 L1440,220 L0,220 Z"
+        fill="rgba(84,220,160,0.06)"
+      />
+      <path
+        d="M0,185 C300,130 600,200 900,165 C1100,140 1300,190 1440,160 L1440,220 L0,220 Z"
+        fill="rgba(84,220,160,0.04)"
+      />
+      {/* Thin gold curves */}
+      <path
+        d="M0,195 C360,155 720,195 1080,170 C1260,158 1380,178 1440,175"
+        stroke="rgba(201,148,24,0.18)"
+        strokeWidth="1"
+        fill="none"
+      />
+      {/* Gold nodes */}
+      {[180, 480, 760, 1050, 1320].map((x, i) => (
+        <circle key={i} cx={x} cy={192 + (i % 2) * 10} r="2.5" fill="rgba(201,148,24,0.35)" />
+      ))}
+    </svg>
+
+    {/* Top-right faint gold glow */}
+    <div
+      className="absolute -top-10 right-0 w-80 h-80 rounded-full opacity-[0.035]"
+      style={{ background: 'radial-gradient(circle, #D8A72B 0%, transparent 70%)' }}
+    />
+  </div>
+);
+
+/* ─────────────────────────────────────────────
+   Shared page background style
+───────────────────────────────────────────── */
+const pageBg = `
+  radial-gradient(circle at 50% 35%, rgba(75,220,160,0.07), transparent 35%),
+  radial-gradient(circle at 10% 85%, rgba(50,200,140,0.10), transparent 32%),
+  radial-gradient(circle at 90% 85%, rgba(50,200,140,0.10), transparent 32%),
+  radial-gradient(circle at 50% 15%, rgba(215,170,40,0.035), transparent 26%),
+  linear-gradient(180deg, #ffffff 0%, #fbfefc 50%, #f1faf5 100%)
+`.trim();
+
+/* ─────────────────────────────────────────────
+   Sub-page layout wrapper
+───────────────────────────────────────────── */
+const SubPageWrapper: React.FC<{
+  onBack: () => void;
+  iconEl: React.ReactNode;
+  title: string;
+  description: string;
+  children: React.ReactNode;
+}> = ({ onBack, iconEl, title, description, children }) => (
+  <main
+    className="relative isolate overflow-hidden px-4 py-10 sm:py-14"
+    style={{ background: pageBg }}
+  >
+    <BackgroundDecor />
+    <div className="mx-auto max-w-3xl relative z-10">
+      {/* Back button */}
+      <motion.button
+        initial={{ opacity: 0, x: 10 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ duration: 0.3 }}
+        onClick={onBack}
+        className="mb-8 inline-flex items-center gap-2 rounded-full border border-[#c89418]/40 bg-white/90 px-4 py-2.5 text-sm font-semibold text-[#315747] shadow-sm transition-all hover:border-[#006a4e]/40 hover:text-[#005b42] hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00835d]/45"
+      >
+        <ChevronLeft className="w-4 h-4 ml-1" />
+        العودة لاختيار وسيلة الإدخال
+      </motion.button>
+
+      {/* Page header */}
+      <motion.div
+        initial={{ opacity: 0, y: 14 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.45, delay: 0.05 }}
+        className="flex flex-col items-center text-center mb-8"
+      >
+        {/* Icon circle */}
+        <div
+          className="mb-5 flex h-[68px] w-[68px] items-center justify-center rounded-full border border-[#c89418]/55 bg-white text-[#005b42] shadow-[0_0_0_8px_rgba(84,220,160,0.08),0_4px_16px_rgba(0,90,60,0.10)]"
+        >
+          {iconEl}
+        </div>
+        <h1 className="text-2xl sm:text-3xl font-bold text-[#005b42] mb-3 leading-tight">
+          {title}
+        </h1>
+        <p className="max-w-xl text-base text-[rgba(0,70,50,0.75)] leading-relaxed">
+          {description}
+        </p>
+      </motion.div>
+
+      {/* Children (form content) */}
+      <motion.div
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.15 }}
+      >
+        {children}
+      </motion.div>
+    </div>
+  </main>
+);
+
+/* ─────────────────────────────────────────────
+   Shared Dropzone label component
+───────────────────────────────────────────── */
+const DropzonePlaceholder: React.FC<{
+  icon: React.ReactNode;
+  mainText: string;
+  subText: string;
+  formats: string;
+  accept: string;
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+}> = ({ icon, mainText, subText, formats, accept, onChange }) => (
+  <label
+    className="group relative flex cursor-pointer flex-col items-center justify-center gap-4 rounded-[24px] border border-dashed border-[#006a4e]/50 bg-white/70 px-6 py-14 text-center transition-all duration-300 hover:border-[#006a4e]/80 hover:bg-[rgba(84,220,160,0.04)] focus-within:border-[#006a4e]/80 focus-within:ring-2 focus-within:ring-[#00835d]/30"
+    style={{
+      boxShadow: '0 0 0 1px rgba(210,165,40,0.10), 0 14px 36px rgba(0,90,60,0.06)',
+    }}
+  >
+    {/* Upload cloud icon with hover lift */}
+    <div className="flex flex-col items-center gap-1 transition-transform duration-300 group-hover:-translate-y-1">
+      <div
+        className="flex h-[64px] w-[64px] items-center justify-center rounded-full border border-[#c89418]/45 bg-gradient-to-br from-white to-[#edfaf4] text-[#005b42] shadow-sm"
+      >
+        {icon}
+      </div>
+      <UploadCloud className="w-5 h-5 text-[#006a4e]/50 mt-1" />
+    </div>
+    <div>
+      <p className="text-base font-bold text-[#005b42] mb-1">{mainText}</p>
+      <p className="text-sm text-[rgba(0,70,50,0.65)]">{subText}</p>
+    </div>
+    <div className="flex flex-wrap justify-center gap-2">
+      {formats.split(',').map((f) => (
+        <span
+          key={f}
+          className="rounded-full border border-[#c89418]/35 bg-white px-3 py-1 text-xs font-semibold text-[#006a4e]"
+        >
+          {f.trim()}
+        </span>
+      ))}
+    </div>
+    <input type="file" accept={accept} className="sr-only" onChange={onChange} />
+  </label>
+);
+
+/* ─────────────────────────────────────────────
+   Shared Submit Button
+───────────────────────────────────────────── */
+const SubmitButton: React.FC<{
+  onClick: () => void;
+  disabled?: boolean;
+  children: React.ReactNode;
+}> = ({ onClick, disabled, children }) => (
+  <motion.button
+    whileTap={disabled ? undefined : { scale: 0.98 }}
+    onClick={onClick}
+    disabled={!!disabled}
+    className="mx-auto mt-6 flex w-full max-w-[480px] items-center justify-center gap-2 rounded-[20px] border border-[#c89418]/40 py-[17px] text-base font-bold text-white shadow-[0_4px_20px_rgba(0,90,60,0.18)] transition-all duration-300 disabled:cursor-not-allowed disabled:opacity-40"
+    style={{
+      background: disabled
+        ? '#9ab5ac'
+        : 'linear-gradient(135deg, #00835d 0%, #006a4c 100%)',
+    }}
+  >
+    {children}
+  </motion.button>
+);
+
+/* ─────────────────────────────────────────────
+   Shared Error Banner
+───────────────────────────────────────────── */
+const ErrorBanner: React.FC<{ message: string }> = ({ message }) => (
+  <div className="mb-5 flex items-start gap-3 rounded-2xl border border-red-200 bg-red-50/90 p-4 text-red-800">
+    <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-red-600" />
+    <div className="flex-1 text-sm leading-relaxed">{message}</div>
+  </div>
+);
+
+/* ─────────────────────────────────────────────
+   Main Component
+───────────────────────────────────────────── */
 export const VerificationPage: React.FC<VerificationPageProps> = ({
   inputText,
   imageBase64,
   urlInput,
   onVerificationComplete,
-  onCancel
+  onCancel,
 }) => {
+  const shouldReduceMotion = useReducedMotion() ?? false;
+
+  /* ── State (ALL ORIGINAL — no changes) ─── */
   const [inputMode, setInputMode] = useState<InputMode>(
-    urlInput ? 'url' : (imageBase64 ? 'image' : (inputText ? 'text' : 'none'))
+    urlInput ? 'url' : imageBase64 ? 'image' : inputText ? 'text' : 'none'
   );
   const [isProcessing, setIsProcessing] = useState(false);
   const [processingStep, setProcessingStep] = useState(1);
@@ -72,7 +295,26 @@ export const VerificationPage: React.FC<VerificationPageProps> = ({
   const [videoStartTime, setVideoStartTime] = useState('00:00');
   const [videoEndTime, setVideoEndTime] = useState('');
 
-  // Handle URL changes & detect platform
+  /* ── Auto-highlight state for selection screen ── */
+  const [highlightIndex, setHighlightIndex] = useState(0);
+  const [userInteracting, setUserInteracting] = useState(false);
+  const interactTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    if (inputMode !== 'none' || shouldReduceMotion || userInteracting) return;
+    const t = setInterval(() => {
+      setHighlightIndex((p) => (p + 1) % 4);
+    }, 3000);
+    return () => clearInterval(t);
+  }, [inputMode, shouldReduceMotion, userInteracting]);
+
+  const handleCardInteract = () => {
+    setUserInteracting(true);
+    if (interactTimeout.current) clearTimeout(interactTimeout.current);
+    interactTimeout.current = setTimeout(() => setUserInteracting(false), 5000);
+  };
+
+  /* ── Original handlers (UNCHANGED) ─────── */
   const handleUrlChange = (val: string) => {
     setUrl(val);
     const low = val.toLowerCase();
@@ -84,14 +326,11 @@ export const VerificationPage: React.FC<VerificationPageProps> = ({
     else setDetectedPlatform('WEB');
   };
 
-  // 1. Submit URL verification
-  // 1. Submit URL verification
   const handleUrlSubmit = async () => {
     if (!url.trim()) return;
     setIsProcessing(true);
     setProcessingStep(1);
     setErrorMessage(null);
-
     try {
       setProcessingStep(2);
       const result = await api.verifyUrl(url);
@@ -103,7 +342,6 @@ export const VerificationPage: React.FC<VerificationPageProps> = ({
     }
   };
 
-  // 2. Upload Image and run OCR first (Rule 20 & 45)
   const handleImageFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files || !e.target.files[0]) return;
     const file = e.target.files[0];
@@ -111,7 +349,6 @@ export const VerificationPage: React.FC<VerificationPageProps> = ({
     setImagePreview(URL.createObjectURL(file));
     setOcrError(null);
     setIsExtractingOcr(true);
-
     try {
       const ocrRes = await api.extractImageText(file);
       if (ocrRes.success && ocrRes.extracted_text) {
@@ -126,13 +363,11 @@ export const VerificationPage: React.FC<VerificationPageProps> = ({
     }
   };
 
-  // Submit Image after OCR review
   const handleImageSubmit = async () => {
     if (!extractedOcrText.trim()) return;
     setIsProcessing(true);
     setProcessingStep(1);
     setErrorMessage(null);
-
     try {
       setProcessingStep(3);
       const result = await api.verifyContent({ text: extractedOcrText });
@@ -144,7 +379,6 @@ export const VerificationPage: React.FC<VerificationPageProps> = ({
     }
   };
 
-  // 3. Submit Video verification (Rule 21 & 46)
   const handleVideoFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
@@ -158,7 +392,6 @@ export const VerificationPage: React.FC<VerificationPageProps> = ({
     setIsProcessing(true);
     setProcessingStep(1);
     setErrorMessage(null);
-
     try {
       setProcessingStep(3);
       const result = await api.verifyVideo(videoFile);
@@ -170,13 +403,11 @@ export const VerificationPage: React.FC<VerificationPageProps> = ({
     }
   };
 
-  // 4. Submit Text verification (Rule 47)
   const handleTextSubmit = async () => {
     if (!text.trim()) return;
     setIsProcessing(true);
     setProcessingStep(1);
     setErrorMessage(null);
-
     try {
       setProcessingStep(2);
       const result = await api.verifyContent({ text: text.trim() });
@@ -188,14 +419,12 @@ export const VerificationPage: React.FC<VerificationPageProps> = ({
     }
   };
 
-  // 5. Submit PDF verification
   const handlePdfChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files || !e.target.files[0]) return;
     const file = e.target.files[0];
     setPdfFile(file);
     setErrorMessage(null);
     setPdfExtracting(true);
-
     try {
       const res = await api.extractPdfText(file);
       setPdfPagesCount(res.total_pages);
@@ -211,7 +440,6 @@ export const VerificationPage: React.FC<VerificationPageProps> = ({
     setIsProcessing(true);
     setProcessingStep(1);
     setErrorMessage(null);
-
     try {
       setProcessingStep(3);
       const result = await api.verifyPdf(pdfFile);
@@ -223,7 +451,14 @@ export const VerificationPage: React.FC<VerificationPageProps> = ({
     }
   };
 
-  // Processing state screen (Rule 48)
+  const goBack = () => {
+    setInputMode('none');
+    setErrorMessage(null);
+  };
+
+  /* ════════════════════════════════════════════
+     PROCESSING SCREEN (UI only — logic preserved)
+  ════════════════════════════════════════════ */
   if (isProcessing) {
     const steps = [
       { num: '01', title: 'فهم المحتوى وتطبيعه', desc: 'تحليل البنية اللغوية وتجريد النص من الشوائب' },
@@ -235,453 +470,651 @@ export const VerificationPage: React.FC<VerificationPageProps> = ({
     ];
 
     return (
-      <div className="max-w-2xl mx-auto px-4 py-20 min-h-[80vh] flex flex-col justify-center">
-        <div className="bg-white p-10 rounded-3xl border border-gray-100 shadow-elevated">
-          <div className="flex justify-center mb-8">
-            <div className="w-16 h-16 rounded-full bg-bayyinah-ivory flex items-center justify-center text-bayyinah-emerald">
-              <Loader2 className="w-8 h-8 animate-spin" />
+      <main
+        className="relative isolate flex min-h-[80vh] flex-col justify-center overflow-hidden px-4 py-14 sm:py-20"
+        style={{ background: pageBg }}
+      >
+        <BackgroundDecor />
+        <div className="mx-auto w-full max-w-2xl relative z-10">
+          <section
+            className="rounded-[24px] border border-[#c89418]/35 bg-white/90 p-6 shadow-[0_20px_50px_rgba(0,90,60,.08)] backdrop-blur sm:p-10"
+          >
+            <div className="flex justify-center mb-8">
+              <div className="w-16 h-16 rounded-full border border-[#c89418]/35 bg-[#f1faf5] flex items-center justify-center text-[#006b4d]">
+                <Loader2 className="w-8 h-8 animate-spin" />
+              </div>
             </div>
-          </div>
-          <h2 className="text-2xl font-bold text-center text-bayyinah-dark-text mb-2">جاري معالجة المحتوى والتحقق منه</h2>
-          <p className="text-center text-bayyinah-secondary-text text-sm mb-10">
-            يقوم محرك بيّنة الآن بربط الادعاء بالمصادر المعتمدة واستخراج سلسلة الأدلة...
-          </p>
+            <h2 className="text-2xl font-bold text-center text-[#005b42] mb-2">
+              جاري معالجة المحتوى والتحقق منه
+            </h2>
+            <p className="text-center text-[rgba(0,70,50,0.65)] text-sm mb-10">
+              يقوم محرك بيّنة الآن بربط الادعاء بالمصادر المعتمدة واستخراج سلسلة الأدلة...
+            </p>
 
-          <div className="space-y-4">
-            {steps.map((st, idx) => {
-              const stepIdx = idx + 1;
-              const isDone = processingStep > stepIdx;
-              const isCurrent = processingStep === stepIdx;
+            <div className="space-y-4">
+              {steps.map((st, idx) => {
+                const stepIdx = idx + 1;
+                const isDone = processingStep > stepIdx;
+                const isCurrent = processingStep === stepIdx;
+                return (
+                  <div
+                    key={st.num}
+                    className={`flex items-start gap-4 rounded-2xl border p-4 transition-all ${
+                      isCurrent
+                        ? 'border-[#00835d]/35 bg-[#effaf5] shadow-sm'
+                        : isDone
+                        ? 'border-[#dcebe3] bg-white'
+                        : 'border-transparent bg-white opacity-40'
+                    }`}
+                  >
+                    <div className="mt-0.5">
+                      {isDone ? (
+                        <CheckCircle2 className="w-5 h-5 text-[#006a4e]" />
+                      ) : isCurrent ? (
+                        <Loader2 className="w-5 h-5 text-[#006a4e] animate-spin" />
+                      ) : (
+                        <div className="w-5 h-5 rounded-full border-2 border-gray-300 flex items-center justify-center text-[10px] text-gray-400 font-bold">
+                          {st.num}
+                        </div>
+                      )}
+                    </div>
+                    <div className="flex-1">
+                      <h4 className={`text-sm font-bold ${isCurrent ? 'text-[#006a4e]' : 'text-[#1a2e28]'}`}>
+                        {st.num} — {st.title}
+                      </h4>
+                      {isCurrent && (
+                        <p className="text-xs text-[rgba(0,70,50,0.65)] mt-1">{st.desc}</p>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </section>
+        </div>
+      </main>
+    );
+  }
+
+  /* ════════════════════════════════════════════
+     SELECTION SCREEN — "ماذا تريد أن تتحقق منه؟"
+  ════════════════════════════════════════════ */
+  if (inputMode === 'none') {
+    const cards = [
+      {
+        id: 'url' as const,
+        title: 'رابط',
+        description: 'لصق رابط ويب',
+        detail: 'يوتيوب، تيك توك، X، ويب',
+        icon: Link2,
+      },
+      {
+        id: 'image' as const,
+        title: 'صورة',
+        description: 'رفع صورة أو لقطة شاشة',
+        detail: 'JPG, PNG, WEBP',
+        icon: ImageIcon,
+      },
+      {
+        id: 'video' as const,
+        title: 'فيديو',
+        description: 'رفع مقطع فيديو',
+        detail: 'MP4, MOV, WEBM',
+        icon: FileVideo,
+      },
+      {
+        id: 'pdf' as const,
+        title: 'وثيقة PDF',
+        description: 'ملفات ومستندات',
+        detail: 'PDF',
+        icon: FileText,
+      },
+    ];
+
+    return (
+      <main
+        className="relative isolate overflow-hidden px-4 py-14 sm:py-20"
+        style={{ background: pageBg }}
+      >
+        <BackgroundDecor />
+
+        <div className="relative z-10 mx-auto max-w-[1120px]">
+          {/* ── Header ── */}
+          <motion.div
+            initial={shouldReduceMotion ? false : { opacity: 0, y: -12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            className="mb-2 text-center"
+          >
+            {/* Decorative icon */}
+            <div className="mx-auto mb-5 flex h-[56px] w-[56px] items-center justify-center rounded-full border border-[#c89418]/45 bg-white text-[#005b42] shadow-[0_0_0_7px_rgba(84,220,160,0.07),0_4px_14px_rgba(0,90,60,0.08)]">
+              <ShieldCheck className="h-7 w-7" strokeWidth={1.8} />
+            </div>
+
+            {/* Main title with color split */}
+            <h1
+              className="font-extrabold leading-tight"
+              style={{ fontSize: 'clamp(38px, 4.5vw, 62px)', lineHeight: 1.2 }}
+            >
+              <span className="text-[#005b42]">ماذا تريد أن </span>
+              <span
+                style={{
+                  background: 'linear-gradient(135deg, #C99418 0%, #D8A72B 55%, #b87e10 100%)',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                  backgroundClip: 'text',
+                }}
+              >
+                تتحقق منه
+              </span>
+              <span className="text-[#005b42]">؟</span>
+            </h1>
+          </motion.div>
+
+          {/* Subtitle */}
+          <motion.p
+            initial={shouldReduceMotion ? false : { opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.1 }}
+            className="mx-auto mt-4 max-w-2xl text-center text-xl font-medium leading-relaxed"
+            style={{ color: 'rgba(0,70,50,0.82)' }}
+          >
+            اختر طريقة إدخال المحتوى لبدء رحلة التحقق المبنية على الأدلة.
+          </motion.p>
+
+          {/* Gold divider */}
+          <motion.div
+            initial={shouldReduceMotion ? false : { opacity: 0, scaleX: 0.5 }}
+            animate={{ opacity: 1, scaleX: 1 }}
+            transition={{ duration: 0.5, delay: 0.18 }}
+          >
+            <GoldDivider />
+          </motion.div>
+
+          {/* ── 2×2 Card Grid ── */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-[24px] max-w-[1050px] mx-auto">
+            {cards.map((card, index) => {
+              const CardIcon = card.icon;
+              const isHighlighted = !userInteracting && highlightIndex === index;
 
               return (
-                <div 
-                  key={st.num}
-                  className={`flex items-start gap-4 p-4 rounded-xl border transition-all ${
-                    isCurrent 
-                      ? 'bg-bayyinah-ivory border-bayyinah-emerald/40 shadow-sm' 
-                      : isDone 
-                      ? 'bg-white border-gray-100' 
-                      : 'bg-white border-transparent opacity-40'
-                  }`}
+                <motion.button
+                  key={card.id}
+                  type="button"
+                  onClick={() => {
+                    setInputMode(card.id);
+                    setErrorMessage(null);
+                  }}
+                  onMouseEnter={() => { handleCardInteract(); setHighlightIndex(index); }}
+                  onFocus={() => { handleCardInteract(); setHighlightIndex(index); }}
+                  onMouseLeave={() => handleCardInteract()}
+                  initial={shouldReduceMotion ? false : { opacity: 0, y: 14, scale: 0.985 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  whileHover={shouldReduceMotion ? undefined : { y: -5 }}
+                  whileTap={shouldReduceMotion ? undefined : { scale: 0.98 }}
+                  transition={{
+                    duration: shouldReduceMotion ? 0 : 0.5,
+                    delay: shouldReduceMotion ? 0 : index * 0.08,
+                    ease: 'easeOut',
+                  }}
+                  className="group relative flex min-h-[185px] items-center gap-6 overflow-hidden rounded-[28px] p-7 text-right transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00835d]/45 focus-visible:ring-offset-2 sm:min-h-[200px] sm:p-8"
+                  style={{
+                    background:
+                      'linear-gradient(135deg, rgba(255,255,255,0.98) 0%, rgba(245,253,249,0.90) 100%)',
+                    border: isHighlighted
+                      ? '1px solid rgba(210,165,35,0.75)'
+                      : '1px solid rgba(210,165,35,0.45)',
+                    boxShadow: isHighlighted
+                      ? '0 22px 50px rgba(0,105,72,0.10), 0 0 0 1px rgba(210,165,40,0.20), 0 0 20px rgba(84,220,160,0.08)'
+                      : '0 16px 40px rgba(0,95,65,0.07), 0 4px 14px rgba(0,95,65,0.04)',
+                    backdropFilter: 'blur(14px)',
+                  }}
                 >
-                  <div className="mt-0.5">
-                    {isDone ? (
-                      <CheckCircle2 className="w-5 h-5 text-bayyinah-emerald" />
-                    ) : isCurrent ? (
-                      <Loader2 className="w-5 h-5 text-bayyinah-emerald animate-spin" />
-                    ) : (
-                      <div className="w-5 h-5 rounded-full border-2 border-gray-300 flex items-center justify-center text-[10px] text-gray-400 font-bold">
-                        {st.num}
-                      </div>
-                    )}
-                  </div>
-                  <div className="flex-1">
-                    <h4 className={`text-sm font-bold ${isCurrent ? 'text-bayyinah-emerald' : 'text-bayyinah-dark-text'}`}>
-                      {st.num} — {st.title}
-                    </h4>
-                    {isCurrent && (
-                      <p className="text-xs text-bayyinah-secondary-text mt-1">{st.desc}</p>
-                    )}
-                  </div>
-                </div>
+                  {/* Subtle geometric ring behind icon */}
+                  <span
+                    className="pointer-events-none absolute -right-12 -top-12 h-36 w-36 rounded-full border border-[#c89418]/08 opacity-[0.08] transition-transform duration-500 group-hover:scale-110"
+                    aria-hidden="true"
+                  />
+
+                  {/* Icon circle */}
+                  <span
+                    className="flex shrink-0 items-center justify-center rounded-full border text-[#005b42] transition-transform duration-300 group-hover:scale-105"
+                    style={{
+                      width: 88,
+                      height: 88,
+                      background:
+                        'radial-gradient(circle, rgba(255,255,255,1) 0%, rgba(235,250,242,0.85) 100%)',
+                      border: isHighlighted
+                        ? '1px solid rgba(210,165,40,0.70)'
+                        : '1px solid rgba(210,165,40,0.55)',
+                      boxShadow: isHighlighted
+                        ? '0 0 14px rgba(84,220,160,0.18)'
+                        : '0 2px 8px rgba(0,90,60,0.07)',
+                    }}
+                  >
+                    <CardIcon
+                      className="transition-transform duration-300 group-hover:scale-110"
+                      style={{ width: 36, height: 36 }}
+                      strokeWidth={1.6}
+                    />
+                  </span>
+
+                  {/* Text content */}
+                  <span className="min-w-0 flex-1">
+                    <span className="block text-xl font-bold text-[#005b42] sm:text-2xl">
+                      {card.title}
+                    </span>
+                    <span className="mt-1.5 block text-base text-[rgba(0,70,50,0.72)]">
+                      {card.description}
+                    </span>
+                    <span className="mt-2 block text-xs font-medium text-[rgba(0,90,60,0.50)]">
+                      {card.detail}
+                    </span>
+                  </span>
+
+                  {/* Arrow indicator */}
+                  <span
+                    className="flex shrink-0 items-center justify-center rounded-full border border-[#006a4e]/16 transition-all duration-300 group-hover:-translate-x-1 group-hover:border-[#006a4e]/30"
+                    style={{
+                      width: 44,
+                      height: 44,
+                      background: 'rgba(255,255,255,0.9)',
+                      boxShadow: '0 2px 8px rgba(0,90,60,0.07)',
+                    }}
+                  >
+                    <ArrowLeft className="h-4 w-4 text-[#005b42]" />
+                  </span>
+                </motion.button>
               );
             })}
           </div>
+
+          {/* ── Info strip ── */}
+          <motion.div
+            initial={shouldReduceMotion ? false : { opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.42 }}
+            className="mx-auto mt-10 flex max-w-[900px] items-center gap-3 px-6 py-4 text-center"
+            style={{
+              background: 'rgba(255,255,255,0.84)',
+              border: '1px solid rgba(210,165,40,0.55)',
+              borderRadius: 999,
+              boxShadow: '0 10px 30px rgba(0,90,60,0.05)',
+            }}
+          >
+            {/* Left diamond */}
+            <svg width="8" height="8" viewBox="0 0 8 8" className="shrink-0 opacity-50" aria-hidden="true">
+              <path d="M4 0L5 3L8 4L5 5L4 8L3 5L0 4L3 3Z" fill="#C99418" />
+            </svg>
+
+            <Info className="h-4 w-4 shrink-0 text-[#005b42]" />
+            <p className="flex-1 text-sm font-medium text-[rgba(0,70,50,0.80)]">
+              ندعم التحقق من مختلف أنواع المحتوى للمساعدة في الوصول إلى المصدر والدليل الموثوق.
+            </p>
+
+            {/* Right diamond */}
+            <svg width="8" height="8" viewBox="0 0 8 8" className="shrink-0 opacity-50" aria-hidden="true">
+              <path d="M4 0L5 3L8 4L5 5L4 8L3 5L0 4L3 3Z" fill="#C99418" />
+            </svg>
+          </motion.div>
         </div>
-      </div>
+      </main>
     );
   }
 
-  // 1. Initial Selection Screen (Rule 43)
-  if (inputMode === 'none') {
+  /* ════════════════════════════════════════════
+     SUB-PAGES
+  ════════════════════════════════════════════ */
+
+  /* ── URL PAGE ── */
+  if (inputMode === 'url') {
     return (
-      <div className="max-w-5xl mx-auto px-4 py-20 min-h-[80vh]">
-        <div className="text-center mb-16">
-          <h1 className="text-4xl font-bold mb-4 text-bayyinah-deep-emerald">ماذا تريد أن تتحقق منه؟</h1>
-          <p className="text-bayyinah-secondary-text text-lg">اختر طريقة إدخال المحتوى للبدء في رحلة التحقق المبنية على الأدلة.</p>
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 max-w-5xl mx-auto">
-          {/* URL */}
-          <button 
-            onClick={() => { setInputMode('url'); setErrorMessage(null); }}
-            className="group bg-white p-6 rounded-3xl border border-gray-100 hover:border-bayyinah-emerald hover:shadow-elevated transition-all flex flex-col items-center text-center gap-4 cursor-pointer"
-          >
-            <div className="w-14 h-14 rounded-2xl bg-bayyinah-ivory flex items-center justify-center text-bayyinah-emerald group-hover:scale-110 transition-transform">
-              <Link2 className="w-7 h-7" />
-            </div>
-            <div>
-              <h3 className="text-lg font-bold text-bayyinah-dark-text mb-1">رابط</h3>
-              <p className="text-bayyinah-secondary-text text-xs">يوتيوب، تيك توك، X، ويب</p>
-            </div>
-          </button>
-
-          {/* Image */}
-          <button 
-            onClick={() => { setInputMode('image'); setErrorMessage(null); }}
-            className="group bg-white p-6 rounded-3xl border border-gray-100 hover:border-bayyinah-emerald hover:shadow-elevated transition-all flex flex-col items-center text-center gap-4 cursor-pointer"
-          >
-            <div className="w-14 h-14 rounded-2xl bg-bayyinah-ivory flex items-center justify-center text-bayyinah-emerald group-hover:scale-110 transition-transform">
-              <ImageIcon className="w-7 h-7" />
-            </div>
-            <div>
-              <h3 className="text-lg font-bold text-bayyinah-dark-text mb-1">صورة</h3>
-              <p className="text-bayyinah-secondary-text text-xs">OCR ومراجعة النص</p>
-            </div>
-          </button>
-
-          {/* Video */}
-          <button 
-            onClick={() => { setInputMode('video'); setErrorMessage(null); }}
-            className="group bg-white p-6 rounded-3xl border border-gray-100 hover:border-bayyinah-emerald hover:shadow-elevated transition-all flex flex-col items-center text-center gap-4 cursor-pointer"
-          >
-            <div className="w-14 h-14 rounded-2xl bg-bayyinah-ivory flex items-center justify-center text-bayyinah-emerald group-hover:scale-110 transition-transform">
-              <FileVideo className="w-7 h-7" />
-            </div>
-            <div>
-              <h3 className="text-lg font-bold text-bayyinah-dark-text mb-1">فيديو</h3>
-              <p className="text-bayyinah-secondary-text text-xs">تفريغ صوتي وتحليل</p>
-            </div>
-          </button>
-
-          {/* PDF */}
-          <button 
-            onClick={() => { setInputMode('pdf'); setErrorMessage(null); }}
-            className="group bg-white p-6 rounded-3xl border border-gray-100 hover:border-bayyinah-emerald hover:shadow-elevated transition-all flex flex-col items-center text-center gap-4 cursor-pointer"
-          >
-            <div className="w-14 h-14 rounded-2xl bg-bayyinah-ivory flex items-center justify-center text-bayyinah-emerald group-hover:scale-110 transition-transform">
-              <FileText className="w-7 h-7" />
-            </div>
-            <div>
-              <h3 className="text-lg font-bold text-bayyinah-dark-text mb-1">وثيقة PDF</h3>
-              <p className="text-bayyinah-secondary-text text-xs">تحليل الصفحات والنسب</p>
-            </div>
-          </button>
-
-          {/* Text */}
-          <button 
-            onClick={() => { setInputMode('text'); setErrorMessage(null); }}
-            className="group bg-white p-6 rounded-3xl border border-gray-100 hover:border-bayyinah-emerald hover:shadow-elevated transition-all flex flex-col items-center text-center gap-4 cursor-pointer"
-          >
-            <div className="w-14 h-14 rounded-2xl bg-bayyinah-ivory flex items-center justify-center text-bayyinah-emerald group-hover:scale-110 transition-transform">
-              <FileText className="w-7 h-7" />
-            </div>
-            <div>
-              <h3 className="text-lg font-bold text-bayyinah-dark-text mb-1">نص</h3>
-              <p className="text-bayyinah-secondary-text text-xs">لصق نص مباشر</p>
-            </div>
-          </button>
-        </div>
-      </div>
-    );
-  }
-
-  // 2. Individual Forms (Rules 44, 45, 46, 47)
-  return (
-    <div className="max-w-3xl mx-auto px-4 py-16 min-h-[80vh]">
-      <button 
-        onClick={() => { setInputMode('none'); setErrorMessage(null); }}
-        className="flex items-center gap-2 text-bayyinah-secondary-text hover:text-bayyinah-emerald mb-8 transition-colors cursor-pointer text-sm font-medium"
+      <SubPageWrapper
+        onBack={goBack}
+        iconEl={<Link2 className="h-7 w-7" strokeWidth={1.7} />}
+        title="تحقق من رابط"
+        description="الصق رابط المنشور أو التغريدة أو الفيديو لفحص سلامته واستخراج المحتوى منه والتحقق من مصادره."
       >
-        <ArrowRight className="w-4 h-4" />
-        العودة لاختيار وسيلة الإدخال
-      </button>
+        {errorMessage && <ErrorBanner message={errorMessage} />}
 
-      {errorMessage && (
-        <div className="mb-6 p-4 rounded-2xl bg-red-50 border border-red-200 text-red-800 flex items-start gap-3">
-          <AlertCircle className="w-5 h-5 shrink-0 mt-0.5 text-red-600" />
-          <div className="flex-1 text-sm leading-relaxed">{errorMessage}</div>
+        {/* SSRF badge */}
+        <div className="flex justify-center mb-5">
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-[#c89418]/35 bg-white px-3 py-1.5 text-xs font-semibold text-[#006a4e] shadow-sm">
+            <ShieldCheck className="w-3.5 h-3.5" />
+            SSRF Protected
+          </span>
         </div>
-      )}
 
-      {/* MODE: URL (Rule 44) */}
-      {inputMode === 'url' && (
-        <div className="bg-white p-10 rounded-3xl border border-gray-100 shadow-sm">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-2xl font-bold text-bayyinah-dark-text">تحقق من رابط</h2>
-            <span className="text-xs font-semibold px-3 py-1 rounded-full bg-bayyinah-ivory text-bayyinah-emerald border border-bayyinah-emerald/20 flex items-center gap-1.5">
-              <ShieldCheck className="w-3.5 h-3.5" />
-              SSRF Protected
-            </span>
-          </div>
-          <p className="text-bayyinah-secondary-text text-sm mb-8">
-            الصق رابط المنشور أو التغريدة أو الفيديو لفحص سلامته واستخراج المحتوى منه والتحقق من مصادره.
-          </p>
-
-          <div className="relative mb-6">
-            <input 
+        {/* URL input */}
+        <div
+          className="rounded-[22px] border border-[#006a4e]/25 bg-white p-6 shadow-sm"
+          style={{ boxShadow: '0 14px 36px rgba(0,90,60,0.06)' }}
+        >
+          <div className="relative mb-5">
+            <input
               type="url"
               value={url}
               onChange={(e) => handleUrlChange(e.target.value)}
               placeholder="https://..."
-              className="w-full text-left bg-gray-50 border border-gray-200 rounded-2xl px-5 py-4 pl-12 text-sm focus:outline-none focus:border-bayyinah-emerald focus:ring-1 focus:ring-bayyinah-emerald"
+              className="w-full rounded-[18px] border border-[#006a4e]/25 bg-gray-50/60 py-4 pl-12 pr-4 text-sm text-left transition-all focus:border-[#006a4e]/60 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#00835d]/20"
               dir="ltr"
             />
-            <Globe className="w-5 h-5 text-gray-400 absolute left-4 top-1/2 -translate-y-1/2" />
+            <Globe className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
           </div>
 
+          {/* Detected platform */}
           {url.trim() && (
-            <div className="mb-6 p-4 rounded-xl bg-bayyinah-ivory border border-gray-100 flex items-center justify-between text-xs">
-              <span className="text-bayyinah-secondary-text">المنصة المكتشفة:</span>
-              <span className="font-bold text-bayyinah-emerald">{detectedPlatform}</span>
+            <div className="mb-5 flex items-center justify-between rounded-xl border border-gray-100 bg-[#f5faf8] px-4 py-3 text-xs">
+              <span className="text-[rgba(0,70,50,0.65)]">المنصة المكتشفة:</span>
+              <span className="font-bold text-[#006a4e]">{detectedPlatform}</span>
             </div>
           )}
 
-          <div className="flex flex-wrap gap-2 mb-8 text-xs text-bayyinah-secondary-text">
-            <span className="px-3 py-1 rounded-lg bg-gray-100">YouTube</span>
-            <span className="px-3 py-1 rounded-lg bg-gray-100">TikTok</span>
-            <span className="px-3 py-1 rounded-lg bg-gray-100">X (Twitter)</span>
-            <span className="px-3 py-1 rounded-lg bg-gray-100">Instagram</span>
-            <span className="px-3 py-1 rounded-lg bg-gray-100">Generic Web</span>
-            <span className="px-3 py-1 rounded-lg bg-gray-100">PDF Document</span>
+          {/* Supported platform chips */}
+          <div className="flex flex-wrap gap-2 mb-2 text-xs">
+            {['YouTube', 'TikTok', 'X (Twitter)', 'Instagram', 'Generic Web', 'PDF Document'].map((p) => (
+              <span
+                key={p}
+                className="rounded-full border border-[#c89418]/30 bg-white px-3 py-1 font-medium text-[rgba(0,70,50,0.65)]"
+              >
+                {p}
+              </span>
+            ))}
           </div>
-
-          <button 
-            onClick={handleUrlSubmit}
-            disabled={!url.trim()}
-            className="w-full bg-bayyinah-emerald hover:bg-bayyinah-deep-emerald disabled:opacity-40 text-white font-bold py-4 rounded-xl transition-colors cursor-pointer shadow-sm"
-          >
-            تحقق من الرابط
-          </button>
         </div>
-      )}
 
-      {/* MODE: IMAGE (Rule 45) */}
-      {inputMode === 'image' && (
-        <div className="bg-white p-10 rounded-3xl border border-gray-100 shadow-sm">
-          <h2 className="text-2xl font-bold text-bayyinah-dark-text mb-2">تحقق من صورة</h2>
-          <p className="text-bayyinah-secondary-text text-sm mb-8">
-            ارفع صورة تحتوي على منشور، لقطة شاشة، أو حديث ليتم استخراج النص أولاً ثم مراجعته.
-          </p>
+        <SubmitButton onClick={handleUrlSubmit} disabled={!url.trim()}>
+          تحقق من الرابط
+          <ArrowLeft className="w-5 h-5" />
+        </SubmitButton>
+      </SubPageWrapper>
+    );
+  }
 
+  /* ── IMAGE PAGE ── */
+  if (inputMode === 'image') {
+    return (
+      <SubPageWrapper
+        onBack={goBack}
+        iconEl={<ImageIcon className="h-7 w-7" strokeWidth={1.7} />}
+        title="تحقق من صورة"
+        description="ارفع صورة تحتوي على منشور، لقطة شاشة، أو حديث ليتم استخراج النص أولاً ثم مراجعته."
+      >
+        {errorMessage && <ErrorBanner message={errorMessage} />}
+
+        <div
+          className="rounded-[22px] border border-[#006a4e]/20 bg-white p-6 shadow-sm"
+          style={{ boxShadow: '0 14px 36px rgba(0,90,60,0.06)' }}
+        >
           {!imagePreview ? (
-            <label className="border-2 border-dashed border-gray-200 hover:border-bayyinah-emerald/50 rounded-3xl p-16 flex flex-col items-center justify-center cursor-pointer bg-bayyinah-ivory/30 hover:bg-bayyinah-ivory/60 transition-all">
-              <div className="w-16 h-16 rounded-2xl bg-white flex items-center justify-center text-bayyinah-emerald shadow-sm mb-4">
-                <ImageIcon className="w-8 h-8" />
-              </div>
-              <span className="text-bayyinah-dark-text font-bold mb-1">اضغط لرفع الصورة</span>
-              <span className="text-xs text-bayyinah-secondary-text">PNG, JPG, WEBP حتى 20 ميغابايت</span>
-              <input type="file" accept="image/*" className="hidden" onChange={handleImageFileChange} />
-            </label>
+            <DropzonePlaceholder
+              icon={<ImageIcon className="w-8 h-8" strokeWidth={1.6} />}
+              mainText="اضغط لرفع الصورة"
+              subText="أو اسحب وأفلت الملف هنا"
+              formats="JPG, PNG, WEBP"
+              accept="image/*"
+              onChange={handleImageFileChange}
+            />
           ) : (
-            <div className="space-y-6">
-              <div className="rounded-2xl overflow-hidden border border-gray-200 bg-gray-50 p-2 max-h-[300px] flex justify-center relative">
+            <div className="space-y-5">
+              <div className="relative rounded-2xl overflow-hidden border border-gray-200 bg-gray-50 p-2 max-h-[300px] flex justify-center">
                 <img src={imagePreview} alt="Preview" className="max-h-full object-contain rounded-xl" />
-                <button 
+                <button
                   onClick={() => { setImageFile(null); setImagePreview(null); setExtractedOcrText(''); setOcrError(null); }}
-                  className="absolute top-4 left-4 bg-white/90 hover:bg-white text-gray-700 text-xs px-3 py-1.5 rounded-lg shadow-sm border border-gray-200"
+                  className="absolute top-4 left-4 rounded-lg border border-gray-200 bg-white/90 px-3 py-1.5 text-xs text-gray-700 shadow-sm hover:bg-white"
                 >
                   تغيير الصورة
                 </button>
               </div>
 
               {isExtractingOcr && (
-                <div className="p-6 rounded-2xl bg-bayyinah-ivory border border-bayyinah-emerald/20 flex items-center justify-center gap-3 text-bayyinah-emerald font-medium">
+                <div className="flex items-center justify-center gap-3 rounded-2xl border border-[#006a4e]/20 bg-[#f1faf5] p-5 text-[#006a4e] font-medium">
                   <Loader2 className="w-5 h-5 animate-spin" />
                   <span>جاري استخراج النص عبر Gemini Multimodal OCR...</span>
                 </div>
               )}
 
               {ocrError && (
-                <div className="p-4 rounded-xl bg-red-50 border border-red-200 text-red-800 text-sm">
+                <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-800">
                   {ocrError}
                 </div>
               )}
 
               {!isExtractingOcr && (
                 <div>
-                  <div className="flex items-center justify-between mb-2">
-                    <h3 className="text-sm font-bold text-bayyinah-dark-text">النص المستخرج من الصورة (قابل للمراجعة والتعديل)</h3>
-                    <span className="text-xs text-bayyinah-secondary-text">راجع النص قبل التحقق</span>
+                  <div className="mb-2 flex items-center justify-between">
+                    <h3 className="text-sm font-bold text-[#1a2e28]">النص المستخرج من الصورة (قابل للمراجعة والتعديل)</h3>
+                    <span className="text-xs text-[rgba(0,70,50,0.55)]">راجع النص قبل التحقق</span>
                   </div>
-                  <textarea 
+                  <textarea
                     value={extractedOcrText}
                     onChange={(e) => setExtractedOcrText(e.target.value)}
-                    placeholder="النص المستخرج يظهر هنا لتتمكن من مراجعته والتأكد من مطابقته قبل التحقق..."
-                    className="w-full bg-gray-50 border border-gray-200 rounded-2xl p-4 min-h-[140px] text-sm focus:outline-none focus:border-bayyinah-emerald focus:ring-1 focus:ring-bayyinah-emerald resize-y"
+                    placeholder="النص المستخرج يظهر هنا لتتمكن من مراجعته..."
+                    className="w-full rounded-2xl border border-gray-200 bg-gray-50/60 p-4 text-sm min-h-[140px] resize-y focus:border-[#006a4e]/60 focus:outline-none focus:ring-2 focus:ring-[#00835d]/20"
                   />
                 </div>
               )}
-
-              <button 
-                onClick={handleImageSubmit}
-                disabled={isExtractingOcr || !extractedOcrText.trim()}
-                className="w-full bg-bayyinah-emerald hover:bg-bayyinah-deep-emerald disabled:opacity-40 text-white font-bold py-4 rounded-xl transition-colors cursor-pointer shadow-sm"
-              >
-                ابدأ التحقق من النص المستخرج
-              </button>
             </div>
           )}
         </div>
-      )}
 
-      {/* MODE: VIDEO (Rule 46) */}
-      {inputMode === 'video' && (
-        <div className="bg-white p-10 rounded-3xl border border-gray-100 shadow-sm">
-          <h2 className="text-2xl font-bold text-bayyinah-dark-text mb-2">تحقق من فيديو</h2>
-          <p className="text-bayyinah-secondary-text text-sm mb-8">
-            ارفع ملف فيديو لتفريغ الصوت عبر Gemini Files API واستخراج الادعاءات مع الطوابع الزمنية.
-          </p>
+        {imagePreview && (
+          <SubmitButton
+            onClick={handleImageSubmit}
+            disabled={isExtractingOcr || !extractedOcrText.trim()}
+          >
+            ابدأ التحقق من النص المستخرج
+            <ArrowLeft className="w-5 h-5" />
+          </SubmitButton>
+        )}
+      </SubPageWrapper>
+    );
+  }
 
+  /* ── VIDEO PAGE ── */
+  if (inputMode === 'video') {
+    return (
+      <SubPageWrapper
+        onBack={goBack}
+        iconEl={<FileVideo className="h-7 w-7" strokeWidth={1.7} />}
+        title="تحقق من فيديو"
+        description="ارفع مقطع فيديو ليتم استخراج المحتوى وتحليله والتحقق منه."
+      >
+        {errorMessage && <ErrorBanner message={errorMessage} />}
+
+        <div
+          className="rounded-[22px] border border-[#006a4e]/20 bg-white p-6 shadow-sm"
+          style={{ boxShadow: '0 14px 36px rgba(0,90,60,0.06)' }}
+        >
           {!videoFile ? (
-            <label className="border-2 border-dashed border-gray-200 hover:border-bayyinah-emerald/50 rounded-3xl p-16 flex flex-col items-center justify-center cursor-pointer bg-bayyinah-ivory/30 hover:bg-bayyinah-ivory/60 transition-all">
-              <div className="w-16 h-16 rounded-2xl bg-white flex items-center justify-center text-bayyinah-emerald shadow-sm mb-4">
-                <FileVideo className="w-8 h-8" />
-              </div>
-              <span className="text-bayyinah-dark-text font-bold mb-1">اضغط لرفع مقطع الفيديو</span>
-              <span className="text-xs text-bayyinah-secondary-text">MP4, MOV, WEBM حتى 100 ميغابايت</span>
-              <input type="file" accept="video/*" className="hidden" onChange={handleVideoFileChange} />
-            </label>
+            <DropzonePlaceholder
+              icon={<FileVideo className="w-8 h-8" strokeWidth={1.6} />}
+              mainText="اضغط لرفع مقطع الفيديو"
+              subText="أو اسحب وأفلت الملف هنا"
+              formats="MP4, MOV, WEBM"
+              accept="video/*"
+              onChange={handleVideoFileChange}
+            />
           ) : (
-            <div className="space-y-6">
-              <div className="p-4 rounded-2xl bg-bayyinah-ivory border border-gray-200 flex items-center justify-between">
+            <div className="space-y-5">
+              <div className="flex items-center justify-between rounded-2xl border border-gray-200 bg-[#f5faf8] p-4">
                 <div className="flex items-center gap-3">
-                  <Play className="w-5 h-5 text-bayyinah-emerald" />
+                  <Play className="w-5 h-5 text-[#006a4e]" />
                   <div>
-                    <span className="block font-bold text-sm text-bayyinah-dark-text">{videoFile.name}</span>
-                    <span className="block text-xs text-bayyinah-secondary-text">{(videoFile.size / (1024*1024)).toFixed(1)} MB</span>
+                    <span className="block font-bold text-sm text-[#1a2e28]">{videoFile.name}</span>
+                    <span className="block text-xs text-[rgba(0,70,50,0.55)]">
+                      {(videoFile.size / (1024 * 1024)).toFixed(1)} MB
+                    </span>
                   </div>
                 </div>
-                <button 
+                <button
                   onClick={() => { setVideoFile(null); setVideoPreview(null); }}
-                  className="text-xs text-red-600 hover:underline"
+                  className="text-xs font-bold text-red-600 hover:underline"
                 >
                   إلغاء
                 </button>
               </div>
 
-              {/* Timestamp selection */}
+              {/* Timestamp selection — preserved exactly */}
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-semibold text-bayyinah-secondary-text mb-2 flex items-center gap-1.5">
+                  <label className="mb-2 flex items-center gap-1.5 text-xs font-semibold text-[rgba(0,70,50,0.65)]">
                     <Clock className="w-3.5 h-3.5" />
                     من الدقيقة (اختياري)
                   </label>
-                  <input 
-                    type="text" 
+                  <input
+                    type="text"
                     value={videoStartTime}
                     onChange={(e) => setVideoStartTime(e.target.value)}
                     placeholder="00:15"
-                    className="w-full bg-gray-50 border border-gray-200 rounded-xl p-3 text-center text-sm font-mono focus:outline-none focus:border-bayyinah-emerald"
+                    className="w-full rounded-xl border border-gray-200 bg-gray-50 p-3 text-center text-sm font-mono focus:border-[#006a4e]/60 focus:outline-none"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-bayyinah-secondary-text mb-2 flex items-center gap-1.5">
+                  <label className="mb-2 flex items-center gap-1.5 text-xs font-semibold text-[rgba(0,70,50,0.65)]">
                     <Clock className="w-3.5 h-3.5" />
                     إلى الدقيقة (اختياري)
                   </label>
-                  <input 
-                    type="text" 
+                  <input
+                    type="text"
                     value={videoEndTime}
                     onChange={(e) => setVideoEndTime(e.target.value)}
                     placeholder="00:45"
-                    className="w-full bg-gray-50 border border-gray-200 rounded-xl p-3 text-center text-sm font-mono focus:outline-none focus:border-bayyinah-emerald"
+                    className="w-full rounded-xl border border-gray-200 bg-gray-50 p-3 text-center text-sm font-mono focus:border-[#006a4e]/60 focus:outline-none"
                   />
                 </div>
               </div>
-
-              <button 
-                onClick={handleVideoSubmit}
-                className="w-full bg-bayyinah-emerald hover:bg-bayyinah-deep-emerald text-white font-bold py-4 rounded-xl transition-colors cursor-pointer shadow-sm"
-              >
-                ابدأ معالجة الفيديو والتحقق
-              </button>
             </div>
           )}
         </div>
-      )}
 
-      {/* MODE: TEXT (Rule 47) */}
-      {inputMode === 'text' && (
-        <div className="bg-white p-10 rounded-3xl border border-gray-100 shadow-sm">
-          <h2 className="text-2xl font-bold text-bayyinah-dark-text mb-2">تحقق من نص</h2>
-          <p className="text-bayyinah-secondary-text text-sm mb-8">
-            الصق النص الذي تريد التحقق منه للبحث عنه في أمهات المصادر والسنة والتفاسير.
-          </p>
+        {videoFile && (
+          <SubmitButton onClick={handleVideoSubmit}>
+            ابدأ معالجة الفيديو والتحقق
+            <ArrowLeft className="w-5 h-5" />
+          </SubmitButton>
+        )}
+      </SubPageWrapper>
+    );
+  }
 
-          <textarea 
+  /* ── TEXT PAGE (hidden from selector but functionality preserved) ── */
+  if (inputMode === 'text') {
+    return (
+      <SubPageWrapper
+        onBack={goBack}
+        iconEl={<FileText className="h-7 w-7" strokeWidth={1.7} />}
+        title="تحقق من نص"
+        description="الصق النص الذي تريد التحقق منه للبحث عنه في أمهات المصادر والسنة والتفاسير."
+      >
+        {errorMessage && <ErrorBanner message={errorMessage} />}
+
+        <div
+          className="rounded-[22px] border border-[#006a4e]/20 bg-white p-6 shadow-sm"
+          style={{ boxShadow: '0 14px 36px rgba(0,90,60,0.06)' }}
+        >
+          <textarea
             value={text}
             onChange={(e) => setText(e.target.value)}
             placeholder="الصق النص الذي تريد التحقق منه..."
-            className="w-full bg-gray-50 border border-gray-200 rounded-2xl p-6 min-h-[220px] text-base leading-relaxed mb-4 focus:outline-none focus:border-bayyinah-emerald focus:ring-1 focus:ring-bayyinah-emerald resize-y"
+            className="w-full rounded-2xl border border-gray-200 bg-gray-50/60 p-5 text-base leading-relaxed min-h-[220px] resize-y focus:border-[#006a4e]/60 focus:outline-none focus:ring-2 focus:ring-[#00835d]/20"
           />
-
-          <div className="flex justify-between items-center mb-6 text-xs text-bayyinah-secondary-text">
+          <div className="mt-3 flex justify-between text-xs text-[rgba(0,70,50,0.50)]">
             <span>{text.length} حرف</span>
             <span>يدعم متون الأحاديث، الآيات، الفتاوى، والأقوال المنسوبة</span>
           </div>
-
-          <button 
-            onClick={handleTextSubmit}
-            disabled={!text.trim()}
-            className="w-full bg-bayyinah-emerald hover:bg-bayyinah-deep-emerald disabled:opacity-40 text-white font-bold py-4 rounded-xl transition-colors cursor-pointer shadow-sm"
-          >
-            ابدأ التحقق
-          </button>
         </div>
-      )}
 
-      {/* MODE: PDF DOCUMENT */}
-      {inputMode === 'pdf' && (
-        <div className="bg-white p-10 rounded-3xl border border-gray-100 shadow-sm">
-          <h2 className="text-2xl font-bold text-bayyinah-dark-text mb-2">تحقق من وثيقة PDF</h2>
-          <p className="text-bayyinah-secondary-text text-sm mb-8">
-            ارفع وثيقة أو بحثاً بصيغة PDF لاستخراج الادعاءات والتحقق منها مع حفظ أرقام الصفحات وترتيب النسب.
-          </p>
+        <SubmitButton onClick={handleTextSubmit} disabled={!text.trim()}>
+          ابدأ التحقق
+          <ArrowLeft className="w-5 h-5" />
+        </SubmitButton>
+      </SubPageWrapper>
+    );
+  }
 
+  /* ── PDF PAGE ── */
+  if (inputMode === 'pdf') {
+    return (
+      <SubPageWrapper
+        onBack={goBack}
+        iconEl={<FileText className="h-7 w-7" strokeWidth={1.7} />}
+        title="تحقق من وثيقة PDF"
+        description="ارفع وثيقة أو بحثاً بصيغة PDF لاستخراج الادعاءات والتحقق منها مع حفظ أرقام الصفحات وترتيب النسب."
+      >
+        {errorMessage && <ErrorBanner message={errorMessage} />}
+
+        <div
+          className="rounded-[22px] border border-[#006a4e]/20 bg-white p-6 shadow-sm"
+          style={{ boxShadow: '0 14px 36px rgba(0,90,60,0.06)' }}
+        >
           {!pdfFile ? (
-            <div className="border-2 border-dashed border-gray-200 rounded-3xl p-12 text-center hover:border-bayyinah-emerald transition-colors relative cursor-pointer">
-              <input 
-                type="file" 
+            <div className="relative">
+              <input
+                type="file"
                 accept=".pdf,application/pdf"
                 onChange={handlePdfChange}
-                className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
+                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
               />
-              <div className="w-16 h-16 rounded-2xl bg-bayyinah-ivory flex items-center justify-center text-bayyinah-emerald mx-auto mb-4">
-                <FileText className="w-8 h-8" />
+              <div
+                className="flex cursor-pointer flex-col items-center justify-center gap-4 rounded-[22px] border border-dashed border-[#006a4e]/50 bg-white/70 px-6 py-14 text-center transition-all duration-300 hover:border-[#006a4e]/80 hover:bg-[rgba(84,220,160,0.04)]"
+                style={{ boxShadow: '0 0 0 1px rgba(210,165,40,0.10)' }}
+              >
+                <div className="flex h-[64px] w-[64px] items-center justify-center rounded-full border border-[#c89418]/45 bg-gradient-to-br from-white to-[#edfaf4] text-[#005b42] shadow-sm">
+                  <FileText className="w-8 h-8" strokeWidth={1.6} />
+                </div>
+                <UploadCloud className="w-5 h-5 text-[#006a4e]/50" />
+                <div>
+                  <p className="text-base font-bold text-[#005b42] mb-1">اسحب ملف PDF هنا أو انقر للاختيار</p>
+                  <p className="text-sm text-[rgba(0,70,50,0.65)]">يدعم ملفات PDF النصية والبحوث والكتب العلمية</p>
+                </div>
+                <span className="rounded-full border border-[#c89418]/35 bg-white px-3 py-1 text-xs font-semibold text-[#006a4e]">
+                  PDF
+                </span>
               </div>
-              <h4 className="font-bold text-bayyinah-dark-text mb-1">اسحب ملف PDF هنا أو انقر للاختيار</h4>
-              <p className="text-xs text-bayyinah-secondary-text">يدعم ملفات PDF النصية والبحوث والكتب العلمية</p>
             </div>
           ) : (
-            <div className="space-y-6">
-              <div className="p-6 rounded-2xl bg-bayyinah-ivory border border-gray-200 flex items-center justify-between">
+            <div className="space-y-5">
+              <div className="flex items-center justify-between rounded-2xl border border-gray-200 bg-[#f5faf8] p-5">
                 <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-xl bg-bayyinah-emerald/10 flex items-center justify-center text-bayyinah-emerald">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#006a4e]/10 text-[#006a4e]">
                     <FileText className="w-6 h-6" />
                   </div>
                   <div>
-                    <span className="block font-bold text-sm text-bayyinah-dark-text">{pdfFile.name}</span>
-                    <span className="block text-xs text-bayyinah-secondary-text">
-                      {(pdfFile.size / (1024*1024)).toFixed(2)} MB {pdfPagesCount ? `• ${pdfPagesCount} صفحة` : ''}
+                    <span className="block font-bold text-sm text-[#1a2e28]">{pdfFile.name}</span>
+                    <span className="block text-xs text-[rgba(0,70,50,0.55)]">
+                      {(pdfFile.size / (1024 * 1024)).toFixed(2)} MB
+                      {pdfPagesCount ? ` • ${pdfPagesCount} صفحة` : ''}
                     </span>
                   </div>
                 </div>
-                <button 
+                <button
                   onClick={() => { setPdfFile(null); setPdfPagesCount(null); }}
-                  className="text-xs text-red-600 hover:underline cursor-pointer font-bold"
+                  className="text-xs font-bold text-red-600 hover:underline cursor-pointer"
                 >
                   تغيير الملف
                 </button>
               </div>
 
-              {pdfExtracting ? (
-                <div className="flex items-center gap-3 p-4 bg-gray-50 rounded-xl text-bayyinah-secondary-text text-sm">
-                  <Loader2 className="w-4 h-4 animate-spin text-bayyinah-emerald" />
+              {pdfExtracting && (
+                <div className="flex items-center gap-3 rounded-xl bg-gray-50 p-4 text-sm text-[rgba(0,70,50,0.65)]">
+                  <Loader2 className="w-4 h-4 animate-spin text-[#006a4e]" />
                   <span>جاري استخراج صفحات الوثيقة وتوثيق تسلسلها...</span>
                 </div>
-              ) : (
-                <button 
-                  onClick={handlePdfSubmit}
-                  className="w-full bg-bayyinah-emerald hover:bg-bayyinah-deep-emerald text-white font-bold py-4 rounded-xl transition-colors cursor-pointer shadow-sm"
-                >
-                  ابدأ فحص الوثيقة والتحقق من الادعاءات
-                </button>
               )}
             </div>
           )}
         </div>
-      )}
-    </div>
-  );
+
+        {pdfFile && !pdfExtracting && (
+          <SubmitButton onClick={handlePdfSubmit}>
+            ابدأ فحص الوثيقة والتحقق من الادعاءات
+            <ArrowLeft className="w-5 h-5" />
+          </SubmitButton>
+        )}
+      </SubPageWrapper>
+    );
+  }
+
+  return null;
 };
